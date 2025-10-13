@@ -34,7 +34,7 @@
      pnpm dev:frontend
      ```
 
-フロントエンドは `http://localhost:5173` で、バックエンドは `http://localhost:3000` で起動します。
+フロントエンドは `http://localhost:5173` で、バックエンドは `http://localhost:3000` で起動します。\n\n### テストの実行\n\n#### E2E (End-to-End) テスト\n\nPlaywrightを使用したE2Eテストを実行します。\n\n```bash\nnpx playwright test\n```\n\nこのコマンドは、`playwright.config.ts`の設定に基づき、自動でWebサーバーを起動してテストを実行します。
 
 ---
 

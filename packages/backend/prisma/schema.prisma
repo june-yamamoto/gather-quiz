@@ -10,25 +10,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Tournament {
-  id          String    @id @default(uuid())
-  name        String
-  password    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  participants Participant[]
-  quizzes     Quiz[]
+  id                      String    @id @default(uuid())
+  name                    String
+  password                String
+  questionsPerParticipant Int
+  points                  String // e.g., "10,20,30"
+  regulation              String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  participants            Participant[]
+  quizzes                 Quiz[]
 }
 
 model Participant {
-  id          String    @id @default(uuid())
-  name        String
-  tournament  Tournament @relation(fields: [tournamentId], references: [id])
+  id           String     @id @default(uuid())
+  name         String
+  password     String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  quizzes     Quiz[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  quizzes      Quiz[]
+
+  @@unique([tournamentId, name])
 }
+
 
 model Quiz {
   id          String    @id @default(uuid())
