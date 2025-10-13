@@ -4,3 +4,7 @@ FROM mcr.microsoft.com/devcontainers/typescript-node:${VARIANT}
 
 # Install pnpm
 RUN npm install -g pnpm
+
+# Install Gemini CLI
+RUN npm install -g @google/gemini-cli
+
