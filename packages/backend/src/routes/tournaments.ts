@@ -39,4 +39,31 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/:id/participants', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    // For now, generate a random password for the participant.
+    // This will be updated later.
+    const password = Math.random().toString(36).slice(-8);
+
+    const participant = await prisma.participant.create({
+      data: {
+        name,
+        password,
+        tournament: {
+          connect: {
+            id,
+          },
+        },
+      },
+    });
+    res.json(participant);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Participant creation failed' });
+  }
+});
+
 export default router;
