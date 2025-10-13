@@ -35,9 +35,8 @@ const ParticipantRegistrationPage = () => {
 
       const participant = await response.json();
       alert(`「${participant.name}」として登録しました！`);
-      // Navigate to the next step, e.g., quiz creation page
-      // For now, just navigate back to the portal
-      navigate(`/tournaments/${tournamentId}`);
+      // Navigate to the quiz creation page
+      navigate(`/tournaments/${tournamentId}/quizzes/new`);
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました。');
