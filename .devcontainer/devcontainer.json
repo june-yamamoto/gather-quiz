@@ -1,5 +1,5 @@
 {
-	"name": "GatherQuiz Dev Container",
+	"name": "GatherQuiz",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
@@ -8,22 +8,31 @@
 	"features": {},
 
 	// Use 'forwardPorts' to make a list of ports available locally.
-	"forwardPorts": [3000, 5173],
+	"forwardPorts": [3000, 5173, 9323],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pnpm install",
+	"postCreateCommand": "sudo chown -R node:node /home/node/.gemini && pnpm install",
 
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-vscode.vscode-typescript-next",
-				"esbenp.prettier-vscode",
 				"dbaeumer.vscode-eslint",
-				"prisma.prisma"
+				"esbenp.prettier-vscode",
+				"google.gemini-cli-vscode-ide-companion",
+				"google.geminicodeassist",
+				"mhutchie.git-graph",
+				"ms-azuretools.vscode-containers",
+				"ms-vscode.vscode-typescript-next",
+				"prisma.prisma",
+				"yzhang.markdown-all-in-one"
 			]
 		}
 	},
+
+	"mounts": [
+		"source=gemini-auth-cache,target=/home/node/.gemini,type=volume"
+	],
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"

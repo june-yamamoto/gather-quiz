@@ -6,11 +6,16 @@
   "scripts": {
     "dev:backend": "pnpm --filter backend start",
     "dev:frontend": "pnpm --filter frontend dev",
-    "db:push": "pnpm --filter backend exec prisma db push",
+    "db:push": "cd packages/backend && pnpm exec prisma db push",
+    "test:e2e": "playwright test",
+    "postinstall": "playwright install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.2"
+  "packageManager": "pnpm@10.18.2",
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
 }
