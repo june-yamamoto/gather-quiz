@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Container, Typography, Box, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import {
+  Button,
+  Container,
+  Typography,
+  Box,
+  TextField,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -59,7 +70,6 @@ const QuizCreatorPage = () => {
     }
   };
 
-
   return (
     <StyledContainer maxWidth="md">
       <Typography variant="h4" component="h1" gutterBottom>
@@ -101,7 +111,12 @@ const QuizCreatorPage = () => {
             onChange={(e) => setCorrectAnswer(e.target.value)}
           >
             {options.map((_, index) => (
-              <FormControlLabel key={index} value={index.toString()} control={<Radio />} label={`選択肢 ${index + 1}`} />
+              <FormControlLabel
+                key={index}
+                value={index.toString()}
+                control={<Radio />}
+                label={`選択肢 ${index + 1}`}
+              />
             ))}
           </RadioGroup>
         </FormControl>

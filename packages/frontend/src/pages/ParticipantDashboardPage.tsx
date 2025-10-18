@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button, Container, Typography, Box, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
-interface Quiz {
-  id: string;
-  question: string;
-  answer: string;
-}
+import { Quiz } from '../models/Quiz';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -34,20 +29,23 @@ const ParticipantDashboardPage = () => {
           throw new Error('Failed to fetch quiz status');
         }
         const data = await response.json();
-        setQuizzes(data.createdQuizzes.map((q: any) => {
-          // The question field contains JSON string with question and options
-          try {
-            const parsedQuestion = JSON.parse(q.question);
-            return { ...q, question: parsedQuestion.question };
-          } catch (e) {
-            // If parsing fails, it might be an old format, just return the raw question
-            return q;
-          }
-        }));
+
+        const parsedQuizzes = data.createdQuizzes
+          .map((quizData: unknown) => {
+            try {
+              return Quiz.fromApi(quizData);
+            } catch (error) {
+              console.error('Failed to parse quiz data:', error);
+              return null;
+            }
+          })
+          .filter((quiz: Quiz | null): quiz is Quiz => quiz !== null);
+
+        setQuizzes(parsedQuizzes);
         setRemainingQuestions(data.remainingQuestions);
       } catch (error) {
         console.error(error);
-        // Handle error display in UI
+        // TODO: Handle error display in UI
       }
     };
 
@@ -65,14 +63,14 @@ const ParticipantDashboardPage = () => {
           問題作成ステータス
         </Typography>
         <Typography variant="body1">
-          あと <Typography component="span" variant="h5" color="secondary">{remainingQuestions}</Typography> 問、作成してください。
+          あと{' '}
+          <Typography component="span" variant="h5" color="secondary">
+            {remainingQuestions}
+          </Typography>{' '}
+          問、作成してください。
         </Typography>
         <Box sx={{ mt: 2 }}>
-          <Button 
-            component={Link} 
-            to={`/tournaments/${tournamentId}/quizzes/new`}
-            variant="contained" 
-            color="primary">
+          <Button component={Link} to={`/tournaments/${tournamentId}/quizzes/new`} variant="contained" color="primary">
             新しい問題を作成する
           </Button>
         </Box>
@@ -86,10 +84,7 @@ const ParticipantDashboardPage = () => {
           {quizzes.map((quiz, index) => (
             <div key={quiz.id}>
               <ListItem>
-                <ListItemText 
-                  primary={quiz.question} 
-                  secondary={`正解: ${quiz.answer}`}
-                />
+                <ListItemText primary={quiz.question} secondary={`正解: ${quiz.answer}`} />
                 {/* TODO: Add Edit/Delete buttons */}
               </ListItem>
               {index < quizzes.length - 1 && <Divider />}
