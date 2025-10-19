@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import express from "express";
-import tournamentsRouter from "./tournaments"; // Adjust path as needed
-import { PrismaClient } from "@prisma/client";
+import tournamentsRouter from "./tournaments";
+import { PrismaClient, Tournament } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -10,10 +10,9 @@ app.use(express.json());
 app.use("/tournaments", tournamentsRouter);
 
 describe("大会API", () => {
-  let tournament;
+  let tournament: Tournament;
 
-  beforeAll(async () => {
-    // Create a tournament for testing
+  beforeEach(async () => {
     tournament = await prisma.tournament.create({
       data: {
         name: "APIテスト用大会",
@@ -24,10 +23,12 @@ describe("大会API", () => {
     });
   });
 
-  afterAll(async () => {
-    // Clean up the database
-    await prisma.tournament.delete({ where: { id: tournament.id } });
-    await prisma.$disconnect();
+  afterEach(async () => {
+    await prisma.quiz.deleteMany({ where: { tournamentId: tournament.id } });
+    await prisma.participant.deleteMany({
+      where: { tournamentId: tournament.id },
+    });
+    await prisma.tournament.deleteMany({ where: { id: tournament.id } });
   });
 
   describe("POST /:id/login (主催者ログイン)", () => {
@@ -50,7 +51,6 @@ describe("大会API", () => {
 
   describe("GET /:id/status (大会ステータス取得)", () => {
     it("参加者の問題作成状況を含んだ大会ステータスが返されること", async () => {
-      // Create a participant and a quiz for the test
       const participant = await prisma.participant.create({
         data: {
           name: "テスト参加者",
@@ -60,9 +60,9 @@ describe("大会API", () => {
       });
       await prisma.quiz.create({
         data: {
+          point: 10,
           questionText: "テスト問題",
           answerText: "テスト解答",
-          point: 10,
           tournamentId: tournament.id,
           participantId: participant.id,
         },
@@ -78,12 +78,6 @@ describe("大会API", () => {
       expect(res.body.participants[0].name).toBe("テスト参加者");
       expect(res.body.participants[0].created).toBe(1);
       expect(res.body.participants[0].required).toBe(3);
-
-      // Cleanup
-      await prisma.quiz.deleteMany({
-        where: { participantId: participant.id },
-      });
-      await prisma.participant.delete({ where: { id: participant.id } });
     });
   });
 });
