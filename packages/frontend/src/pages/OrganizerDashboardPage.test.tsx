@@ -3,16 +3,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import OrganizerDashboardPage from './OrganizerDashboardPage';
 
-describe('OrganizerDashboardPage', () => {
+describe('主催者ダッシュボードページ', () => {
   const mockData = {
-    tournamentName: 'My Test Tournament',
+    tournamentName: 'マイテスト大会',
     participants: [
-      { id: '1', name: 'Alice', created: 2, required: 3 },
-      { id: '2', name: 'Bob', created: 3, required: 3 },
+      { id: '1', name: 'アリス', created: 2, required: 3 },
+      { id: '2', name: 'ボブ', created: 3, required: 3 },
     ],
   };
 
-  it('should fetch and display tournament status correctly', async () => {
+  it('大会ステータスを正しく取得して表示すること', async () => {
     // Mock the global fetch function
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -33,9 +33,9 @@ describe('OrganizerDashboardPage', () => {
     });
 
     // Check if participant data is rendered correctly
-    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('アリス')).toBeInTheDocument();
     expect(screen.getByText('2 / 3 問')).toBeInTheDocument();
-    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('ボブ')).toBeInTheDocument();
     expect(screen.getByText('3 / 3 問')).toBeInTheDocument();
 
     // Check if the API was called with the correct URL

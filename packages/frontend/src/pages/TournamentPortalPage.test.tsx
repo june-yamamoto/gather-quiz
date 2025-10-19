@@ -3,8 +3,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import TournamentPortalPage from './TournamentPortalPage';
 
-describe('TournamentPortalPage', () => {
-  it('should open login modal, attempt login, and navigate on success', async () => {
+describe('大会ポータルページ', () => {
+  it('ログインモーダルを開き、ログインを試み、成功時に画面遷移すること', async () => {
     // Mock the global fetch function
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
