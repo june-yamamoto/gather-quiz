@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for GatherQuiz Frontend (S3 and CloudFront)
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: The domain name for the CloudFront distribution (e.g., gather-quiz.yourdomain.com)
+  SubdomainName:
+    Type: String
+    Description: The subdomain part for the S3 bucket name (e.g., gather-quiz.yourdomain.com -> gather-quiz)
+
+Resources:
+  # S3 Bucket for Frontend Static Files
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${SubdomainName}-frontend-bucket
+      AccessControl: Private
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  # S3 Bucket Policy to allow CloudFront access
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${FrontendBucket}/*
+
+  # CloudFront Origin Access Identity (OAI) to restrict S3 bucket access
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: OAI for S3 bucket access
+
+  # CloudFront Distribution for Frontend
+  FrontendCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !Ref DomainName
+        Comment: CloudFront distribution for GatherQuiz frontend
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: s3-origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD, OPTIONS]
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          MinTTL: 0
+          DefaultTTL: 86400 # 24 hours
+          MaxTTL: 31536000 # 1 year
+        Origins:
+          - Id: s3-origin
+            DomainName: !GetAtt FrontendBucket.DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+        ViewerCertificate:
+          AcmCertificateArn: !ImportValue GatherQuiz-ACMCertificateArn # Assumes ACM cert is created in us-east-1
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2019
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 300
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCachingMinTTL: 300
+            ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+Outputs:
+  FrontendBucketName:
+    Description: Name of the S3 bucket for the frontend
+    Value: !Ref FrontendBucket
+    Export: 
+      Name: !Sub ${AWS::StackName}-FrontendBucketName
+  CloudFrontDistributionId:
+    Description: ID of the CloudFront Distribution
+    Value: !Ref FrontendCloudFrontDistribution
+    Export:
+      Name: !Sub ${AWS::StackName}-CloudFrontDistributionId
+  CloudFrontDomainName:
+    Description: Domain name of the CloudFront Distribution
+    Value: !GetAtt FrontendCloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub ${AWS::StackName}-CloudFrontDomainName

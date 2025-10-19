@@ -12,9 +12,7 @@ const meta: Meta<typeof ParticipantDashboardPage> = {
         method: 'GET',
         status: 200,
         response: {
-          createdQuizzes: [
-            { id: 'q1', question: '{"question":"これは最初の問題です"}', answer: '答え1' },
-          ],
+          createdQuizzes: [{ id: 'q1', question: '{"question":"これは最初の問題です"}', answer: '答え1' }],
           remainingQuestions: 2,
         },
       },

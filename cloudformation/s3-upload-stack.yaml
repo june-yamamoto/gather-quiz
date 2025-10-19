@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for GatherQuiz Image Upload (S3 Bucket and IAM Role)
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: The name of the project (e.g., GatherQuiz)
+  Environment:
+    Type: String
+    Description: The deployment environment (e.g., dev, prod)
+
+Resources:
+  # S3 Bucket for Image Uploads
+  ImageUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${Environment}-image-uploads
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM Policy for S3 Upload Access
+  ImageUploadPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Policy for allowing pre-signed URL generation and S3 PUT access
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource: !Sub arn:aws:s3:::${ImageUploadBucket}/*
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub arn:aws:s3:::${ImageUploadBucket}
+
+  # IAM Role for Backend Service to Assume (e.g., App Runner)
+  BackendServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apprunner.amazonaws.com # Adjust if using a different compute service
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref ImageUploadPolicy
+
+Outputs:
+  ImageUploadBucketName:
+    Description: Name of the S3 bucket for image uploads
+    Value: !Ref ImageUploadBucket
+    Export:
+      Name: !Sub ${ProjectName}-${Environment}-ImageUploadBucketName
+  BackendServiceRoleArn:
+    Description: ARN of the IAM Role for the backend service
+    Value: !GetAtt BackendServiceRole.Arn
+    Export:
+      Name: !Sub ${ProjectName}-${Environment}-BackendServiceRoleArn
