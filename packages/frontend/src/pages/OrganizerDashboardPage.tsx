@@ -34,7 +34,6 @@ const HeaderPaper = styled(Paper)(({ theme }) => ({
 
 const OrganizerDashboardPage = () => {
   const { tournamentId } = useParams();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
@@ -68,9 +67,7 @@ const OrganizerDashboardPage = () => {
         method: 'PATCH',
       });
       if (response.ok) {
-        // TODO: Navigate to the quiz board page
-        alert('大会が開始されました！問題選択ボードに遷移します。');
-        // navigate(`/tournaments/${tournamentId}/board`);
+        navigate(`/tournaments/${tournamentId}/board`);
       } else {
         throw new Error('Failed to start tournament');
       }
