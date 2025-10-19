@@ -9,8 +9,7 @@ RUN npm install -g pnpm
 RUN npx playwright install-deps
 
 # Install Japanese fonts
-RUN apt-get update && apt-get install -y fonts-noto-cjk && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y fonts-noto-cjk xvfb
 
 # Install Gemini CLI
 RUN npm install -g @google/gemini-cli

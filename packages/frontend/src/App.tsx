@@ -25,6 +25,10 @@ const App = () => {
         <Route path="/tournaments/:tournamentId/admin" element={<OrganizerDashboardPage />} />
         <Route path="/tournaments/:tournamentId/edit" element={<TournamentCreationPage />} />
         <Route path="/tournaments/:tournamentId/board" element={<QuizBoardPage />} />
+        <Route
+          path="/tournaments/:tournamentId/participants/:participantId/quizzes/new"
+          element={<QuizCreatorPage />}
+        />
         <Route path="/quizzes/:quizId" element={<QuizDisplayPage />} />
         <Route path="/quizzes/:quizId/answer" element={<AnswerDisplayPage />} />
         <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
