@@ -1,6 +1,4 @@
 import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
