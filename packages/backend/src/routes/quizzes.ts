@@ -59,4 +59,39 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const {
+      point,
+      questionText,
+      questionImage,
+      questionLink,
+      answerText,
+      answerImage,
+      answerLink,
+    } = req.body;
+
+    const updatedQuiz = await prisma.quiz.update({
+      where: { id },
+      data: {
+        point,
+        questionText,
+        questionImage,
+        questionLink,
+        answerText,
+        answerImage,
+        answerLink,
+      },
+    });
+    res.status(200).json(updatedQuiz);
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Quiz not found' });
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update quiz' });
+  }
+});
+
 export default router;
