@@ -75,7 +75,7 @@ const QuizBoardPage = () => {
             {tournament.participants.map((p: any) => {
               const quiz = p.quizzes.find((q: any) => q.point === point);
               return (
-                <Grid item xs key={`${p.id}-${point}`}>
+                <Grid item xs={true} key={`${p.id}-${point}`}>
                   {quiz ? (
                     <ButtonBase sx={{ width: '100%' }} onClick={() => handleQuizSelect(quiz.id)}>
                       <QuizCard elevation={3}>
