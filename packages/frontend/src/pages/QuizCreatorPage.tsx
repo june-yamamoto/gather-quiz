@@ -1,6 +1,4 @@
 import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
@@ -23,15 +21,13 @@ const QuizCreatorPage = () => {
   const [questionLink, setQuestionLink] = useState('');
 
   const [questionImageFile, setQuestionImageFile] = useState<File | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [questionImageUrl, setQuestionImageUrl] = useState<string | null>(null);
+  const [questionImageUrl] = useState<string | null>(null);
 
   const [answerText, setAnswerText] = useState('');
   const [answerLink, setAnswerLink] = useState('');
 
   const [answerImageFile, setAnswerImageFile] = useState<File | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [answerImageUrl, setAnswerImageUrl] = useState<string | null>(null);
+  const [answerImageUrl] = useState<string | null>(null);
 
   // TODO: Implement edit mode logic if needed for quizzes
 

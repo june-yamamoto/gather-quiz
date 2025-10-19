@@ -67,18 +67,15 @@ const QuizBoardPage = () => {
           </Grid>
         ))}
 
-        {/* Quiz Rows */}
         {points.map((point: number, rowIndex: number) => (
           <Grid container item spacing={2} key={rowIndex} alignItems="center">
             <Grid item xs={2} textAlign="right">
               <Typography variant="h5">{point}点</Typography>
             </Grid>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {tournament.participants.map((p: any) => {
-              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               const quiz = p.quizzes.find((q: any) => q.point === point);
               return (
-                <Grid item xs key={`${p.id}-${point}`}>
+                <Grid item xs={true} key={`${p.id}-${point}`}>
                   {quiz ? (
                     <ButtonBase sx={{ width: '100%' }} onClick={() => handleQuizSelect(quiz.id)}>
                       <QuizCard elevation={3}>
