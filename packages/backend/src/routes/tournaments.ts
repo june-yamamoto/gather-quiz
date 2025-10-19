@@ -130,4 +130,44 @@ router.get("/:id/status", async (req: Request, res: Response) => {
   }
 });
 
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, password, questionsPerParticipant, points, regulation } =
+      req.body;
+
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        name,
+        password,
+        questionsPerParticipant,
+        points,
+        regulation,
+      },
+    });
+
+    res.json(updatedTournament);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update tournament" });
+  }
+});
+
+router.patch("/:id/start", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        status: "in_progress",
+      },
+    });
+    res.json(updatedTournament);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to start tournament" });
+  }
+});
+
 export default router;

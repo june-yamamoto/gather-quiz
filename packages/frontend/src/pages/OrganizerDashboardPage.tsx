@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Button,
   Container,
@@ -34,6 +34,8 @@ const HeaderPaper = styled(Paper)(({ theme }) => ({
 
 const OrganizerDashboardPage = () => {
   const { tournamentId } = useParams();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
   const [participants, setParticipants] = useState<ParticipantStatus[]>([]);
@@ -60,9 +62,22 @@ const OrganizerDashboardPage = () => {
     fetchTournamentStatus();
   }, [tournamentId]);
 
-  const handleStartTournament = () => {
-    // TODO: Implement start tournament logic
-    alert('大会を開始します！（仮）');
+  const handleStartTournament = async () => {
+    try {
+      const response = await fetch(`/api/tournaments/${tournamentId}/start`, {
+        method: 'PATCH',
+      });
+      if (response.ok) {
+        // TODO: Navigate to the quiz board page
+        alert('大会が開始されました！問題選択ボードに遷移します。');
+        // navigate(`/tournaments/${tournamentId}/board`);
+      } else {
+        throw new Error('Failed to start tournament');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('大会の開始に失敗しました。');
+    }
   };
 
   return (
@@ -77,6 +92,10 @@ const OrganizerDashboardPage = () => {
             {portalUrl}
           </Typography>
         </Box>
+
+        <Button component={Link} to={`/tournaments/${tournamentId}/edit`} variant="outlined" sx={{ mt: 2 }}>
+          大会概要を編集する
+        </Button>
       </HeaderPaper>
 
       <Typography variant="h5" component="h2" gutterBottom>

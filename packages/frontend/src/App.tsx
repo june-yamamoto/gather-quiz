@@ -19,6 +19,7 @@ const App = () => {
         <Route path="/tournaments/:tournamentId/quizzes/new" element={<QuizCreatorPage />} />
         <Route path="/tournaments/:tournamentId/participants/:participantId" element={<ParticipantDashboardPage />} />
         <Route path="/tournaments/:tournamentId/admin" element={<OrganizerDashboardPage />} />
+        <Route path="/tournaments/:tournamentId/edit" element={<TournamentCreationPage />} />
         <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
       </Routes>
     </BrowserRouter>

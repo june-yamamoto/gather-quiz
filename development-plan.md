@@ -49,9 +49,9 @@
     - ✅ **画面**: `大会ポータルページ`, `参加者登録ページ`, `問題作成・編集ページ`, `参加者ダッシュボードページ`
     - ✅ **API**: 参加者の登録 (`POST /api/tournaments/:id/participants`), 問題の作成 (`POST /api/quizzes`), 参加者の問題作成状況の取得 (`GET /api/participants/:participantId/quizzes`)
 
-- **主催者管理フローの実装**
-    - **画面**: `主催者用 管理ページ`
-    - **API**: 主催者ログイン, 参加状況の取得, 大会情報の更新
+- **主催者管理フローの実装**: ✅ 完了
+    - ✅ **画面**: `主催者用 管理ページ` (ログイン機能含む)
+    - ✅ **API**: 主催者ログイン (`POST /tournaments/:id/login`), 参加状況の取得 (`GET /tournaments/:id/status`), 大会情報の更新 (`PUT /tournaments/:id`), 大会開始 (`PATCH /tournaments/:id/start`)
 
 ### フェーズ3: 大会実施機能と仕上げ
 
