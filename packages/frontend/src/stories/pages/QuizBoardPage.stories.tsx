@@ -18,7 +18,10 @@ const meta: Meta<typeof QuizBoardPage> = {
             {
               id: 'p1',
               name: '田中',
-              quizzes: [{ id: 'q1', point: 10 }, { id: 'q2', point: 30 }],
+              quizzes: [
+                { id: 'q1', point: 10 },
+                { id: 'q2', point: 30 },
+              ],
             },
             {
               id: 'p2',

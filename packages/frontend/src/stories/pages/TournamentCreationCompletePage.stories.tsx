@@ -21,10 +21,12 @@ const meta: Meta<typeof TournamentCreationCompletePage> = {
   decorators: [
     (Story) => (
       <MemoryRouter
-        initialEntries={[{
-          pathname: '/tournaments/test-complete-id/created',
-          state: { password: 'password123' },
-        }]}
+        initialEntries={[
+          {
+            pathname: '/tournaments/test-complete-id/created',
+            state: { password: 'password123' },
+          },
+        ]}
       >
         <Routes>
           <Route path="/tournaments/:id/created" element={<Story />} />

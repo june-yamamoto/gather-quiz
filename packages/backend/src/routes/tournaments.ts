@@ -113,12 +113,14 @@ router.get("/:id/status", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Tournament not found" });
     }
 
-    const participantStatus = tournament.participants.map((p) => ({
-      id: p.id,
-      name: p.name,
-      created: p._count.quizzes,
-      required: tournament.questionsPerParticipant,
-    }));
+    const participantStatus = tournament.participants.map(
+      (p: { id: string; name: string; _count: { quizzes: number } }) => ({
+        id: p.id,
+        name: p.name,
+        created: p._count.quizzes,
+        required: tournament.questionsPerParticipant,
+      }),
+    );
 
     res.json({
       tournamentName: tournament.name,
