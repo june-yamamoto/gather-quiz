@@ -6,6 +6,7 @@ import TournamentPortalPage from './pages/TournamentPortalPage';
 import ParticipantRegistrationPage from './pages/ParticipantRegistrationPage';
 import QuizCreatorPage from './pages/QuizCreatorPage';
 import ParticipantDashboardPage from './pages/ParticipantDashboardPage';
+import OrganizerDashboardPage from './pages/OrganizerDashboardPage';
 
 const App = () => {
   return (
@@ -15,9 +16,10 @@ const App = () => {
         <Route path="/tournaments/new" element={<TournamentCreationPage />} />
         <Route path="/tournaments/:id/created" element={<TournamentCreationCompletePage />} />
         <Route path="/tournaments/:id/register" element={<ParticipantRegistrationPage />} />
-        <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
         <Route path="/tournaments/:tournamentId/quizzes/new" element={<QuizCreatorPage />} />
         <Route path="/tournaments/:tournamentId/participants/:participantId" element={<ParticipantDashboardPage />} />
+        <Route path="/tournaments/:tournamentId/admin" element={<OrganizerDashboardPage />} />
+        <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
       </Routes>
     </BrowserRouter>
   );

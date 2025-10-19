@@ -1,16 +1,24 @@
-import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post('/', async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const { question, options, answer, point, tournamentId, participantId } = req.body;
+    const { question, options, answer, point, tournamentId, participantId } =
+      req.body;
 
     // Basic validation
-    if (!question || !options || !answer || !point || !tournamentId || !participantId) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (
+      !question ||
+      !options ||
+      !answer ||
+      !point ||
+      !tournamentId ||
+      !participantId
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     // Temporary: Combine question and options into the question field
@@ -28,7 +36,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json(quiz);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Quiz creation failed' });
+    res.status(500).json({ error: "Quiz creation failed" });
   }
 });
 

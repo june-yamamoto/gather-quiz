@@ -9,6 +9,12 @@
     "db:push": "cd packages/backend && pnpm exec prisma db push",
     "test:e2e": "playwright test",
     "postinstall": "playwright install",
+    "lint-fix": "pnpm -r lint-fix",
+    "format": "pnpm -r format",
+    "lint-fix:frontend": "pnpm --filter frontend lint-fix",
+    "format:frontend": "pnpm --filter frontend format",
+    "lint-fix:backend": "pnpm --filter backend lint-fix",
+    "format:backend": "pnpm --filter backend format",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
