@@ -7,6 +7,10 @@ import ParticipantRegistrationPage from './pages/ParticipantRegistrationPage';
 import QuizCreatorPage from './pages/QuizCreatorPage';
 import ParticipantDashboardPage from './pages/ParticipantDashboardPage';
 import OrganizerDashboardPage from './pages/OrganizerDashboardPage';
+import QuizBoardPage from './pages/QuizBoardPage';
+import QuizDisplayPage from './pages/QuizDisplayPage';
+import AnswerDisplayPage from './pages/AnswerDisplayPage';
+import ErrorPage from './pages/ErrorPage';
 
 const App = () => {
   return (
@@ -20,7 +24,12 @@ const App = () => {
         <Route path="/tournaments/:tournamentId/participants/:participantId" element={<ParticipantDashboardPage />} />
         <Route path="/tournaments/:tournamentId/admin" element={<OrganizerDashboardPage />} />
         <Route path="/tournaments/:tournamentId/edit" element={<TournamentCreationPage />} />
+        <Route path="/tournaments/:tournamentId/board" element={<QuizBoardPage />} />
+        <Route path="/quizzes/:quizId" element={<QuizDisplayPage />} />
+        <Route path="/quizzes/:quizId/answer" element={<AnswerDisplayPage />} />
         <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
+        {/* Catch-all route for 404 Not Found */}
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   );

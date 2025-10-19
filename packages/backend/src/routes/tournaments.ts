@@ -170,4 +170,29 @@ router.patch("/:id/start", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/:id/board", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      include: {
+        participants: {
+          include: {
+            quizzes: true,
+          },
+        },
+      },
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
+    }
+
+    res.json(tournament);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve board data" });
+  }
+});
+
 export default router;

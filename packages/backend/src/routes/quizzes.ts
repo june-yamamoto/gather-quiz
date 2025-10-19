@@ -42,4 +42,21 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+    });
+    if (quiz) {
+      res.json(quiz);
+    } else {
+      res.status(404).json({ error: "Quiz not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve quiz" });
+  }
+});
+
 export default router;
