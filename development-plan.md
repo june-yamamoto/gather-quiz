@@ -76,6 +76,26 @@
     - DBスキーマの正規化（`Quiz`モデルの選択肢など）
     - コンポーネントの分割と可読性向上
 
+## リファクタリング指示
+
+- サーバー
+  - 全APIについてテストケースを作成してください
+  - DBで使用するモデルをクラス化して`backend/src/model`に切り出してください
+  - 全APIについて、パスの生成を関数化してください
+    - 作成した関数は`api-helper.ts`に切り出してまとめる
+    - 可能であればフロントエンドから呼び出せるようにする
+    - ex) `pathToApiPostParticipants = () => ['rootpath', ':id', 'participants'].join('/');`
+      - `const rootpath = '/';` を定義しておく
+- フロントエンド
+  - サーバと通信するfetch処理は対象となるモデル毎のクラスに切り出してください
+  - フロントエンドのパスの生成は全て関数化してください
+    - ex) `pathToCreateQuizPage = (tournamentId: string, pariticipantId: string) => [rootpath, rournamentId, 'participants', participantId, 'quizzes', 'new']`
+      - `const rootpath = '/';` を定義してください
+  - DBから取得するモデルをクラス化して`frontend/src/model`に切り出す。以下の関数を実装してください
+    - `HogeClass.fromApi()`: APIから取得したオブジェクトをモデル化する関数
+    - `HogeClass.toApi()`: APIにわたす際のオブジェクトを取得する関数
+  - StyledComponent化したコンポーネントは必ず全てPrefixに`Styled`をつけてください
+
 ---
 
 ## 5. デプロイ計画 (中断中)
