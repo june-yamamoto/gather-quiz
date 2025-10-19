@@ -6,29 +6,31 @@ const router = Router();
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { question, options, answer, point, tournamentId, participantId } =
-      req.body;
+    const {
+      point,
+      questionText,
+      questionImage,
+      questionLink,
+      answerText,
+      answerImage,
+      answerLink,
+      tournamentId,
+      participantId,
+    } = req.body;
 
-    // Basic validation
-    if (
-      !question ||
-      !options ||
-      !answer ||
-      !point ||
-      !tournamentId ||
-      !participantId
-    ) {
+    if (!point || !tournamentId || !participantId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Temporary: Combine question and options into the question field
-    const questionWithOptions = JSON.stringify({ question, options });
-
     const quiz = await prisma.quiz.create({
       data: {
-        question: questionWithOptions,
-        answer,
         point,
+        questionText,
+        questionImage,
+        questionLink,
+        answerText,
+        answerImage,
+        answerLink,
         tournament: { connect: { id: tournamentId } },
         participant: { connect: { id: participantId } },
       },

@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -21,6 +21,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 
 const TournamentPortalPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
 
@@ -44,9 +45,10 @@ const TournamentPortalPage = () => {
       });
 
       if (response.ok) {
-        alert('主催者としてログインしました！');
-        navigate(`/tournaments/${id}/admin`);
         handleClose();
+        setTimeout(() => {
+          navigate(`/tournaments/${id}/admin`);
+        }, 0);
       } else {
         alert('パスワードが違います。');
         setPassword('');

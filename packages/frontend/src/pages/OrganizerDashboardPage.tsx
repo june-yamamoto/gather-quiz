@@ -15,12 +15,12 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-// Mock data for now
-const mockParticipants = [
-  { id: '1', name: 'Tanaka', created: 5, required: 5 },
-  { id: '2', name: 'Sato', created: 3, required: 5 },
-  { id: '3', name: 'Suzuki', created: 0, required: 5 },
-];
+interface ParticipantStatus {
+  id: string;
+  name: string;
+  created: number;
+  required: number;
+}
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -36,15 +36,29 @@ const OrganizerDashboardPage = () => {
   const { tournamentId } = useParams();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
-  // TODO: Replace with API call
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [participants, setParticipants] = useState(mockParticipants);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tournamentName, setTournamentName] = useState('〇〇〇〇クイズ大会');
+  const [participants, setParticipants] = useState<ParticipantStatus[]>([]);
+  const [tournamentName, setTournamentName] = useState('');
 
   useEffect(() => {
-    // This will be used to fetch data from the API
-  }, []);
+    if (!tournamentId) return;
+
+    const fetchTournamentStatus = async () => {
+      try {
+        const response = await fetch(`/api/tournaments/${tournamentId}/status`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tournament status');
+        }
+        const data = await response.json();
+        setTournamentName(data.tournamentName);
+        setParticipants(data.participants);
+      } catch (error) {
+        console.error(error);
+        // TODO: Handle error display in UI
+      }
+    };
+
+    fetchTournamentStatus();
+  }, [tournamentId]);
 
   const handleStartTournament = () => {
     // TODO: Implement start tournament logic

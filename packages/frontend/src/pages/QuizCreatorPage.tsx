@@ -1,17 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  Button,
-  Container,
-  Typography,
-  Box,
-  TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-} from '@mui/material';
+import { Button, Container, Typography, Box, TextField, Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -19,55 +7,28 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
+const Section = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+}));
+
 const QuizCreatorPage = () => {
-  const { tournamentId } = useParams();
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState(['', '', '', '']);
-  const [correctAnswer, setCorrectAnswer] = useState('0');
   const [point, setPoint] = useState(10);
+  const [questionText, setQuestionText] = useState('');
+  const [questionLink, setQuestionLink] = useState('');
+  const [answerText, setAnswerText] = useState('');
+  const [answerLink, setAnswerLink] = useState('');
 
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
-    // TODO: Replace with the actual logged-in participant ID
-    const participantId = 'clxza9vjm000111mndb1f42k5';
-
-    const submission = {
-      question,
-      // Note: Storing options in the question field for now.
-      // This should be normalized in the DB schema later.
-      options: JSON.stringify(options),
-      answer: options[parseInt(correctAnswer)],
+    // TODO: Implement submission logic with new fields
+    console.log({
       point,
-      tournamentId,
-      participantId,
-    };
-
-    try {
-      const response = await fetch('/api/quizzes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submission),
-      });
-
-      if (!response.ok) {
-        throw new Error('問題の作成に失敗しました。');
-      }
-
-      alert('問題が作成されました！');
-      // TODO: Navigate to the quiz list page or clear the form
-    } catch (error) {
-      console.error(error);
-      alert('エラーが発生しました。');
-    }
+      questionText,
+      questionLink,
+      answerText,
+      answerLink,
+    });
+    alert('問題が作成されました（仮）');
   };
 
   return (
@@ -76,51 +37,6 @@ const QuizCreatorPage = () => {
         問題作成・編集
       </Typography>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
-        <TextField
-          label="問題文"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
-          required
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          sx={{ mb: 3 }}
-        />
-
-        {options.map((option, index) => (
-          <TextField
-            key={index}
-            label={`選択肢 ${index + 1}`}
-            variant="outlined"
-            fullWidth
-            required
-            value={option}
-            onChange={(e) => handleOptionChange(index, e.target.value)}
-            sx={{ mb: 2 }}
-          />
-        ))}
-
-        <FormControl component="fieldset" sx={{ mt: 2, mb: 3 }}>
-          <FormLabel component="legend">正解の選択肢</FormLabel>
-          <RadioGroup
-            row
-            aria-label="correct-answer"
-            name="correct-answer-group"
-            value={correctAnswer}
-            onChange={(e) => setCorrectAnswer(e.target.value)}
-          >
-            {options.map((_, index) => (
-              <FormControlLabel
-                key={index}
-                value={index.toString()}
-                control={<Radio />}
-                label={`選択肢 ${index + 1}`}
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
-
         <TextField
           label="配点"
           variant="outlined"
@@ -131,9 +47,71 @@ const QuizCreatorPage = () => {
           sx={{ mb: 3, width: '150px' }}
         />
 
-        <Button type="submit" variant="contained" color="primary" size="large">
-          この内容で問題を保存する
-        </Button>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Section>
+              <Typography variant="h6" gutterBottom>
+                問題の作成
+              </Typography>
+              <TextField
+                label="問題文"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <Button variant="outlined" component="label" fullWidth sx={{ mb: 2 }}>
+                添付画像を選択
+                <input type="file" hidden />
+              </Button>
+              <TextField
+                label="参考リンク"
+                variant="outlined"
+                fullWidth
+                value={questionLink}
+                onChange={(e) => setQuestionLink(e.target.value)}
+              />
+            </Section>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Section>
+              <Typography variant="h6" gutterBottom>
+                解答の作成
+              </Typography>
+              <TextField
+                label="解答文"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                value={answerText}
+                onChange={(e) => setAnswerText(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <Button variant="outlined" component="label" fullWidth sx={{ mb: 2 }}>
+                添付画像を選択
+                <input type="file" hidden />
+              </Button>
+              <TextField
+                label="参考リンク"
+                variant="outlined"
+                fullWidth
+                value={answerLink}
+                onChange={(e) => setAnswerLink(e.target.value)}
+              />
+            </Section>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+          <Button type="submit" variant="contained" color="primary" size="large">
+            この内容で問題を保存する
+          </Button>
+        </Box>
       </Box>
     </StyledContainer>
   );
