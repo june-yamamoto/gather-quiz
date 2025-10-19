@@ -16,7 +16,7 @@ const Section = styled(Box)(({ theme }) => ({
 
 const QuizCreatorPage = () => {
   const navigate = useNavigate();
-  const { tournamentId } = useParams();
+  const { tournamentId, participantId } = useParams();
 
   const [point, setPoint] = useState(10);
   const [questionText, setQuestionText] = useState('');
@@ -96,8 +96,7 @@ const QuizCreatorPage = () => {
       answerImage: finalAnswerImageUrl,
       answerLink,
       tournamentId,
-      // TODO: Replace with actual participant ID from context/auth
-      participantId: 'clxza9vjm000111mndb1f42k5',
+      participantId, // Use the ID from the URL
     };
 
     try {
@@ -115,7 +114,7 @@ const QuizCreatorPage = () => {
 
       alert('問題が作成されました！');
       // TODO: Navigate to the participant dashboard or clear the form
-      navigate(`/tournaments/${tournamentId}/participants/clxza9vjm000111mndb1f42k5`);
+      navigate(`/tournaments/${tournamentId}/participants/${participantId}`);
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました。');

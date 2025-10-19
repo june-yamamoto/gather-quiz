@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = Router({ mergeParams: true }); // Enable mergeParams to access :tournamentId
 
 router.get("/:participantId/quizzes", async (req: Request, res: Response) => {
   try {

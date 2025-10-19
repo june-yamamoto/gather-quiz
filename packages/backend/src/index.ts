@@ -12,10 +12,9 @@ app.use(express.json());
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
-
-app.use("/api/tournaments", tournamentsRouter);
 app.use("/api/quizzes", quizzesRouter);
 app.use("/api/participants", participantsRouter);
+app.use("/api/tournaments", tournamentsRouter);
 app.use("/api/upload", uploadRouter);
 
 app.listen(port, () => {

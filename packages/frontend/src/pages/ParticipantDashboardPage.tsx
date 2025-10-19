@@ -24,7 +24,7 @@ const ParticipantDashboardPage = () => {
 
     const fetchQuizStatus = async () => {
       try {
-        const response = await fetch(`/api/participants/${participantId}/quizzes`);
+        const response = await fetch(`/api/tournaments/${tournamentId}/participants/${participantId}/quizzes`);
         if (!response.ok) {
           throw new Error('Failed to fetch quiz status');
         }
@@ -50,7 +50,7 @@ const ParticipantDashboardPage = () => {
     };
 
     fetchQuizStatus();
-  }, [participantId]);
+  }, [participantId, tournamentId]);
 
   return (
     <StyledContainer maxWidth="md">
@@ -70,7 +70,12 @@ const ParticipantDashboardPage = () => {
           問、作成してください。
         </Typography>
         <Box sx={{ mt: 2 }}>
-          <Button component={Link} to={`/tournaments/${tournamentId}/quizzes/new`} variant="contained" color="primary">
+          <Button
+            component={Link}
+            to={`/tournaments/${tournamentId}/participants/${participantId}/quizzes/new`}
+            variant="contained"
+            color="primary"
+          >
             新しい問題を作成する
           </Button>
         </Box>
@@ -84,7 +89,10 @@ const ParticipantDashboardPage = () => {
           {quizzes.map((quiz, index) => (
             <div key={quiz.id}>
               <ListItem>
-                <ListItemText primary={quiz.question} secondary={`正解: ${quiz.answer}`} />
+                <ListItemText
+                  primary={quiz.questionText || '（問題文がありません）'}
+                  secondary={`正解: ${quiz.answerText || '（解答文がありません）'}`}
+                />
                 {/* TODO: Add Edit/Delete buttons */}
               </ListItem>
               {index < quizzes.length - 1 && <Divider />}

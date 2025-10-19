@@ -1,8 +1,11 @@
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import participantsRouter from "./participants";
 
 const prisma = new PrismaClient();
 const router = Router();
+
+router.use("/:tournamentId/participants", participantsRouter);
 
 router.post("/", async (req: Request, res: Response) => {
   try {

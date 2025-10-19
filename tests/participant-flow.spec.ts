@@ -30,15 +30,21 @@ test.describe('参加者登録と問題作成フロー', () => {
     // 3. Fill out the registration form
     const participantName = `Test Participant ${Date.now()}`
     await page.getByLabel('あなたの名前').fill(participantName);
+
+    const responsePromise = page.waitForResponse(resp => resp.url().includes('/participants') && resp.status() === 200);
     await page.getByRole('button', { name: 'この名前で参加する' }).click();
+    const response = await responsePromise;
+    const participant = await response.json();
 
     // 4. Expect to be redirected to the quiz creation page
-    await page.waitForURL(`/tournaments/${tournamentId}/quizzes/new`);
+    await page.waitForURL(`/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
     await expect(page.getByRole('heading', { name: '問題作成・編集' })).toBeVisible();
 
     // 5. Check if the form elements are visible
-    await expect(page.getByLabel('問題文')).toBeVisible();
-    await expect(page.getByRole('textbox', { name: '参考リンク' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: '問題文' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: '参考リンク' }).first()).toBeVisible(); // 問題の参考リンク
+    await expect(page.getByRole('textbox', { name: '解答文' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: '参考リンク' }).nth(1)).toBeVisible(); // 解答の参考リンク
     await expect(page.getByLabel('配点')).toBeVisible();
     await expect(page.getByRole('button', { name: 'この内容で問題を保存する' })).toBeVisible();
   });
