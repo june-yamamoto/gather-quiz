@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 let tournamentId: string;
 
@@ -17,8 +17,8 @@ test.beforeAll(async ({ request }) => {
   tournamentId = tournament.id;
 });
 
-test.describe('Participant Registration and Quiz Creation Flow', () => {
-  test('should allow a user to register and be redirected to the quiz creator page', async ({ page }) => {
+test.describe('参加者登録と問題作成フロー', () => {
+  test('ユーザーが参加者登録し、問題作成ページにリダイレクトされること', async ({ page }) => {
     // 1. Navigate to the tournament portal page
     await page.goto(`/tournaments/${tournamentId}`);
     await expect(page.getByRole('heading', { name: '大会ポータル' })).toBeVisible();
@@ -38,7 +38,7 @@ test.describe('Participant Registration and Quiz Creation Flow', () => {
 
     // 5. Check if the form elements are visible
     await expect(page.getByLabel('問題文')).toBeVisible();
-    await expect(page.getByRole('textbox', { name: '選択肢 1' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: '参考リンク' })).toBeVisible();
     await expect(page.getByLabel('配点')).toBeVisible();
     await expect(page.getByRole('button', { name: 'この内容で問題を保存する' })).toBeVisible();
   });

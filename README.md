@@ -34,7 +34,34 @@
      pnpm dev:frontend
      ```
 
-フロントエンドは `http://localhost:5173` で、バックエンドは `http://localhost:3000` で起動します。\n\n### テストの実行\n\n#### E2E (End-to-End) テスト\n\nPlaywrightを使用したE2Eテストを実行します。\n\n```bash\nnpx playwright test\n```\n\nこのコマンドは、`playwright.config.ts`の設定に基づき、自動でWebサーバーを起動してテストを実行します。
+フロントエンドは `http://localhost:5173` で、バックエンドは `http://localhost:3000` で起動します。
+
+### テストの実行
+
+#### E2E (End-to-End) テスト
+
+Playwrightを使用したE2Eテストを実行します。
+
+```bash
+npx playwright test
+```
+
+現在、以下の主要なユーザーフローがテストされています。
+- 大会作成フロー
+- 参加者登録から問題作成ページへの遷移フロー
+- 参加者ダッシュボードでの問題作成状況表示フロー
+
+このコマンドは、`playwright.config.ts`の設定に基づき、自動でWebサーバーを起動してテストを実行します。
+
+### 静的解析とフォーマット\n\nコードの品質を保つため、ESLintとPrettierを導入しています。
+
+```bash
+# すべてのパッケージを対象に、修正可能な問題を自動修正
+pnpm lint-fix
+
+# すべてのパッケージを対象に、コードを自動整形
+pnpm format
+```
 
 ---
 

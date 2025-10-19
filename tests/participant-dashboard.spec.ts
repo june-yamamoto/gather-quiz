@@ -28,9 +28,8 @@ const createParticipant = async (request: APIRequestContext, tournamentId: strin
 const createQuiz = async (request: APIRequestContext, tournamentId: string, participantId: string, questionNumber: number) => {
   const response = await request.post('/api/quizzes', {
     data: {
-      question: `Question ${questionNumber}` ,
-      options: JSON.stringify(['A', 'B', 'C', 'D']),
-      answer: 'A',
+      questionText: `Question ${questionNumber}` ,
+      answerText: 'A',
       point: 10,
       tournamentId,
       participantId,
@@ -39,9 +38,9 @@ const createQuiz = async (request: APIRequestContext, tournamentId: string, part
   return await response.json();
 };
 
-test.describe('Participant Dashboard', () => {
+test.describe('参加者ダッシュボード', () => {
 
-  test('Scenario 1: should display correct status when no quizzes are created', async ({ page, request }) => {
+  test('シナリオ1: クイズが一件も作成されていない場合に正しいステータスが表示されること', async ({ page, request }) => {
     const tournament = await createTournament(request);
     const participant = await createParticipant(request, tournament.id);
 
@@ -54,7 +53,7 @@ test.describe('Participant Dashboard', () => {
     expect(listItems).toBe(0);
   });
 
-  test('Scenario 2: should display correct status when some quizzes are created', async ({ page, request }) => {
+  test('シナリオ2: クイズがいくつか作成済みの場合に正しいステータスが表示されること', async ({ page, request }) => {
     const tournament = await createTournament(request);
     const participant = await createParticipant(request, tournament.id);
     const quiz = await createQuiz(request, tournament.id, participant.id, 1);
@@ -63,10 +62,10 @@ test.describe('Participant Dashboard', () => {
 
     await expect(page.getByText('あと 2 問、作成してください。')).toBeVisible();
     await expect(page.getByText('作成済みの問題')).toBeVisible();
-    await expect(page.getByText(JSON.parse(quiz.question).question)).toBeVisible();
+    await expect(page.getByText(quiz.questionText)).toBeVisible();
   });
 
-  test('Scenario 3: should display correct status when all quizzes are created', async ({ page, request }) => {
+  test('シナリオ3: すべてのクイズが作成済みの場合に正しいステータスが表示されること', async ({ page, request }) => {
     const tournament = await createTournament(request);
     const participant = await createParticipant(request, tournament.id);
     await createQuiz(request, tournament.id, participant.id, 1);

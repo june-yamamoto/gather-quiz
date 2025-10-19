@@ -1,13 +1,13 @@
-
-import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post('/', async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const { name, password, questionsPerParticipant, points, regulation } = req.body;
+    const { name, password, questionsPerParticipant, points, regulation } =
+      req.body;
     const tournament = await prisma.tournament.create({
       data: {
         name,
@@ -18,12 +18,13 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
     res.json(tournament);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    res.status(500).json({ error: 'Tournament creation failed' });
+    res.status(500).json({ error: "Tournament creation failed" });
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tournament = await prisma.tournament.findUnique({
@@ -32,14 +33,15 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (tournament) {
       res.json(tournament);
     } else {
-      res.status(404).json({ error: 'Tournament not found' });
+      res.status(404).json({ error: "Tournament not found" });
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve tournament' });
+    res.status(500).json({ error: "Failed to retrieve tournament" });
   }
 });
 
-router.post('/:id/participants', async (req: Request, res: Response) => {
+router.post("/:id/participants", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -62,7 +64,109 @@ router.post('/:id/participants', async (req: Request, res: Response) => {
     res.json(participant);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Participant creation failed' });
+    res.status(500).json({ error: "Participant creation failed" });
+  }
+});
+
+router.post("/:id/login", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
+    }
+
+    if (tournament.password === password) {
+      // In a real application, you would issue a token (e.g., JWT)
+      res.json({ success: true, message: "Login successful" });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid password" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.get("/:id/status", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      include: {
+        participants: {
+          include: {
+            _count: {
+              select: { quizzes: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
+    }
+
+    const participantStatus = tournament.participants.map((p) => ({
+      id: p.id,
+      name: p.name,
+      created: p._count.quizzes,
+      required: tournament.questionsPerParticipant,
+    }));
+
+    res.json({
+      tournamentName: tournament.name,
+      participants: participantStatus,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve tournament status" });
+  }
+});
+
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, password, questionsPerParticipant, points, regulation } =
+      req.body;
+
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        name,
+        password,
+        questionsPerParticipant,
+        points,
+        regulation,
+      },
+    });
+
+    res.json(updatedTournament);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update tournament" });
+  }
+});
+
+router.patch("/:id/start", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        status: "in_progress",
+      },
+    });
+    res.json(updatedTournament);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to start tournament" });
   }
 });
 

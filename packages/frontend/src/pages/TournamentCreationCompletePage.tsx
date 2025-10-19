@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
@@ -81,9 +80,7 @@ const TournamentCreationCompletePage = () => {
           </InfoBox>
           <InfoBox>
             <Typography variant="subtitle2">▼ 管理用パスワード</Typography>
-            <UrlDisplay>
-              {location.state?.password || '********'} (あなたが設定したパスワード)
-            </UrlDisplay>
+            <UrlDisplay>{location.state?.password || '********'} (あなたが設定したパスワード)</UrlDisplay>
           </InfoBox>
         </InfoPaper>
       )}

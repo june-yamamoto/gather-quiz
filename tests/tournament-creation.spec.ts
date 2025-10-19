@@ -26,6 +26,7 @@ test.describe('Tournament Creation Flow', () => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
     const tournamentName = `My New E2E Test ${Date.now()}`;
+
     // Run the creation helper
     await createTournament(page, tournamentName);
 

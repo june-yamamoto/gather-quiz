@@ -1,26 +1,36 @@
-import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post('/', async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const { question, options, answer, point, tournamentId, participantId } = req.body;
+    const {
+      point,
+      questionText,
+      questionImage,
+      questionLink,
+      answerText,
+      answerImage,
+      answerLink,
+      tournamentId,
+      participantId,
+    } = req.body;
 
-    // Basic validation
-    if (!question || !options || !answer || !point || !tournamentId || !participantId) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!point || !tournamentId || !participantId) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
-
-    // Temporary: Combine question and options into the question field
-    const questionWithOptions = JSON.stringify({ question, options });
 
     const quiz = await prisma.quiz.create({
       data: {
-        question: questionWithOptions,
-        answer,
         point,
+        questionText,
+        questionImage,
+        questionLink,
+        answerText,
+        answerImage,
+        answerLink,
         tournament: { connect: { id: tournamentId } },
         participant: { connect: { id: participantId } },
       },
@@ -28,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(201).json(quiz);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Quiz creation failed' });
+    res.status(500).json({ error: "Quiz creation failed" });
   }
 });
 
