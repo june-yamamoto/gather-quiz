@@ -62,15 +62,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      point,
-      questionText,
-      questionImage,
-      questionLink,
-      answerText,
-      answerImage,
-      answerLink,
-    } = req.body;
+    const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink } = req.body;
 
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
