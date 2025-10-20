@@ -3,6 +3,25 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Paper, Grid, ButtonBase } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
+// APIから取得するデータ構造に合わせて型を定義
+interface Quiz {
+  id: string;
+  point: number;
+}
+
+interface Participant {
+  id: string;
+  name: string;
+  quizzes: Quiz[];
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  points: string;
+  participants: Participant[];
+}
+
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(4),
@@ -23,8 +42,7 @@ const QuizBoardPage = () => {
   const { tournamentId } = useParams();
 
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [tournament, setTournament] = useState<any>(null);
+  const [tournament, setTournament] = useState<Tournament | null>(null);
 
   useEffect(() => {
     if (!tournamentId) return;
@@ -60,8 +78,7 @@ const QuizBoardPage = () => {
       <Grid container spacing={2} sx={{ mt: 4 }}>
         {/* Header Row */}
         <Grid item xs={2} />
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {tournament.participants.map((p: any) => (
+        {tournament.participants.map((p: Participant) => (
           <Grid item xs key={p.id} textAlign="center">
             <Typography variant="h6">{p.name}</Typography>
           </Grid>
@@ -72,8 +89,8 @@ const QuizBoardPage = () => {
             <Grid item xs={2} textAlign="right">
               <Typography variant="h5">{point}点</Typography>
             </Grid>
-            {tournament.participants.map((p: any) => {
-              const quiz = p.quizzes.find((q: any) => q.point === point);
+            {tournament.participants.map((p: Participant) => {
+              const quiz = p.quizzes.find((q: Quiz) => q.point === point);
               return (
                 <Grid item xs={true} key={`${p.id}-${point}`}>
                   {quiz ? (

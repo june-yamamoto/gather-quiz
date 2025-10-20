@@ -45,7 +45,7 @@ const ParticipantDashboardPage = () => {
         setRemainingQuestions(data.remainingQuestions);
       } catch (error) {
         console.error(error);
-        // TODO: Handle error display in UI
+        // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
       }
     };
 
@@ -93,7 +93,7 @@ const ParticipantDashboardPage = () => {
                   primary={quiz.questionText || '（問題文がありません）'}
                   secondary={`正解: ${quiz.answerText || '（解答文がありません）'}`}
                 />
-                {/* TODO: Add Edit/Delete buttons */}
+                {/* TODO: 作成した問題を編集・削除できるように、今後ボタンをここに追加する */}
               </ListItem>
               {index < quizzes.length - 1 && <Divider />}
             </div>

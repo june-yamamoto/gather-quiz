@@ -29,11 +29,11 @@ const QuizCreatorPage = () => {
   const [answerImageFile, setAnswerImageFile] = useState<File | null>(null);
   const [answerImageUrl] = useState<string | null>(null);
 
-  // TODO: Implement edit mode logic if needed for quizzes
+  // TODO: クイズ編集モードが必要な場合は、既存のクイズ情報を読み込むロジックをここに実装する
 
   const uploadImageToS3 = async (file: File): Promise<string | null> => {
     try {
-      // 1. Get pre-signed URL from backend
+      // 1. バックエンドにリクエストを送り、S3へのアップロードに必要な署名付きURLを取得する
       const getSignedUrlRes = await fetch('/api/upload/image', {
         method: 'POST',
         headers: {
@@ -47,7 +47,7 @@ const QuizCreatorPage = () => {
       }
       const { signedUrl, objectUrl } = await getSignedUrlRes.json();
 
-      // 2. Upload image to S3 using the pre-signed URL
+      // 2. 取得した署名付きURLに対して、実際の画像ファイルをPUTリクエストでアップロードする
       const uploadRes = await fetch(signedUrl, {
         method: 'PUT',
         headers: {
@@ -74,13 +74,15 @@ const QuizCreatorPage = () => {
     let finalQuestionImageUrl = questionImageUrl;
     if (questionImageFile) {
       finalQuestionImageUrl = await uploadImageToS3(questionImageFile);
-      if (!finalQuestionImageUrl) return; // Stop if upload failed
+      // 画像アップロードが失敗した場合は、フォームの送信を中断する
+      if (!finalQuestionImageUrl) return;
     }
 
     let finalAnswerImageUrl = answerImageUrl;
     if (answerImageFile) {
       finalAnswerImageUrl = await uploadImageToS3(answerImageFile);
-      if (!finalAnswerImageUrl) return; // Stop if upload failed
+      // 画像アップロードが失敗した場合は、フォームの送信を中断する
+      if (!finalAnswerImageUrl) return;
     }
 
     const submission = {
@@ -92,7 +94,8 @@ const QuizCreatorPage = () => {
       answerImage: finalAnswerImageUrl,
       answerLink,
       tournamentId,
-      participantId, // Use the ID from the URL
+      // URLのパスパラメータから取得した参加者IDを利用する
+      participantId,
     };
 
     try {
@@ -109,7 +112,7 @@ const QuizCreatorPage = () => {
       }
 
       alert('問題が作成されました！');
-      // TODO: Navigate to the participant dashboard or clear the form
+      // TODO: 問題作成後は、参加者ダッシュボードに戻るか、フォームをクリアするなど、UXを考慮した実装が必要
       navigate(`/tournaments/${tournamentId}/participants/${participantId}`);
     } catch (error) {
       console.error(error);
