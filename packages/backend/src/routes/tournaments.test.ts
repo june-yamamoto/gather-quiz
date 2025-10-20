@@ -202,7 +202,8 @@ describe('大会API', () => {
           tournamentId: tournament.id,
         },
       });
-      const participant2 = await prisma.participant.create({
+       
+      const _participant2 = await prisma.participant.create({
         data: {
           name: 'Board Participant 2',
           password: 'pw2',

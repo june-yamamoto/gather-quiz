@@ -98,6 +98,34 @@
 
 ---
 
+## 6. GEMINI.md 規約適合タスク
+
+`GEMINI.md`に記載された新しい規約にコードベースを適合させるためのタスク一覧。
+
+- **コメントの日本語化と内容の見直し**
+  - プロジェクト全体のソースコードに含まれる英語のコメントや、「WHAT」を説明しているコメントを、規約に沿って「WHY」を説明する日本語のコメントに修正する。
+    - 対象ファイル例: `packages/backend/src/routes/tournaments.ts`, `packages/frontend/src/pages/QuizCreatorPage.tsx` など多数。
+
+- **重複ロジックの関数化**
+  - **バックエンド**: 各APIルートで共通しているエラーハンドリングのロジックを、共通のエラーハンドリングミドルウェアとして切り出すことを検討する。
+  - **フロントエンド**: 各ページコンポーネントの`useEffect`内で共通しているAPI呼び出しの`try-catch`ロジックを、汎用的なカスタムフック（例: `useApi`）として切り出すことを検討する。
+
+- **APIパス生成の関数化**
+  - `packages/backend/src/api-helper.ts`のようなファイルを作成し、全てのAPIエンドポイントのパス文字列を生成する関数を実装する。
+
+- **フロントエンドルーティングパスの関数化**
+  - `packages/frontend/src/utils/paths.ts`のようなヘルパーファイルを作成し、`react-router-dom`で使用する全てのパスを生成する関数を実装する。
+
+- **フロントエンドモデルのクラス化**
+  - `packages/frontend/src/models`ディレクトリに`Tournament.ts`と`Participant.ts`を追加する。
+  - `Quiz.ts`を含む全てのモデルクラスに、APIレスポンスをクラスインスタンスに変換する`fromApi`静的メソッドと、APIリクエスト用にオブジェクトを変換する`toApi`メソッドを実装する。
+
+- **Styled-Componentsの命名規則適用**
+  - `Styled`プレフィックスが付与されていないStyled-Component（例: `Form`, `Section`）を、規約通り`StyledForm`, `StyledSection`などにリネームする。
+    - 対象ファイル例: `packages/frontend/src/pages/TournamentCreationPage.tsx`, `packages/frontend/src/pages/QuizCreatorPage.tsx` など。
+
+---
+
 ## 5. デプロイ計画 (中断中)
 
 AWS CloudFormationを用いたデプロイを計画中。ドメイン移管作業の完了待ち。

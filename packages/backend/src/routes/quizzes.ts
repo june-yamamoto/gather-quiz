@@ -78,7 +78,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     });
     res.status(200).json(updatedQuiz);
   } catch (error) {
-    if (error.code === 'P2025') {
+    if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: 'Quiz not found' });
     }
     console.error(error);

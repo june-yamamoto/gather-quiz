@@ -9,6 +9,9 @@
     "storybook": "pnpm --filter frontend storybook",
     "db:push": "cd packages/backend && pnpm exec prisma db push",
     "test:e2e": "playwright test",
+    "test:frontend": "pnpm --filter frontend test",
+    "test:backend": "pnpm --filter backend test",
+    "build:frontend": "pnpm --filter frontend build",
     "postinstall": "playwright install",
     "lint-fix": "pnpm -r lint-fix",
     "format": "pnpm -r format",
@@ -23,7 +26,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.18.2",
   "devDependencies": {
-    "@playwright/test": "^1.56.0"
+    "@eslint/js": "^9.38.0",
+    "@playwright/test": "^1.56.0",
+    "globals": "^16.4.0",
+    "typescript-eslint": "^8.46.1"
   },
   "msw": {
     "workerDirectory": [
