@@ -13,7 +13,7 @@ describe('主催者ダッシュボードページ', () => {
   };
 
   it('大会ステータスを正しく取得して表示すること', async () => {
-    // Mock the global fetch function
+    // fetchが呼ばれた際に、モックデータを返すように設定
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockData),
@@ -27,18 +27,18 @@ describe('主催者ダッシュボードページ', () => {
       </MemoryRouter>
     );
 
-    // Wait for the API call and rendering to complete
+    // API呼び出しと画面の再レンダリングが完了するまで待機
     await waitFor(() => {
       expect(screen.getByText(`管理ページ: ${mockData.tournamentName}`)).toBeInTheDocument();
     });
 
-    // Check if participant data is rendered correctly
+    // 参加者のデータが正しく画面に表示されているか検証
     expect(screen.getByText('アリス')).toBeInTheDocument();
     expect(screen.getByText('2 / 3 問')).toBeInTheDocument();
     expect(screen.getByText('ボブ')).toBeInTheDocument();
     expect(screen.getByText('3 / 3 問')).toBeInTheDocument();
 
-    // Check if the API was called with the correct URL
+    // 意図したAPIエンドポイントが呼び出されているか検証
     expect(global.fetch).toHaveBeenCalledWith('/api/tournaments/test-id/status');
   });
 });

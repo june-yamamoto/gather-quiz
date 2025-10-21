@@ -9,7 +9,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 }));
 
 const Form = styled('form')(({ theme }) => ({
-  width: '100%', // Fix IE 11 issue.
+  width: '100%',
   marginTop: theme.spacing(1),
 }));
 
@@ -36,7 +36,7 @@ const TournamentCreationPage = () => {
           if (response.ok) {
             const data = await response.json();
             setName(data.name);
-            // Password is not fetched for security reasons
+            // セキュリティ上の理由から、編集モードではパスワードは取得・表示しない
             setQuestionsPerParticipant(data.questionsPerParticipant);
             setPoints(data.points);
             setRegulation(data.regulation || '');
@@ -63,7 +63,7 @@ const TournamentCreationPage = () => {
       questionsPerParticipant: Number(questionsPerParticipant),
       points,
       regulation,
-      // Only include password if it's not edit mode or if it has been changed
+      // 新規作成時、または編集時にパスワードが変更された場合のみリクエストに含める
       ...(password && { password }),
     };
 

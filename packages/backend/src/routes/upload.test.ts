@@ -3,7 +3,7 @@ import request from 'supertest';
 import express from 'express';
 import uploadRouter from './upload';
 
-// Mock the AWS SDK modules
+// AWS SDK関連のモジュールは、外部との通信を行わないようにモック化する
 vi.mock('@aws-sdk/client-s3', () => {
   const S3Client = vi.fn();
   const PutObjectCommand = vi.fn();
@@ -41,7 +41,8 @@ describe('アップロードAPI', async () => {
     });
 
     it('必須フィールドが不足している場合に400エラーを返すこと', async () => {
-      const res = await request(app).post('/upload/image').send({ fileName: 'test.jpg' }); // Missing fileType
+      // fileTypeフィールドが欠けているため、バリデーションエラーとなることを期待する
+      const res = await request(app).post('/upload/image').send({ fileName: 'test.jpg' });
 
       expect(res.statusCode).toBe(400);
     });

@@ -102,7 +102,7 @@
 
 `GEMINI.md`に記載された新しい規約にコードベースを適合させるためのタスク一覧。
 
-- **コメントの日本語化と内容の見直し**
+- **コメントの日本語化と内容の見直し** ✅ 完了
   - プロジェクト全体のソースコードに含まれる英語のコメントや、「WHAT」を説明しているコメントを、規約に沿って「WHY」を説明する日本語のコメントに修正する。
     - 対象ファイル例: `packages/backend/src/routes/tournaments.ts`, `packages/frontend/src/pages/QuizCreatorPage.tsx` など多数。
 

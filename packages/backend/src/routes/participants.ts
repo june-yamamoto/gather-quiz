@@ -2,7 +2,8 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router({ mergeParams: true }); // Enable mergeParams to access :tournamentId
+// 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
+const router = Router({ mergeParams: true });
 
 router.get('/:participantId/quizzes', async (req: Request, res: Response) => {
   try {
@@ -11,8 +12,10 @@ router.get('/:participantId/quizzes', async (req: Request, res: Response) => {
     const participant = await prisma.participant.findUnique({
       where: { id: participantId },
       include: {
-        tournament: true, // Include tournament data
-        quizzes: true, // Include quizzes created by the participant
+        // 残りの問題数を計算するために大会情報が必要
+        tournament: true,
+        // 作成済みのクイズ一覧を返すためにクイズ情報が必要
+        quizzes: true,
       },
     });
 

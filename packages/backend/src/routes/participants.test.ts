@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import participantsRouter from './participants';
-import tournamentsRouter from './tournaments'; // To create a tournament for testing
+// テストデータ作成のために大会APIも利用する
+import tournamentsRouter from './tournaments';
 import { PrismaClient, Tournament, Participant, Quiz } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
-// Mount tournamentsRouter to handle tournament creation and participant creation
+// テスト対象のAPIエンドポイントをマウントする
 app.use('/tournaments', tournamentsRouter);
-// Mount participantsRouter under the correct path
 app.use('/tournaments/:tournamentId/participants', participantsRouter);
 
 describe('参加者API', () => {
@@ -20,7 +20,7 @@ describe('参加者API', () => {
   let quiz2: Quiz;
 
   beforeEach(async () => {
-    // Create a tournament
+    // 各テストの前に、テスト用の大会データを作成する
     tournament = await prisma.tournament.create({
       data: {
         name: 'Participant API Test Tournament',
@@ -30,7 +30,7 @@ describe('参加者API', () => {
       },
     });
 
-    // Create a participant for the tournament
+    // テスト用の参加者データを作成する
     participant = await prisma.participant.create({
       data: {
         name: 'Test Participant',
@@ -39,7 +39,7 @@ describe('参加者API', () => {
       },
     });
 
-    // Create some quizzes for the participant
+    // テスト用のクイズデータを作成する
     quiz1 = await prisma.quiz.create({
       data: {
         point: 10,

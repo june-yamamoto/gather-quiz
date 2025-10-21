@@ -4,11 +4,11 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const router = Router();
 
-// Initialize S3 client without depending on module-level env vars
+// 環境変数がモジュール読み込み時に評価されることを防ぐため、S3クライアントの初期化を関数内で行う
 const getS3Client = () => new S3Client({ region: process.env.AWS_REGION || 'ap-northeast-1' });
 
 router.post('/image', async (req: Request, res: Response) => {
-  // Evaluate environment variables inside the request handler
+  // テスト実行時など、環境変数の動的な変更に対応するため、リクエストハンドラ内で環境変数を評価する
   const imageUploadBucket = process.env.IMAGE_UPLOAD_BUCKET_NAME;
   const awsRegion = process.env.AWS_REGION || 'ap-northeast-1';
 

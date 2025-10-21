@@ -41,7 +41,7 @@ const AnswerDisplayPage = () => {
   }, [quizId]);
 
   const backToBoard = () => {
-    // TODO: Get tournamentId properly
+    // TODO: クイズ情報から取得しているが、将来的にはより適切な方法で大会IDを取得する必要がある
     navigate(`/tournaments/${quiz.tournamentId}/board`);
   };
 
@@ -59,7 +59,7 @@ const AnswerDisplayPage = () => {
         <Typography variant="h3" align="center" gutterBottom sx={{ my: 4 }}>
           A. {quiz.answerText}
         </Typography>
-        {/* TODO: Display image and link if they exist */}
+        {/* TODO: 画像やリンクが存在する場合に表示する処理を追加する */}
       </QuizContentPaper>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={backToBoard}>

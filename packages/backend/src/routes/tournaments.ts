@@ -48,8 +48,7 @@ router.post('/:id/participants', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
 
-    // For now, generate a random password for the participant.
-    // This will be updated later.
+    // TODO: パスワードは将来的にユーザーが設定できるようにするが、現在はランダムな文字列を生成して仮対応する
     const password = Math.random().toString(36).slice(-8);
 
     const participant = await prisma.participant.create({
@@ -84,7 +83,7 @@ router.post('/:id/login', async (req: Request, res: Response) => {
     }
 
     if (tournament.password === password) {
-      // In a real application, you would issue a token (e.g., JWT)
+      // 本番環境ではセッション管理のためにJWTなどのトークンを発行するが、ここでは成功ステータスのみ返す
       res.json({ success: true, message: 'Login successful' });
     } else {
       res.status(401).json({ success: false, message: 'Invalid password' });

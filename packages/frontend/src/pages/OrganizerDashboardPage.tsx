@@ -54,7 +54,7 @@ const OrganizerDashboardPage = () => {
         setParticipants(data.participants);
       } catch (error) {
         console.error(error);
-        // TODO: Handle error display in UI
+        // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
       }
     };
 
