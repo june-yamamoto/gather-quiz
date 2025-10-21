@@ -52,11 +52,12 @@ describe('大会API', () => {
         name: '無効な大会',
         password: 'new_password',
         questionsPerParticipant: 2,
-        // pointsが不足
+        // pointsフィールドが欠けているため、バリデーションエラーとなることを期待する
       };
       const res = await request(app).post('/tournaments').send(invalidTournamentData);
 
-      expect(res.statusCode).toBe(500); // Prisma validation error results in 500
+      // Prismaのバリデーションエラーは500を返すため、それを検証する
+      expect(res.statusCode).toBe(500);
     });
   });
 
@@ -87,9 +88,11 @@ describe('大会API', () => {
     });
 
     it('必須フィールドが不足している場合にエラーを返すこと', async () => {
-      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({}); // nameが不足
+      // nameフィールドが欠けているため、バリデーションエラーとなることを期待する
+      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({});
 
-      expect(res.statusCode).toBe(500); // Prisma validation error results in 500
+      // Prismaのバリデーションエラーは500を返すため、それを検証する
+      expect(res.statusCode).toBe(500);
     });
 
     it('同じ大会内で重複する参加者名の場合、エラーを返すこと', async () => {
@@ -103,7 +106,8 @@ describe('大会API', () => {
 
       const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '重複参加者' });
 
-      expect(res.statusCode).toBe(500); // Prisma unique constraint error results in 500
+      // Prismaのユニーク制約違反は500を返すため、それを検証する
+      expect(res.statusCode).toBe(500);
     });
   });
 
@@ -174,7 +178,8 @@ describe('大会API', () => {
       };
       const res = await request(app).put('/tournaments/nonexistent_id').send(updatedData);
 
-      expect(res.statusCode).toBe(500); // Prisma update on non-existent record results in 500
+      // Prismaで存在しないレコードを更新しようとすると500エラーが返るため、それを検証する
+      expect(res.statusCode).toBe(500);
     });
   });
 
@@ -189,7 +194,8 @@ describe('大会API', () => {
     it('存在しないIDの場合、404エラーを返すこと', async () => {
       const res = await request(app).patch('/tournaments/nonexistent_id/start');
 
-      expect(res.statusCode).toBe(500); // Prisma update on non-existent record results in 500
+      // Prismaで存在しないレコードを更新しようとすると500エラーが返るため、それを検証する
+      expect(res.statusCode).toBe(500);
     });
   });
 

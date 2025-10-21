@@ -5,7 +5,7 @@ import TournamentPortalPage from './TournamentPortalPage';
 
 describe('大会ポータルページ', () => {
   it('ログインモーダルを開き、ログインを試み、成功時に画面遷移すること', async () => {
-    // Mock the global fetch function
+    // fetchが呼ばれた際に、成功レスポンスを返すように設定
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ success: true }),
@@ -19,20 +19,20 @@ describe('大会ポータルページ', () => {
       </MemoryRouter>
     );
 
-    // 1. Click the organizer login button
+    // 1. 主催者ログインボタンをクリックしてモーダルを開く
     fireEvent.click(screen.getByRole('button', { name: '主催者としてログイン' }));
 
-    // 2. Assert the modal is open
+    // 2. モーダルが正しく表示されているか検証
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByLabelText('管理用パスワード')).toBeInTheDocument();
 
-    // 3. Fill in the password and click login
+    // 3. パスワードを入力してログインボタンをクリック
     fireEvent.change(screen.getByLabelText('管理用パスワード'), {
       target: { value: 'password123' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'ログイン' }));
 
-    // 4. Assert the API was called correctly
+    // 4. APIが正しい引数で呼び出されたか検証
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/tournaments/test-id/login', {
         method: 'POST',
