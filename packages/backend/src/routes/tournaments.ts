@@ -1,11 +1,22 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import participantsRouter from './participants';
+import {
+  pathToParticipants,
+  pathToTournaments,
+  pathToTournamentLogin,
+  pathToTournamentStatus,
+  pathToTournamentStart,
+  pathToTournamentBoard,
+} from '../api-helper';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.use('/:tournamentId/participants', participantsRouter);
+/** 大会オブジェクトに関するAPIのrouter向けパスを取得する関数 */
+const tournamentsRouterPath = (path: string) => path.substring(pathToTournaments().length);
+
+router.use(tournamentsRouterPath(pathToParticipants(':tournamentId')), participantsRouter);
 
 router.post('/', async (req: Request, res: Response) => {
   try {
@@ -43,7 +54,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:id/participants', async (req: Request, res: Response) => {
+router.post(tournamentsRouterPath(pathToParticipants(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -69,7 +80,7 @@ router.post('/:id/participants', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:id/login', async (req: Request, res: Response) => {
+router.post(tournamentsRouterPath(pathToTournamentLogin(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -94,7 +105,7 @@ router.post('/:id/login', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:id/status', async (req: Request, res: Response) => {
+router.get(tournamentsRouterPath(pathToTournamentStatus(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tournament = await prisma.tournament.findUnique({
@@ -156,7 +167,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.patch('/:id/start', async (req: Request, res: Response) => {
+router.patch(tournamentsRouterPath(pathToTournamentStart(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updatedTournament = await prisma.tournament.update({
@@ -172,7 +183,7 @@ router.patch('/:id/start', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:id/board', async (req: Request, res: Response) => {
+router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tournament = await prisma.tournament.findUnique({

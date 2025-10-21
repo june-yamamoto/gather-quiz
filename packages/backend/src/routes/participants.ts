@@ -1,11 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { pathToParticipantQuizzes, pathToParticipants } from '../api-helper';
 
 const prisma = new PrismaClient();
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
 const router = Router({ mergeParams: true });
 
-router.get('/:participantId/quizzes', async (req: Request, res: Response) => {
+/** 参加者オブジェクトに関するAPIのrouter向けパスを取得する関数 */
+const participantsRouterPath = (path: string) => path.substring(pathToParticipants(':tournamentId').length);
+
+router.get(participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')), async (req: Request, res: Response) => {
   try {
     const { participantId } = req.params;
 

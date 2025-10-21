@@ -81,7 +81,7 @@
 - サーバー
   - 全APIについてテストケースを作成してください
   - DBで使用するモデルをクラス化して`backend/src/model`に切り出してください
-  - 全APIについて、パスの生成を関数化してください
+  - 全APIについて、パスの生成を関数化してください ✅ 完了
     - 作成した関数は`api-helper.ts`に切り出してまとめる
     - 可能であればフロントエンドから呼び出せるようにする
     - ex) `pathToApiPostParticipants = () => ['rootpath', ':id', 'participants'].join('/');`
