@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { pathToQuiz, pathToQuizzes } from '../api-helper';
 
 const prisma = new PrismaClient();
 const router = Router();
+
+/** クイズオブジェクトに関するAPIのrouter向けパスを取得する関数 */
+const quizzesRouterPath = (path: string) => path.substring(pathToQuizzes().length);
 
 router.post('/', async (req: Request, res: Response) => {
   try {
@@ -42,7 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get(quizzesRouterPath(pathToQuiz(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const quiz = await prisma.quiz.findUnique({
@@ -59,7 +63,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put(quizzesRouterPath(pathToQuiz(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink } = req.body;

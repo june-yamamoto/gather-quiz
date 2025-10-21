@@ -1,13 +1,17 @@
 import { Router, Request, Response } from 'express';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { pathToUploadImage } from '../api-helper';
 
 const router = Router();
+
+/** アップロードオブジェクトに関するAPIのrouter向けパスを取得する関数 */
+const uploadRouterPath = (path: string) => path.substring(pathToUploadImage().replace('/image', '').length);
 
 // 環境変数がモジュール読み込み時に評価されることを防ぐため、S3クライアントの初期化を関数内で行う
 const getS3Client = () => new S3Client({ region: process.env.AWS_REGION || 'ap-northeast-1' });
 
-router.post('/image', async (req: Request, res: Response) => {
+router.post(uploadRouterPath(pathToUploadImage()), async (req: Request, res: Response) => {
   // テスト実行時など、環境変数の動的な変更に対応するため、リクエストハンドラ内で環境変数を評価する
   const imageUploadBucket = process.env.IMAGE_UPLOAD_BUCKET_NAME;
   const awsRegion = process.env.AWS_REGION || 'ap-northeast-1';
