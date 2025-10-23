@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -47,7 +48,7 @@ const TournamentPortalPage = () => {
       if (response.ok) {
         handleClose();
         setTimeout(() => {
-          navigate(`/tournaments/${id}/admin`);
+          navigate(pathToOrganizerDashboard(id || ''));
         }, 0);
       } else {
         alert('パスワードが違います。');
@@ -71,7 +72,13 @@ const TournamentPortalPage = () => {
         <Button variant="outlined" color="primary" size="large" onClick={handleClickOpen}>
           主催者としてログイン
         </Button>
-        <Button component={Link} to={`/tournaments/${id}/register`} variant="contained" color="primary" size="large">
+        <Button
+          component={Link}
+          to={pathToTournamentRegisterParticipant(id || '')}
+          variant="contained"
+          color="primary"
+          size="large"
+        >
           参加者として新規登録
         </Button>
       </Box>

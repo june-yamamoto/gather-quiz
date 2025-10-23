@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { pathToQuizCreator } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -36,7 +37,7 @@ const ParticipantRegistrationPage = () => {
       const participant = await response.json();
       alert(`「${participant.name}」として登録しました！`);
       // 登録完了後、新しく発行された参加者IDを使って問題作成ページへ遷移させる
-      navigate(`/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
+      navigate(pathToQuizCreator(tournamentId || '', participant.id));
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました。');

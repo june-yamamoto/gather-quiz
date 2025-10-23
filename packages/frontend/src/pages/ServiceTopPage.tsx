@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Button, Container, Typography, Box } from '@mui/material';
+import { pathToTournamentCreation } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -17,7 +18,7 @@ const ServiceTopPage = () => {
         みんなで問題を持ち寄る、クイズ大会開催ツール
       </Typography>
       <Box sx={{ mt: 4 }}>
-        <Button component={Link} to="/tournaments/new" variant="contained" color="primary" size="large">
+        <Button component={Link} to={pathToTournamentCreation()} variant="contained" color="primary" size="large">
           クイズ大会を新しく作成する
         </Button>
       </Box>

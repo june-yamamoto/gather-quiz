@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography } from '@mui/material';
 
@@ -79,9 +80,9 @@ const TournamentCreationPage = () => {
       const tournament = await response.json();
       if (isEditMode) {
         alert('大会情報が更新されました。');
-        navigate(`/tournaments/${tournament.id}/admin`);
+        navigate(pathToOrganizerDashboard(tournament.id));
       } else {
-        navigate(`/tournaments/${tournament.id}/created`, { state: { password } });
+        navigate(pathToTournamentCreationComplete(tournament.id), { state: { password } });
       }
     } else {
       alert(isEditMode ? '更新に失敗しました。' : '作成に失敗しました。');

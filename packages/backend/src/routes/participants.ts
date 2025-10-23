@@ -9,38 +9,41 @@ const router = Router({ mergeParams: true });
 /** 参加者オブジェクトに関するAPIのrouter向けパスを取得する関数 */
 const participantsRouterPath = (path: string) => path.substring(pathToParticipants(':tournamentId').length);
 
-router.get(participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')), async (req: Request, res: Response) => {
-  try {
-    const { participantId } = req.params;
+router.get(
+  participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')),
+  async (req: Request, res: Response) => {
+    try {
+      const { participantId } = req.params;
 
-    const participant = await prisma.participant.findUnique({
-      where: { id: participantId },
-      include: {
-        // 残りの問題数を計算するために大会情報が必要
-        tournament: true,
-        // 作成済みのクイズ一覧を返すためにクイズ情報が必要
-        quizzes: true,
-      },
-    });
+      const participant = await prisma.participant.findUnique({
+        where: { id: participantId },
+        include: {
+          // 残りの問題数を計算するために大会情報が必要
+          tournament: true,
+          // 作成済みのクイズ一覧を返すためにクイズ情報が必要
+          quizzes: true,
+        },
+      });
 
-    if (!participant) {
-      return res.status(404).json({ error: 'Participant not found' });
+      if (!participant) {
+        return res.status(404).json({ error: 'Participant not found' });
+      }
+
+      const requiredQuestions = participant.tournament.questionsPerParticipant;
+      const createdQuestionsCount = participant.quizzes.length;
+      const remainingQuestions = requiredQuestions - createdQuestionsCount;
+
+      res.json({
+        createdQuizzes: participant.quizzes,
+        remainingQuestions,
+        requiredQuestions,
+        createdQuestionsCount,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to retrieve quiz status' });
     }
-
-    const requiredQuestions = participant.tournament.questionsPerParticipant;
-    const createdQuestionsCount = participant.quizzes.length;
-    const remainingQuestions = requiredQuestions - createdQuestionsCount;
-
-    res.json({
-      createdQuizzes: participant.quizzes,
-      remainingQuestions,
-      requiredQuestions,
-      createdQuestionsCount,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve quiz status' });
   }
-});
+);
 
 export default router;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { pathToQuizBoard } from '../helpers/route-helpers';
 import { Container, Typography, Box, Paper, Button, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -42,7 +43,7 @@ const AnswerDisplayPage = () => {
 
   const backToBoard = () => {
     // TODO: クイズ情報から取得しているが、将来的にはより適切な方法で大会IDを取得する必要がある
-    navigate(`/tournaments/${quiz.tournamentId}/board`);
+    navigate(pathToQuizBoard(quiz.tournamentId));
   };
 
   if (!quiz) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
+import { pathToTournamentPortal } from '../helpers/route-helpers';
 
 interface Tournament {
   id: string;
@@ -51,7 +52,7 @@ const TournamentCreationCompletePage = () => {
     }
   }, [id]);
 
-  const portalUrl = `${window.location.origin}/tournaments/${id}`;
+  const portalUrl = `${window.location.origin}${pathToTournamentPortal(id || '')}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -86,7 +87,7 @@ const TournamentCreationCompletePage = () => {
       )}
 
       <Box sx={{ mt: 3 }}>
-        <Button component={Link} to={portalUrl} variant="contained">
+        <Button component={Link} to={pathToTournamentPortal(id || '')} variant="contained">
           大会ポータルへ移動
         </Button>
       </Box>

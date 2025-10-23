@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
+import { pathToParticipantDashboard } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -113,7 +114,7 @@ const QuizCreatorPage = () => {
 
       alert('問題が作成されました！');
       // TODO: 問題作成後は、参加者ダッシュボードに戻るか、フォームをクリアするなど、UXを考慮した実装が必要
-      navigate(`/tournaments/${tournamentId}/participants/${participantId}`);
+      navigate(pathToParticipantDashboard(tournamentId || '', participantId || ''));
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました。');

@@ -3,12 +3,7 @@ import tournamentsRouter from './routes/tournaments';
 import quizzesRouter from './routes/quizzes';
 import participantsRouter from './routes/participants';
 import uploadRouter from './routes/upload';
-import {
-  pathToQuizzes,
-  pathToParticipants,
-  pathToTournaments,
-  pathToUploadImage,
-} from './api-helper';
+import { pathToQuizzes, pathToParticipants, pathToTournaments, pathToUploadImage } from './api-helper';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;

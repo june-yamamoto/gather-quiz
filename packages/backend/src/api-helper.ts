@@ -8,7 +8,8 @@ export const pathToTournamentStart = (id: string) => `${pathToTournament(id)}/st
 export const pathToTournamentBoard = (id: string) => `${pathToTournament(id)}/board`;
 
 export const pathToParticipants = (tournamentId: string) => `${pathToTournament(tournamentId)}/participants`;
-export const pathToParticipantQuizzes = (tournamentId: string, participantId: string) => `${pathToParticipants(tournamentId)}/${participantId}/quizzes`;
+export const pathToParticipantQuizzes = (tournamentId: string, participantId: string) =>
+  `${pathToParticipants(tournamentId)}/${participantId}/quizzes`;
 
 export const pathToQuizzes = () => `${API_ROOT}/quizzes`;
 export const pathToQuiz = (id: string) => `${pathToQuizzes()}/${id}`;

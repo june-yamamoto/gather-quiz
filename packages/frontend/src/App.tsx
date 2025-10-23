@@ -11,29 +11,43 @@ import QuizBoardPage from './pages/QuizBoardPage';
 import QuizDisplayPage from './pages/QuizDisplayPage';
 import AnswerDisplayPage from './pages/AnswerDisplayPage';
 import ErrorPage from './pages/ErrorPage';
+import {
+  pathToServiceTop,
+  pathToTournamentCreation,
+  pathToTournamentCreationComplete,
+  pathToTournamentRegisterParticipant,
+  pathToQuizCreator,
+  pathToParticipantDashboard,
+  pathToOrganizerDashboard,
+  pathToTournamentEdit,
+  pathToQuizBoard,
+  pathToQuizDisplay,
+  pathToAnswerDisplay,
+  pathToTournamentPortal,
+  pathToErrorPage,
+} from './helpers/route-helpers';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<ServiceTopPage />} />
-        <Route path="/tournaments/new" element={<TournamentCreationPage />} />
-        <Route path="/tournaments/:id/created" element={<TournamentCreationCompletePage />} />
-        <Route path="/tournaments/:id/register" element={<ParticipantRegistrationPage />} />
-        <Route path="/tournaments/:tournamentId/quizzes/new" element={<QuizCreatorPage />} />
-        <Route path="/tournaments/:tournamentId/participants/:participantId" element={<ParticipantDashboardPage />} />
-        <Route path="/tournaments/:tournamentId/admin" element={<OrganizerDashboardPage />} />
-        <Route path="/tournaments/:tournamentId/edit" element={<TournamentCreationPage />} />
-        <Route path="/tournaments/:tournamentId/board" element={<QuizBoardPage />} />
+        <Route path={pathToServiceTop()} element={<ServiceTopPage />} />
+        <Route path={pathToTournamentCreation()} element={<TournamentCreationPage />} />
+        <Route path={pathToTournamentCreationComplete(':id')} element={<TournamentCreationCompletePage />} />
+        <Route path={pathToTournamentRegisterParticipant(':id')} element={<ParticipantRegistrationPage />} />
+        <Route path={pathToQuizCreator(':tournamentId', ':participantId')} element={<QuizCreatorPage />} />
         <Route
-          path="/tournaments/:tournamentId/participants/:participantId/quizzes/new"
-          element={<QuizCreatorPage />}
+          path={pathToParticipantDashboard(':tournamentId', ':participantId')}
+          element={<ParticipantDashboardPage />}
         />
-        <Route path="/quizzes/:quizId" element={<QuizDisplayPage />} />
-        <Route path="/quizzes/:quizId/answer" element={<AnswerDisplayPage />} />
-        <Route path="/tournaments/:id" element={<TournamentPortalPage />} />
+        <Route path={pathToOrganizerDashboard(':tournamentId')} element={<OrganizerDashboardPage />} />
+        <Route path={pathToTournamentEdit(':tournamentId')} element={<TournamentCreationPage />} />
+        <Route path={pathToQuizBoard(':tournamentId')} element={<QuizBoardPage />} />
+        <Route path={pathToQuizDisplay(':quizId')} element={<QuizDisplayPage />} />
+        <Route path={pathToAnswerDisplay(':quizId')} element={<AnswerDisplayPage />} />
+        <Route path={pathToTournamentPortal(':id')} element={<TournamentPortalPage />} />
         {/* Catch-all route for 404 Not Found */}
-        <Route path="*" element={<ErrorPage />} />
+        <Route path={pathToErrorPage()} element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   );
