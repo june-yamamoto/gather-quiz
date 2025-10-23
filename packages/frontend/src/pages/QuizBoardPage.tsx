@@ -2,25 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Paper, Grid, ButtonBase } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
-// APIから取得するデータ構造に合わせて型を定義
-interface Quiz {
-  id: string;
-  point: number;
-}
-
-interface Participant {
-  id: string;
-  name: string;
-  quizzes: Quiz[];
-}
-
-interface Tournament {
-  id: string;
-  name: string;
-  points: string;
-  participants: Participant[];
-}
+import { Tournament } from '../models/Tournament';
+import { Participant } from '../models/Participant';
+import { Quiz } from '../models/Quiz';
+import { pathToQuizDisplay } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -40,7 +25,6 @@ const QuizCard = styled(Paper)(({ theme }) => ({
 
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
-
   const navigate = useNavigate();
   const [tournament, setTournament] = useState<Tournament | null>(null);
 
@@ -53,7 +37,7 @@ const QuizBoardPage = () => {
           throw new Error('Failed to fetch board data');
         }
         const data = await response.json();
-        setTournament(data);
+        setTournament(Tournament.fromApi(data));
       } catch (error) {
         console.error(error);
       }
@@ -62,8 +46,9 @@ const QuizBoardPage = () => {
   }, [tournamentId]);
 
   const handleQuizSelect = (quizId: string) => {
-    navigate(`/quizzes/${quizId}`);
+    navigate(pathToQuizDisplay(quizId));
   };
+
   if (!tournament) {
     return <Typography>Loading...</Typography>;
   }

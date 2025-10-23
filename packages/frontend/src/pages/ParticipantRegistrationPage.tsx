@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { pathToQuizCreator } from '../helpers/route-helpers';
+import { Participant } from '../models/Participant';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -34,7 +35,8 @@ const ParticipantRegistrationPage = () => {
         throw new Error('参加者登録に失敗しました。');
       }
 
-      const participant = await response.json();
+      const participantData = await response.json();
+      const participant = Participant.fromApi(participantData);
       alert(`「${participant.name}」として登録しました！`);
       // 登録完了後、新しく発行された参加者IDを使って問題作成ページへ遷移させる
       navigate(pathToQuizCreator(tournamentId || '', participant.id));

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography } from '@mui/material';
+import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
+import { Tournament } from '../models/Tournament';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -36,11 +37,11 @@ const TournamentCreationPage = () => {
           const response = await fetch(`/api/tournaments/${tournamentId}`);
           if (response.ok) {
             const data = await response.json();
-            setName(data.name);
-            // セキュリティ上の理由から、編集モードではパスワードは取得・表示しない
-            setQuestionsPerParticipant(data.questionsPerParticipant);
-            setPoints(data.points);
-            setRegulation(data.regulation || '');
+            const tournament = Tournament.fromApi(data);
+            setName(tournament.name);
+            setQuestionsPerParticipant(tournament.questionsPerParticipant);
+            setPoints(tournament.points);
+            setRegulation(tournament.regulation || '');
           } else {
             throw new Error('Failed to fetch tournament data');
           }
@@ -64,7 +65,6 @@ const TournamentCreationPage = () => {
       questionsPerParticipant: Number(questionsPerParticipant),
       points,
       regulation,
-      // 新規作成時、または編集時にパスワードが変更された場合のみリクエストに含める
       ...(password && { password }),
     };
 
@@ -77,12 +77,15 @@ const TournamentCreationPage = () => {
     });
 
     if (response.ok) {
-      const tournament = await response.json();
+      const tournamentData = await response.json();
+      const tournament = Tournament.fromApi(tournamentData);
       if (isEditMode) {
         alert('大会情報が更新されました。');
         navigate(pathToOrganizerDashboard(tournament.id));
       } else {
-        navigate(pathToTournamentCreationComplete(tournament.id), { state: { password } });
+        navigate(pathToTournamentCreationComplete(tournament.id), {
+          state: { password },
+        });
       }
     } else {
       alert(isEditMode ? '更新に失敗しました。' : '作成に失敗しました。');

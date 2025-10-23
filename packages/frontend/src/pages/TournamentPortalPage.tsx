@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Container,
@@ -14,6 +14,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
+import { Tournament } from '../models/Tournament';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -25,6 +26,26 @@ const TournamentPortalPage = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
+  const [tournament, setTournament] = useState<Tournament | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchTournament = async () => {
+      try {
+        const response = await fetch(`/api/tournaments/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTournament(Tournament.fromApi(data));
+        } else {
+          // ここでエラーページに遷移させるなどの処理も考えられる
+          console.error('Failed to fetch tournament');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchTournament();
+  }, [id]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -63,7 +84,7 @@ const TournamentPortalPage = () => {
   return (
     <StyledContainer maxWidth="md">
       <Typography variant="h4" component="h1" gutterBottom>
-        大会ポータル
+        {tournament ? `大会: ${tournament.name}` : '大会ポータル'}
       </Typography>
       <Typography variant="h6" color="textSecondary" paragraph>
         参加方法を選択してください

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { Quiz } from '../models/Quiz';
+import { pathToAnswerDisplay } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -21,7 +23,7 @@ const QuizContentPaper = styled(Paper)(({ theme }) => ({
 const QuizDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
     if (!quizId) return;
@@ -32,7 +34,7 @@ const QuizDisplayPage = () => {
           throw new Error('Failed to fetch quiz');
         }
         const data = await response.json();
-        setQuiz(data);
+        setQuiz(Quiz.fromApi(data));
       } catch (error) {
         console.error(error);
       }
@@ -41,7 +43,9 @@ const QuizDisplayPage = () => {
   }, [quizId]);
 
   const showAnswer = () => {
-    navigate(`/quizzes/${quizId}/answer`);
+    if (quizId) {
+      navigate(pathToAnswerDisplay(quizId));
+    }
   };
 
   if (!quiz) {

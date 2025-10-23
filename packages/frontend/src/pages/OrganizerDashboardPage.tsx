@@ -14,13 +14,7 @@ import {
   TableBody,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
-interface ParticipantStatus {
-  id: string;
-  name: string;
-  created: number;
-  required: number;
-}
+import { Participant } from '../models/Participant';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -37,7 +31,7 @@ const OrganizerDashboardPage = () => {
   const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
-  const [participants, setParticipants] = useState<ParticipantStatus[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [tournamentName, setTournamentName] = useState('');
 
   useEffect(() => {
@@ -51,7 +45,7 @@ const OrganizerDashboardPage = () => {
         }
         const data = await response.json();
         setTournamentName(data.tournamentName);
-        setParticipants(data.participants);
+        setParticipants(data.participants.map(Participant.fromApi));
       } catch (error) {
         console.error(error);
         // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
