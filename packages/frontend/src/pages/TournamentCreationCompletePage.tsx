@@ -3,11 +3,7 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
 import { pathToTournamentPortal } from '../helpers/route-helpers';
-
-interface Tournament {
-  id: string;
-  name: string;
-}
+import { Tournament } from '../models/Tournament';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -41,7 +37,7 @@ const TournamentCreationCompletePage = () => {
       const response = await fetch(`/api/tournaments/${id}`);
       if (response.ok) {
         const data = await response.json();
-        setTournament(data);
+        setTournament(Tournament.fromApi(data));
       } else {
         console.error('Failed to fetch tournament');
       }

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { pathToQuizBoard } from '../helpers/route-helpers';
 import { Container, Typography, Box, Paper, Button, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { Quiz } from '../models/Quiz';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -22,7 +23,7 @@ const QuizContentPaper = styled(Paper)(({ theme }) => ({
 const AnswerDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
     if (!quizId) return;
@@ -33,7 +34,7 @@ const AnswerDisplayPage = () => {
           throw new Error('Failed to fetch quiz');
         }
         const data = await response.json();
-        setQuiz(data);
+        setQuiz(Quiz.fromApi(data));
       } catch (error) {
         console.error(error);
       }
@@ -42,8 +43,9 @@ const AnswerDisplayPage = () => {
   }, [quizId]);
 
   const backToBoard = () => {
-    // TODO: クイズ情報から取得しているが、将来的にはより適切な方法で大会IDを取得する必要がある
-    navigate(pathToQuizBoard(quiz.tournamentId));
+    if (quiz) {
+      navigate(pathToQuizBoard(quiz.tournamentId));
+    }
   };
 
   if (!quiz) {
