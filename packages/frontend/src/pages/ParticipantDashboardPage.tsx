@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Button, Container, Typography, Box, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Quiz } from '../models/Quiz';
+import { pathToQuizCreator } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -72,7 +73,7 @@ const ParticipantDashboardPage = () => {
         <Box sx={{ mt: 2 }}>
           <Button
             component={Link}
-            to={`/tournaments/${tournamentId}/participants/${participantId}/quizzes/new`}
+            to={pathToQuizCreator(tournamentId || '', participantId || '')}
             variant="contained"
             color="primary"
           >
