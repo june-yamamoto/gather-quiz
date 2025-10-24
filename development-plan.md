@@ -82,12 +82,6 @@
   - DBで使用するモデルをクラス化して`backend/src/model`に切り出してください
 - フロントエンド
   - サーバと通信するfetch処理は対象となるモデル毎のクラスに切り出してください
-  - フロントエンドのパスの生成は全て関数化してください
-    - ex) `pathToCreateQuizPage = (tournamentId: string, pariticipantId: string) => [rootpath, rournamentId, 'participants', participantId, 'quizzes', 'new']`
-      - `const rootpath = '/';` を定義してください
-  - DBから取得するモデルをクラス化して`frontend/src/model`に切り出す。以下の関数を実装してください
-    - `HogeClass.fromApi()`: APIから取得したオブジェクトをモデル化する関数
-    - `HogeClass.toApi()`: APIにわたす際のオブジェクトを取得する関数
   - StyledComponent化したコンポーネントは必ず全てPrefixに`Styled`をつけてください
 
 ---

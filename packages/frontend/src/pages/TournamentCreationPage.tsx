@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography } from '@mui/material';
 import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
-import { Tournament } from '../models/Tournament';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -31,20 +31,14 @@ const TournamentCreationPage = () => {
   const [regulation, setRegulation] = useState('');
 
   useEffect(() => {
-    if (isEditMode) {
+    if (isEditMode && tournamentId) {
       const fetchTournament = async () => {
         try {
-          const response = await fetch(`/api/tournaments/${tournamentId}`);
-          if (response.ok) {
-            const data = await response.json();
-            const tournament = Tournament.fromApi(data);
-            setName(tournament.name);
-            setQuestionsPerParticipant(tournament.questionsPerParticipant);
-            setPoints(tournament.points);
-            setRegulation(tournament.regulation || '');
-          } else {
-            throw new Error('Failed to fetch tournament data');
-          }
+          const tournament = await tournamentApiClient.get(tournamentId);
+          setName(tournament.name);
+          setQuestionsPerParticipant(tournament.questionsPerParticipant);
+          setPoints(tournament.points);
+          setRegulation(tournament.regulation || '');
         } catch (error) {
           console.error(error);
           alert('大会情報の取得に失敗しました。');
@@ -57,9 +51,6 @@ const TournamentCreationPage = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const url = isEditMode ? `/api/tournaments/${tournamentId}` : '/api/tournaments';
-    const method = isEditMode ? 'PUT' : 'POST';
-
     const body = {
       name,
       questionsPerParticipant: Number(questionsPerParticipant),
@@ -68,26 +59,19 @@ const TournamentCreationPage = () => {
       ...(password && { password }),
     };
 
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (response.ok) {
-      const tournamentData = await response.json();
-      const tournament = Tournament.fromApi(tournamentData);
-      if (isEditMode) {
+    try {
+      if (isEditMode && tournamentId) {
+        const tournament = await tournamentApiClient.update(tournamentId, body);
         alert('大会情報が更新されました。');
         navigate(pathToOrganizerDashboard(tournament.id));
       } else {
+        const tournament = await tournamentApiClient.create(body);
         navigate(pathToTournamentCreationComplete(tournament.id), {
           state: { password },
         });
       }
-    } else {
+    } catch (error) {
+      console.error(error);
       alert(isEditMode ? '更新に失敗しました。' : '作成に失敗しました。');
     }
   };

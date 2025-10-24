@@ -15,6 +15,7 @@ import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
 import { Tournament } from '../models/Tournament';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -32,16 +33,10 @@ const TournamentPortalPage = () => {
     if (!id) return;
     const fetchTournament = async () => {
       try {
-        const response = await fetch(`/api/tournaments/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setTournament(Tournament.fromApi(data));
-        } else {
-          // ここでエラーページに遷移させるなどの処理も考えられる
-          console.error('Failed to fetch tournament');
-        }
+        const tournamentData = await tournamentApiClient.get(id);
+        setTournament(tournamentData);
       } catch (error) {
-        console.error(error);
+        console.error('Failed to fetch tournament', error);
       }
     };
     fetchTournament();
@@ -57,27 +52,17 @@ const TournamentPortalPage = () => {
   };
 
   const handleLogin = async () => {
+    if (!id) return;
     try {
-      const response = await fetch(`/api/tournaments/${id}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
-
-      if (response.ok) {
-        handleClose();
-        setTimeout(() => {
-          navigate(pathToOrganizerDashboard(id || ''));
-        }, 0);
-      } else {
-        alert('パスワードが違います。');
-        setPassword('');
-      }
+      await tournamentApiClient.login(id, password);
+      handleClose();
+      setTimeout(() => {
+        navigate(pathToOrganizerDashboard(id));
+      }, 0);
     } catch (error) {
       console.error(error);
-      alert('ログイン中にエラーが発生しました。');
+      alert('パスワードが違います。');
+      setPassword('');
     }
   };
 

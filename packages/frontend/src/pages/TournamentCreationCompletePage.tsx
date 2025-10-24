@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
 import { pathToTournamentPortal } from '../helpers/route-helpers';
 import { Tournament } from '../models/Tournament';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -33,19 +34,17 @@ const TournamentCreationCompletePage = () => {
   const [tournament, setTournament] = useState<Tournament | null>(null);
 
   useEffect(() => {
+    if (!id) return;
     const fetchTournament = async () => {
-      const response = await fetch(`/api/tournaments/${id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTournament(Tournament.fromApi(data));
-      } else {
-        console.error('Failed to fetch tournament');
+      try {
+        const tournamentData = await tournamentApiClient.get(id);
+        setTournament(tournamentData);
+      } catch (error) {
+        console.error('Failed to fetch tournament', error);
       }
     };
 
-    if (id) {
-      fetchTournament();
-    }
+    fetchTournament();
   }, [id]);
 
   const portalUrl = `${window.location.origin}${pathToTournamentPortal(id || '')}`;

@@ -4,6 +4,7 @@ import { pathToQuizBoard } from '../helpers/route-helpers';
 import { Container, Typography, Box, Paper, Button, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Quiz } from '../models/Quiz';
+import { quizApiClient } from '../api/QuizApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -29,12 +30,8 @@ const AnswerDisplayPage = () => {
     if (!quizId) return;
     const fetchQuiz = async () => {
       try {
-        const response = await fetch(`/api/quizzes/${quizId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch quiz');
-        }
-        const data = await response.json();
-        setQuiz(Quiz.fromApi(data));
+        const quizData = await quizApiClient.get(quizId);
+        setQuiz(quizData);
       } catch (error) {
         console.error(error);
       }

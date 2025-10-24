@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Participant } from '../models/Participant';
+import { tournamentApiClient } from '../api/TournamentApiClient';
+import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -39,13 +41,9 @@ const OrganizerDashboardPage = () => {
 
     const fetchTournamentStatus = async () => {
       try {
-        const response = await fetch(`/api/tournaments/${tournamentId}/status`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch tournament status');
-        }
-        const data = await response.json();
+        const data = await tournamentApiClient.getStatus(tournamentId);
         setTournamentName(data.tournamentName);
-        setParticipants(data.participants.map(Participant.fromApi));
+        setParticipants(data.participants);
       } catch (error) {
         console.error(error);
         // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
@@ -56,15 +54,10 @@ const OrganizerDashboardPage = () => {
   }, [tournamentId]);
 
   const handleStartTournament = async () => {
+    if (!tournamentId) return;
     try {
-      const response = await fetch(`/api/tournaments/${tournamentId}/start`, {
-        method: 'PATCH',
-      });
-      if (response.ok) {
-        navigate(`/tournaments/${tournamentId}/board`);
-      } else {
-        throw new Error('Failed to start tournament');
-      }
+      await tournamentApiClient.start(tournamentId);
+      navigate(pathToQuizBoard(tournamentId));
     } catch (error) {
       console.error(error);
       alert('大会の開始に失敗しました。');
@@ -84,7 +77,7 @@ const OrganizerDashboardPage = () => {
           </Typography>
         </Box>
 
-        <Button component={Link} to={`/tournaments/${tournamentId}/edit`} variant="outlined" sx={{ mt: 2 }}>
+        <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined" sx={{ mt: 2 }}>
           大会概要を編集する
         </Button>
       </HeaderPaper>

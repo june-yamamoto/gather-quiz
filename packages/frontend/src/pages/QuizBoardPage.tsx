@@ -6,6 +6,7 @@ import { Tournament } from '../models/Tournament';
 import { Participant } from '../models/Participant';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizDisplay } from '../helpers/route-helpers';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -32,12 +33,8 @@ const QuizBoardPage = () => {
     if (!tournamentId) return;
     const fetchBoardData = async () => {
       try {
-        const response = await fetch(`/api/tournaments/${tournamentId}/board`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch board data');
-        }
-        const data = await response.json();
-        setTournament(Tournament.fromApi(data));
+        const data = await tournamentApiClient.getBoard(tournamentId);
+        setTournament(data);
       } catch (error) {
         console.error(error);
       }

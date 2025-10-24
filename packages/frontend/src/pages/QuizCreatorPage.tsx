@@ -4,6 +4,8 @@ import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { Quiz } from '../models/Quiz';
+import { uploadApiClient } from '../api/UploadApiClient';
+import { quizApiClient } from '../api/QuizApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -26,63 +28,30 @@ const QuizCreatorPage = () => {
   const [answerLink, setAnswerLink] = useState('');
   const [answerImageFile, setAnswerImageFile] = useState<File | null>(null);
 
-  const uploadImage = async (file: File): Promise<string | null> => {
-    try {
-      const getSignedUrlRes = await fetch('/api/upload/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
-      });
-      if (!getSignedUrlRes.ok) throw new Error('Failed to get signed URL');
-      const { signedUrl, objectUrl } = await getSignedUrlRes.json();
-
-      const uploadRes = await fetch(signedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      if (!uploadRes.ok) throw new Error('Failed to upload image to S3');
-
-      return objectUrl;
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      alert('画像のアップロードに失敗しました。');
-      return null;
-    }
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const questionImageUrl = questionImageFile ? await uploadImage(questionImageFile) : null;
-    if (questionImageFile && !questionImageUrl) return;
-
-    const answerImageUrl = answerImageFile ? await uploadImage(answerImageFile) : null;
-    if (answerImageFile && !answerImageUrl) return;
-
-    const quiz = new Quiz({
-      id: '', // New quiz, so no ID yet
-      point,
-      questionText,
-      questionImage: questionImageUrl,
-      questionLink,
-      answerText,
-      answerImage: answerImageUrl,
-      answerLink,
-      tournamentId: tournamentId || '',
-      participantId: participantId || '',
-    });
-
     try {
-      const response = await fetch('/api/quizzes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quiz.toApi()),
+      const questionImageUrl = questionImageFile ? await uploadApiClient.uploadImage(questionImageFile) : null;
+      if (questionImageFile && !questionImageUrl) return;
+
+      const answerImageUrl = answerImageFile ? await uploadApiClient.uploadImage(answerImageFile) : null;
+      if (answerImageFile && !answerImageUrl) return;
+
+      const quiz = new Quiz({
+        id: '', // New quiz, so no ID yet
+        point,
+        questionText,
+        questionImage: questionImageUrl,
+        questionLink,
+        answerText,
+        answerImage: answerImageUrl,
+        answerLink,
+        tournamentId: tournamentId || '',
+        participantId: participantId || '',
       });
 
-      if (!response.ok) {
-        throw new Error('問題の作成に失敗しました。');
-      }
+      await quizApiClient.create(quiz.toApi());
 
       alert('問題が作成されました！');
       navigate(pathToParticipantDashboard(tournamentId || '', participantId || ''));
