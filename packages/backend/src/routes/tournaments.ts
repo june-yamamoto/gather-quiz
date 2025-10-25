@@ -1,3 +1,4 @@
+import { Quiz } from '../model/Quiz';
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import participantsRouter from './participants';
@@ -9,6 +10,8 @@ import {
   pathToTournamentStart,
   pathToTournamentBoard,
 } from '../api-helper';
+import { Tournament } from '../model/Tournament';
+import { Participant } from '../model/Participant';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -30,7 +33,7 @@ router.post('/', async (req: Request, res: Response) => {
         regulation,
       },
     });
-    res.json(tournament);
+    res.json(new Tournament(tournament));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     res.status(500).json({ error: 'Tournament creation failed' });
@@ -44,7 +47,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       where: { id },
     });
     if (tournament) {
-      res.json(tournament);
+      res.json(new Tournament(tournament));
     } else {
       res.status(404).json({ error: 'Tournament not found' });
     }
@@ -73,7 +76,7 @@ router.post(tournamentsRouterPath(pathToParticipants(':id')), async (req: Reques
         },
       },
     });
-    res.json(participant);
+    res.json(new Participant(participant));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Participant creation failed' });
@@ -161,7 +164,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       },
     });
 
-    res.json(updatedTournament);
+    res.json(new Tournament(updatedTournament));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to update tournament' });
@@ -177,7 +180,7 @@ router.patch(tournamentsRouterPath(pathToTournamentStart(':id')), async (req: Re
         status: 'in_progress',
       },
     });
-    res.json(updatedTournament);
+    res.json(new Tournament(updatedTournament));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to start tournament' });
@@ -187,7 +190,7 @@ router.patch(tournamentsRouterPath(pathToTournamentStart(':id')), async (req: Re
 router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const tournament = await prisma.tournament.findUnique({
+    const tournamentWithRelations = await prisma.tournament.findUnique({
       where: { id },
       include: {
         participants: {
@@ -198,9 +201,18 @@ router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Requ
       },
     });
 
-    if (!tournament) {
+    if (!tournamentWithRelations) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
+
+    // Prismaのレスポンスをモデルクラスのインスタンスに変換する
+    const participants = tournamentWithRelations.participants.map((p) => {
+      const quizzes = p.quizzes.map((q) => new Quiz(q));
+      // @ts-ignore
+      return new Participant({ ...p, quizzes });
+    });
+
+    const tournament = new Tournament({ ...tournamentWithRelations, participants });
 
     res.json(tournament);
   } catch (error) {

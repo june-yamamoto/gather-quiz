@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { pathToParticipantQuizzes, pathToParticipants } from '../api-helper';
+import { Quiz } from '../model/Quiz';
 
 const prisma = new PrismaClient();
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
@@ -30,11 +31,12 @@ router.get(
       }
 
       const requiredQuestions = participant.tournament.questionsPerParticipant;
-      const createdQuestionsCount = participant.quizzes.length;
+      const createdQuizzes = participant.quizzes.map((q) => new Quiz(q));
+      const createdQuestionsCount = createdQuizzes.length;
       const remainingQuestions = requiredQuestions - createdQuestionsCount;
 
       res.json({
-        createdQuizzes: participant.quizzes,
+        createdQuizzes,
         remainingQuestions,
         requiredQuestions,
         createdQuestionsCount,
