@@ -50,6 +50,11 @@ jobs:
         env:
           DATABASE_URL: "file::memory:?cache=shared"
 
+      - name: Apply database schema
+        run: pnpm --filter backend exec prisma db push
+        env:
+          DATABASE_URL: "file::memory:?cache=shared"
+
       - name: Run unit tests
         run: npm run test:backend && npm run test:frontend
         env:
