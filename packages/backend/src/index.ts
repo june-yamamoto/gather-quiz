@@ -1,3 +1,9 @@
+/**
+ * @file Expressアプリケーションのエントリーポイントです。
+ *       ミドルウェアの設定、ルーターのマウント、サーバーの起動を行います。
+ * @module index
+ */
+
 import express, { Express, Request, Response } from 'express';
 import tournamentsRouter from './routes/tournaments';
 import quizzesRouter from './routes/quizzes';

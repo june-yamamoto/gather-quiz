@@ -73,18 +73,7 @@ export class Tournament {
 
   /**
    * @constructor
-   * @param {object} data - 大会データ
-   * @param {string} data.id - 大会ID
-   * @param {string} data.name - 大会名
-   * @param {string} data.password - 管理用パスワード
-   * @param {number} data.questionsPerParticipant - 参加者1人あたりの問題作成数
-   * @param {string} data.points - 各問題の配点
-   * @param {string | null} data.regulation - レギュレーション
-   * @param {string} data.status - 大会の状態
-   * @param {Date} data.createdAt - 作成日時
-   * @param {Date} data.updatedAt - 更新日時
-   * @param {Participant[]} [data.participants] - 参加者リスト
-   * @param {Quiz[]} [data.quizzes] - クイズリスト
+   * @param {Tournament} data - PrismaのTournamentモデルのデータ
    */
   constructor(data: {
     id: string;
@@ -113,7 +102,7 @@ export class Tournament {
   }
 
   /**
-   * JSONシリアライズ用
+   * 関連モデル（Participant, Quiz）も含めて、JSONシリアライズ可能なオブジェクトに変換します。
    * @returns {object} プレーンなオブジェクト
    */
   toJSON() {

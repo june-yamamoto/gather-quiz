@@ -18,11 +18,28 @@ import { NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
 const prisma = new PrismaClient();
 const router = Router();
 
+/**
+ * @file 大会（Tournament）に関連するAPIエンドポイントのルーター
+ * @module routes/tournaments
+ */
+
 /** 大会オブジェクトに関するAPIのrouter向けパスを取得する関数 */
 const tournamentsRouterPath = (path: string) => path.substring(pathToTournaments().length);
 
 router.use(tournamentsRouterPath(pathToParticipants(':tournamentId')), participantsRouter);
 
+/**
+ * 新しい大会を作成するエンドポイント
+ * @route POST /
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @body {string} name - 大会名
+ * @body {string} password - 管理用パスワード
+ * @body {number} questionsPerParticipant - 参加者1人あたりの問題作成数
+ * @body {string} points - 各問題の配点 (カンマ区切り)
+ * @body {string | null} regulation - レギュレーション
+ * @returns {Tournament} 作成された大会オブジェクト
+ */
 router.post(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
@@ -40,6 +57,15 @@ router.post(
   })
 );
 
+/**
+ * 指定されたIDの大会情報を取得するエンドポイント
+ * @route GET /:id
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 取得対象の大会ID
+ * @returns {Tournament} 取得した大会オブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ */
 router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
@@ -55,6 +81,15 @@ router.get(
   })
 );
 
+/**
+ * 指定された大会に新しい参加者を作成するエンドポイント
+ * @route POST /:id/participants
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @body {string} name - 新しい参加者の名前
+ * @returns {Participant} 作成された参加者オブジェクト
+ */
 router.post(
   tournamentsRouterPath(pathToParticipants(':id')),
   asyncHandler(async (req: Request, res: Response) => {
@@ -79,6 +114,17 @@ router.post(
   })
 );
 
+/**
+ * 主催者として大会にログインするためのエンドポイント
+ * @route POST /:id/login
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @body {string} password - 管理用パスワード
+ * @returns {object} ログイン成功を示すオブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ * @throws {UnauthorizedError} パスワードが不正な場合
+ */
 router.post(
   tournamentsRouterPath(pathToTournamentLogin(':id')),
   asyncHandler(async (req: Request, res: Response) => {
@@ -102,6 +148,15 @@ router.post(
   })
 );
 
+/**
+ * 大会のステータス（参加者の問題作成状況など）を取得するエンドポイント
+ * @route GET /:id/status
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @returns {object} 大会名と参加者のステータスリストを含むオブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ */
 router.get(
   tournamentsRouterPath(pathToTournamentStatus(':id')),
   asyncHandler(async (req: Request, res: Response) => {
@@ -140,6 +195,20 @@ router.get(
   })
 );
 
+/**
+ * 指定されたIDの大会情報を更新するエンドポイント
+ * @route PUT /:id
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 更新対象の大会ID
+ * @body {string} [name] - 新しい大会名
+ * @body {string} [password] - 新しい管理用パスワード
+ * @body {number} [questionsPerParticipant] - 新しい問題作成数
+ * @body {string} [points] - 新しい配点
+ * @body {string | null} [regulation] - 新しいレギュレーション
+ * @returns {Tournament} 更新された大会オブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ */
 router.put(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
@@ -168,6 +237,15 @@ router.put(
   })
 );
 
+/**
+ * 大会を開始状態に更新するエンドポイント
+ * @route PATCH /:id/start
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @returns {Tournament} ステータスが更新された大会オブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ */
 router.patch(
   tournamentsRouterPath(pathToTournamentStart(':id')),
   asyncHandler(async (req: Request, res: Response) => {
@@ -190,6 +268,15 @@ router.patch(
   })
 );
 
+/**
+ * 大会ボードページに必要な、参加者と各参加者が作成したクイズの情報を取得するエンドポイント
+ * @route GET /:id/board
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @returns {Tournament} 参加者とクイズの情報を含む大会オブジェクト
+ * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
+ */
 router.get(
   tournamentsRouterPath(pathToTournamentBoard(':id')),
   asyncHandler(async (req: Request, res: Response) => {

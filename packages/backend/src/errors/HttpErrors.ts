@@ -1,4 +1,9 @@
 /**
+ * @file アプリケーションで使用するHTTPエラークラスを定義します。
+ * @module errors/HttpErrors
+ */
+
+/**
  * HTTPエラーの基底クラス
  */
 export class HttpError extends Error {

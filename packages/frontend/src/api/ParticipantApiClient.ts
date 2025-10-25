@@ -3,6 +3,11 @@ import { Quiz } from '../models/Quiz';
 import { ApiError } from '../errors/ApiError';
 
 /**
+ * @file 参加者（Participant）関連のAPIエンドポイントと通信するためのクライアントクラス
+ * @module api/ParticipantApiClient
+ */
+
+/**
  * 参加者関連のAPI呼び出しをまとめたクラス
  */
 class ParticipantApiClient {
@@ -22,6 +27,7 @@ class ParticipantApiClient {
    * @param {string} tournamentId - 大会ID
    * @param {string} participantId - 参加者ID
    * @returns {Promise<{ createdQuizzes: Quiz[], remainingQuestions: number }>} 作成済みクイズと残り問題数
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async getQuizzes(
     tournamentId: string,

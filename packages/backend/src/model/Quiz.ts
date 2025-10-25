@@ -76,19 +76,7 @@ export class Quiz {
 
   /**
    * @constructor
-   * @param {object} data - クイズデータ
-   * @param {string} data.id - クイズID
-   * @param {number} data.point - 配点
-   * @param {string | null} data.questionText - 問題文
-   * @param {string | null} data.questionImage - 問題画像URL
-   * @param {string | null} data.questionLink - 問題参考リンク
-   * @param {string | null} data.answerText - 解答文
-   * @param {string | null} data.answerImage - 解答画像URL
-   * @param {string | null} data.answerLink - 解答参考リンク
-   * @param {string} data.tournamentId - 紐づく大会のID
-   * @param {string} data.participantId - 紐づく参加者のID
-   * @param {Date} data.createdAt - 作成日時
-   * @param {Date} data.updatedAt - 更新日時
+   * @param {Quiz} data - PrismaのQuizモデルのデータ
    */
   constructor(data: {
     id: string;
@@ -119,7 +107,7 @@ export class Quiz {
   }
 
   /**
-   * JSONシリアライズ用
+   * 自身のプロパティをJSONシリアライズ可能なオブジェクトに変換します。
    * @returns {object} プレーンなオブジェクト
    */
   toJSON() {

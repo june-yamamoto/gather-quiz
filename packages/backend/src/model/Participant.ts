@@ -48,14 +48,7 @@ export class Participant {
 
   /**
    * @constructor
-   * @param {object} data - 参加者データ
-   * @param {string} data.id - 参加者ID
-   * @param {string} data.name - 参加者名
-   * @param {string} data.password - パスワード
-   * @param {string} data.tournamentId - 紐づく大会のID
-   * @param {Date} data.createdAt - 作成日時
-   * @param {Date} data.updatedAt - 更新日時
-   * @param {Quiz[]} [data.quizzes] - 作成したクイズのリスト
+   * @param {Participant} data - PrismaのParticipantモデルのデータ
    */
   constructor(data: {
     id: string;
@@ -76,7 +69,7 @@ export class Participant {
   }
 
   /**
-   * JSONシリアライズ用
+   * 関連モデル（Quiz）も含めて、JSONシリアライズ可能なオブジェクトに変換します。
    * @returns {object} プレーンなオブジェクト
    */
   toJSON() {
