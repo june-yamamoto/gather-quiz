@@ -7,7 +7,7 @@ const createTournament = async (page: Page, tournamentName: string) => {
 
   // Click the button to create a new tournament
   await page.getByRole('link', { name: 'クイズ大会を新しく作成する' }).click();
-  await page.waitForURL('/tournaments/new');
+  await page.waitForURL('/gather/tournaments/new');
 
   // Fill out the form
   await page.getByRole('textbox', { name: '大会名' }).fill(tournamentName);
@@ -38,11 +38,10 @@ test.describe('大会作成フロー', () => {
     await expect(page.getByText(`大会名: ${tournamentName}`)).toBeVisible();
 
     // Check that the portal URL is displayed and correct
-    const portalUrlLocator = page.getByText(/http:\/\/localhost:5173\/tournaments\/.*/);
+    const portalUrlLocator = page.getByText(/http:\/\/localhost:5173\/gather\/tournaments\/.*/);
     await expect(portalUrlLocator).toBeVisible();
     const portalUrl = await portalUrlLocator.textContent();
     expect(portalUrl).toContain('/tournaments/');
-
 
     // Check that the password is displayed (as passed in state)
     await expect(page.getByText(/password123/)).toBeVisible();

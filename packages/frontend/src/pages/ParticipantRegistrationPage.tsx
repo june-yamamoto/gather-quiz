@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { pathToQuizCreator } from '../helpers/route-helpers';
-import { Participant } from '../models/Participant';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -17,29 +17,16 @@ const ParticipantRegistrationPage = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name.trim()) {
+    if (!name.trim() || !tournamentId) {
       alert('名前を入力してください。');
       return;
     }
 
     try {
-      const response = await fetch(`/api/tournaments/${tournamentId}/participants`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      if (!response.ok) {
-        throw new Error('参加者登録に失敗しました。');
-      }
-
-      const participantData = await response.json();
-      const participant = Participant.fromApi(participantData);
+      const participant = await tournamentApiClient.createParticipant(tournamentId, { name });
       alert(`「${participant.name}」として登録しました！`);
       // 登録完了後、新しく発行された参加者IDを使って問題作成ページへ遷移させる
-      navigate(pathToQuizCreator(tournamentId || '', participant.id));
+      navigate(pathToQuizCreator(tournamentId, participant.id));
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました。');

@@ -1,13 +1,13 @@
-import { test, expect, APIRequestContext } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 let tournamentId: string;
 let participantId: string;
 
 // Setup: Create a tournament and a participant before the test
 test.beforeAll(async ({ request }) => {
-  const tournamentRes = await request.post('/api/tournaments', {
+  const tournamentRes = await request.post('http://localhost:3000/api/tournaments', {
     data: {
-      name: `Quiz Creation Test Tournament ${Date.now()}` ,
+      name: `Quiz Creation Test Tournament ${Date.now()}`,
       password: 'test-password',
       questionsPerParticipant: 1,
       points: '10',
@@ -16,8 +16,8 @@ test.beforeAll(async ({ request }) => {
   const tournament = await tournamentRes.json();
   tournamentId = tournament.id;
 
-  const participantRes = await request.post(`/api/tournaments/${tournamentId}/participants`, {
-    data: { name: 'QuizCreator' }
+  const participantRes = await request.post(`http://localhost:3000/api/tournaments/${tournamentId}/participants`, {
+    data: { name: 'QuizCreator' },
   });
   const participant = await participantRes.json();
   participantId = participant.id;
@@ -26,7 +26,7 @@ test.beforeAll(async ({ request }) => {
 test.describe('クイズ作成フロー', () => {
   test('参加者が新しいクイズを作成できること', async ({ page }) => {
     // 1. Navigate to the quiz creation page
-    await page.goto(`/tournaments/${tournamentId}/participants/${participantId}/quizzes/new`);
+    await page.goto(`/gather/tournaments/${tournamentId}/participants/${participantId}/quizzes/new`);
     await expect(page.getByRole('heading', { name: '問題作成・編集' })).toBeVisible();
 
     // 2. Fill out the form
@@ -40,7 +40,7 @@ test.describe('クイズ作成フロー', () => {
     await page.getByRole('button', { name: 'この内容で問題を保存する' }).click();
 
     // 4. Assert navigation to the participant dashboard
-    await page.waitForURL(`/tournaments/${tournamentId}/participants/${participantId}`);
+    await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participantId}`);
     await expect(page.getByRole('heading', { name: '参加者ダッシュボード' })).toBeVisible();
 
     // 5. Verify the created quiz is displayed on the dashboard

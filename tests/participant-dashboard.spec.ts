@@ -2,9 +2,9 @@ import { test, expect, APIRequestContext } from '@playwright/test';
 
 // Helper function to create a tournament via API
 const createTournament = async (request: APIRequestContext) => {
-  const response = await request.post('/api/tournaments', {
+  const response = await request.post('http://localhost:3000/api/tournaments', {
     data: {
-      name: `Dashboard Test Tournament ${Date.now()}` ,
+      name: `Dashboard Test Tournament ${Date.now()}`,
       password: 'test-password',
       questionsPerParticipant: 3,
       points: '10,20,30',
@@ -16,35 +16,39 @@ const createTournament = async (request: APIRequestContext) => {
 
 // Helper function to create a participant via API
 const createParticipant = async (request: APIRequestContext, tournamentId: string) => {
-  const response = await request.post(`/api/tournaments/${tournamentId}/participants`, {
+  const response = await request.post(`http://localhost:3000/api/tournaments/${tournamentId}/participants`, {
     data: {
-      name: `Test Participant ${Date.now()}`
-    }
+      name: `Test Participant ${Date.now()}`,
+    },
   });
   return await response.json();
 };
 
 // Helper function to create a quiz via API
-const createQuiz = async (request: APIRequestContext, tournamentId: string, participantId: string, questionNumber: number) => {
-  const response = await request.post('/api/quizzes', {
+const createQuiz = async (
+  request: APIRequestContext,
+  tournamentId: string,
+  participantId: string,
+  questionNumber: number
+) => {
+  const response = await request.post('http://localhost:3000/api/quizzes', {
     data: {
-      questionText: `Question ${questionNumber}` ,
+      questionText: `Question ${questionNumber}`,
       answerText: 'A',
       point: 10,
       tournamentId,
       participantId,
-    }
+    },
   });
   return await response.json();
 };
 
 test.describe('参加者ダッシュボード', () => {
-
   test('シナリオ1: クイズが一件も作成されていない場合に正しいステータスが表示されること', async ({ page, request }) => {
     const tournament = await createTournament(request);
     const participant = await createParticipant(request, tournament.id);
 
-    await page.goto(`/tournaments/${tournament.id}/participants/${participant.id}`);
+    await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 3 問、作成してください。')).toBeVisible();
     await expect(page.getByText('作成済みの問題')).toBeVisible();
@@ -57,8 +61,7 @@ test.describe('参加者ダッシュボード', () => {
     const tournament = await createTournament(request);
     const participant = await createParticipant(request, tournament.id);
     const quiz = await createQuiz(request, tournament.id, participant.id, 1);
-
-    await page.goto(`/tournaments/${tournament.id}/participants/${participant.id}`);
+    await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 2 問、作成してください。')).toBeVisible();
     await expect(page.getByText('作成済みの問題')).toBeVisible();
@@ -72,7 +75,7 @@ test.describe('参加者ダッシュボード', () => {
     await createQuiz(request, tournament.id, participant.id, 2);
     await createQuiz(request, tournament.id, participant.id, 3);
 
-    await page.goto(`/tournaments/${tournament.id}/participants/${participant.id}`);
+    await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 0 問、作成してください。')).toBeVisible();
     await expect(page.getByText('作成済みの問題')).toBeVisible();

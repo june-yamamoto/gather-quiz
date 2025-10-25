@@ -4,9 +4,9 @@ let tournamentId: string;
 
 // Create a new tournament before running the tests in this file
 test.beforeAll(async ({ request }) => {
-  const response = await request.post('/api/tournaments', {
+  const response = await request.post('http://localhost:3000/api/tournaments', {
     data: {
-      name: `Participant Flow Test Tournament ${Date.now()}` ,
+      name: `Participant Flow Test Tournament ${Date.now()}`,
       password: 'test-password',
       questionsPerParticipant: 3,
       points: '10,20,30',
@@ -20,24 +20,26 @@ test.beforeAll(async ({ request }) => {
 test.describe('参加者登録と問題作成フロー', () => {
   test('ユーザーが参加者登録し、問題作成ページにリダイレクトされること', async ({ page }) => {
     // 1. Navigate to the tournament portal page
-    await page.goto(`/tournaments/${tournamentId}`);
+    await page.goto(`/gather/tournaments/${tournamentId}`);
     await expect(page.getByRole('heading', { name: '大会ポータル' })).toBeVisible();
 
     // 2. Click the button to register as a participant
     await page.getByRole('link', { name: '参加者として新規登録' }).click();
-    await page.waitForURL(`/tournaments/${tournamentId}/register`);
+    await page.waitForURL(`/gather/tournaments/${tournamentId}/register`);
 
     // 3. Fill out the registration form
-    const participantName = `Test Participant ${Date.now()}`
+    const participantName = `Test Participant ${Date.now()}`;
     await page.getByLabel('あなたの名前').fill(participantName);
 
-    const responsePromise = page.waitForResponse(resp => resp.url().includes('/participants') && resp.status() === 200);
+    const responsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/participants') && resp.status() === 200
+    );
     await page.getByRole('button', { name: 'この名前で参加する' }).click();
     const response = await responsePromise;
     const participant = await response.json();
 
     // 4. Expect to be redirected to the quiz creation page
-    await page.waitForURL(`/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
+    await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
     await expect(page.getByRole('heading', { name: '問題作成・編集' })).toBeVisible();
 
     // 5. Check if the form elements are visible

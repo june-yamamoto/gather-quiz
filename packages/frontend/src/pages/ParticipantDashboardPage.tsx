@@ -4,6 +4,7 @@ import { Button, Container, Typography, Box, Paper, List, ListItem, ListItemText
 import { styled } from '@mui/material/styles';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizCreator } from '../helpers/route-helpers';
+import { participantApiClient } from '../api/ParticipantApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -21,28 +22,12 @@ const ParticipantDashboardPage = () => {
   const [remainingQuestions, setRemainingQuestions] = useState(0);
 
   useEffect(() => {
-    if (!participantId) return;
+    if (!participantId || !tournamentId) return;
 
     const fetchQuizStatus = async () => {
       try {
-        const response = await fetch(`/api/tournaments/${tournamentId}/participants/${participantId}/quizzes`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch quiz status');
-        }
-        const data = await response.json();
-
-        const parsedQuizzes = data.createdQuizzes
-          .map((quizData: unknown) => {
-            try {
-              return Quiz.fromApi(quizData);
-            } catch (error) {
-              console.error('Failed to parse quiz data:', error);
-              return null;
-            }
-          })
-          .filter((quiz: Quiz | null): quiz is Quiz => quiz !== null);
-
-        setQuizzes(parsedQuizzes);
+        const data = await participantApiClient.getQuizzes(tournamentId, participantId);
+        setQuizzes(data.createdQuizzes);
         setRemainingQuestions(data.remainingQuestions);
       } catch (error) {
         console.error(error);

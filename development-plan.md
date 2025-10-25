@@ -64,9 +64,6 @@
 
 ## 4. 継続的改善タスク
 
-- **E2Eテストの導入 (完了)**
-    - ✅ Playwrightの導入とDev Container上での動作環境を構築。
-    - ✅ すべての主要ユーザーフローに対するE2Eテストを実装し、動作検証を完了。
 - **CI/CDの構築 (Next Step)**
     - GitHub Actionsを導入し、以下のワークフローを構築する。
         - 静的解析 (Lint)
@@ -82,12 +79,6 @@
   - DBで使用するモデルをクラス化して`backend/src/model`に切り出してください
 - フロントエンド
   - サーバと通信するfetch処理は対象となるモデル毎のクラスに切り出してください
-  - フロントエンドのパスの生成は全て関数化してください
-    - ex) `pathToCreateQuizPage = (tournamentId: string, pariticipantId: string) => [rootpath, rournamentId, 'participants', participantId, 'quizzes', 'new']`
-      - `const rootpath = '/';` を定義してください
-  - DBから取得するモデルをクラス化して`frontend/src/model`に切り出す。以下の関数を実装してください
-    - `HogeClass.fromApi()`: APIから取得したオブジェクトをモデル化する関数
-    - `HogeClass.toApi()`: APIにわたす際のオブジェクトを取得する関数
   - StyledComponent化したコンポーネントは必ず全てPrefixに`Styled`をつけてください
 
 ---
@@ -99,13 +90,6 @@
 - **重複ロジックの関数化**
   - **バックエンド**: 各APIルートで共通しているエラーハンドリングのロジックを、共通のエラーハンドリングミドルウェアとして切り出すことを検討する。
   - **フロントエンド**: 各ページコンポーネントの`useEffect`内で共通しているAPI呼び出しの`try-catch`ロジックを、汎用的なカスタムフック（例: `useApi`）として切り出すことを検討する。
-
-- **フロントエンドルーティングパスの関数化**
-  - `packages/frontend/src/utils/paths.ts`のようなヘルパーファイルを作成し、`react-router-dom`で使用する全てのパスを生成する関数を実装する。
-
-- **フロントエンドモデルのクラス化**
-  - `packages/frontend/src/models`ディレクトリに`Tournament.ts`と`Participant.ts`を追加する。
-  - `Quiz.ts`を含む全てのモデルクラスに、APIレスポンスをクラスインスタンスに変換する`fromApi`静的メソッドと、APIリクエスト用にオブジェクトを変換する`toApi`メソッドを実装する。
 
 - **Styled-Componentsの命名規則適用**
   - `Styled`プレフィックスが付与されていないStyled-Component（例: `Form`, `Section`）を、規約通り`StyledForm`, `StyledSection`などにリネームする。
