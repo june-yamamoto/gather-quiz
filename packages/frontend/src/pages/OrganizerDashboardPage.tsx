@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -12,9 +11,10 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Participant } from '../models/Participant';
+import { useQuery } from '@tanstack/react-query';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
 
@@ -23,7 +23,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const HeaderPaper = styled(Paper)(({ theme }) => ({
+const StyledHeaderPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
 }));
@@ -33,25 +33,20 @@ const OrganizerDashboardPage = () => {
   const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [tournamentName, setTournamentName] = useState('');
-
-  useEffect(() => {
-    if (!tournamentId) return;
-
-    const fetchTournamentStatus = async () => {
-      try {
-        const data = await tournamentApiClient.getStatus(tournamentId);
-        setTournamentName(data.tournamentName);
-        setParticipants(data.participants);
-      } catch (error) {
-        console.error(error);
-        // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
+  const {
+    data: status,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['tournament', tournamentId, 'status'],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
       }
-    };
-
-    fetchTournamentStatus();
-  }, [tournamentId]);
+      return tournamentApiClient.getStatus(tournamentId);
+    },
+    enabled: !!tournamentId, // tournamentId が存在する場合のみクエリを実行
+  });
 
   const handleStartTournament = async () => {
     if (!tournamentId) return;
@@ -64,11 +59,27 @@ const OrganizerDashboardPage = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <StyledContainer maxWidth="lg" sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <StyledContainer maxWidth="lg">
+        <Typography color="error">エラー: {error.message}</Typography>
+      </StyledContainer>
+    );
+  }
+
   return (
     <StyledContainer maxWidth="lg">
-      <HeaderPaper elevation={3}>
+      <StyledHeaderPaper elevation={3}>
         <Typography variant="h4" component="h1" gutterBottom>
-          管理ページ: {tournamentName}
+          管理ページ: {status?.tournamentName}
         </Typography>
         <Box>
           <Typography variant="subtitle1">招待URL</Typography>
@@ -80,7 +91,7 @@ const OrganizerDashboardPage = () => {
         <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined" sx={{ mt: 2 }}>
           大会概要を編集する
         </Button>
-      </HeaderPaper>
+      </StyledHeaderPaper>
 
       <Typography variant="h5" component="h2" gutterBottom>
         参加者の問題作成状況
@@ -94,7 +105,7 @@ const OrganizerDashboardPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {participants.map((p) => (
+            {status?.participants.map((p) => (
               <TableRow key={p.id}>
                 <TableCell component="th" scope="row">
                   {p.name}

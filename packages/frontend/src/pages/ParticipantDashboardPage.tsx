@@ -1,8 +1,18 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Button, Container, Typography, Box, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
+import {
+  Button,
+  Container,
+  Typography,
+  Box,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  CircularProgress,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Quiz } from '../models/Quiz';
+import { useQuery } from '@tanstack/react-query';
 import { pathToQuizCreator } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
 
@@ -11,32 +21,44 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const StatusPaper = styled(Paper)(({ theme }) => ({
+const StyledStatusPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
 }));
 
 const ParticipantDashboardPage = () => {
   const { tournamentId, participantId } = useParams();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [remainingQuestions, setRemainingQuestions] = useState(0);
 
-  useEffect(() => {
-    if (!participantId || !tournamentId) return;
-
-    const fetchQuizStatus = async () => {
-      try {
-        const data = await participantApiClient.getQuizzes(tournamentId, participantId);
-        setQuizzes(data.createdQuizzes);
-        setRemainingQuestions(data.remainingQuestions);
-      } catch (error) {
-        console.error(error);
-        // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
+  const {
+    data: status,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['participant', participantId, 'quizzes'],
+    queryFn: () => {
+      if (!tournamentId || !participantId) {
+        throw new Error('ID is not defined');
       }
-    };
+      return participantApiClient.getQuizzes(tournamentId, participantId);
+    },
+    enabled: !!tournamentId && !!participantId,
+  });
 
-    fetchQuizStatus();
-  }, [participantId, tournamentId]);
+  if (isLoading) {
+    return (
+      <StyledContainer maxWidth="md" sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <StyledContainer maxWidth="md">
+        <Typography color="error">エラー: {error.message}</Typography>
+      </StyledContainer>
+    );
+  }
 
   return (
     <StyledContainer maxWidth="md">
@@ -44,14 +66,14 @@ const ParticipantDashboardPage = () => {
         参加者ダッシュボード
       </Typography>
 
-      <StatusPaper elevation={3}>
+      <StyledStatusPaper elevation={3}>
         <Typography variant="h6" gutterBottom>
           問題作成ステータス
         </Typography>
         <Typography variant="body1">
           あと{' '}
           <Typography component="span" variant="h5" color="secondary">
-            {remainingQuestions}
+            {status?.remainingQuestions ?? 0}
           </Typography>{' '}
           問、作成してください。
         </Typography>
@@ -65,14 +87,14 @@ const ParticipantDashboardPage = () => {
             新しい問題を作成する
           </Button>
         </Box>
-      </StatusPaper>
+      </StyledStatusPaper>
 
       <Typography variant="h5" component="h2" gutterBottom>
         作成済みの問題
       </Typography>
       <Paper>
         <List>
-          {quizzes.map((quiz, index) => (
+          {status?.createdQuizzes.map((quiz, index) => (
             <div key={quiz.id}>
               <ListItem>
                 <ListItemText
@@ -81,7 +103,7 @@ const ParticipantDashboardPage = () => {
                 />
                 {/* TODO: 作成した問題を編集・削除できるように、今後ボタンをここに追加する */}
               </ListItem>
-              {index < quizzes.length - 1 && <Divider />}
+              {index < status.createdQuizzes.length - 1 && <Divider />}
             </div>
           ))}
         </List>

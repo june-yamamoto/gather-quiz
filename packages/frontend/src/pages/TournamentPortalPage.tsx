@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Button,
   Container,
@@ -13,8 +13,8 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
-import { Tournament } from '../models/Tournament';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -27,20 +27,17 @@ const TournamentPortalPage = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
-  const [tournament, setTournament] = useState<Tournament | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchTournament = async () => {
-      try {
-        const tournamentData = await tournamentApiClient.get(id);
-        setTournament(tournamentData);
-      } catch (error) {
-        console.error('Failed to fetch tournament', error);
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', id],
+    queryFn: () => {
+      if (!id) {
+        throw new Error('Tournament ID is not defined');
       }
-    };
-    fetchTournament();
-  }, [id]);
+      return tournamentApiClient.get(id);
+    },
+    enabled: !!id,
+  });
 
   const handleClickOpen = () => {
     setOpen(true);

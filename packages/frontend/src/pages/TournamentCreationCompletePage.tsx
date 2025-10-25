@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { pathToTournamentPortal } from '../helpers/route-helpers';
-import { Tournament } from '../models/Tournament';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -11,16 +10,16 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const InfoPaper = styled(Paper)(({ theme }) => ({
+const StyledInfoPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginTop: theme.spacing(3),
 }));
 
-const InfoBox = styled(Box)(({ theme }) => ({
+const StyledInfoBox = styled(Box)(({ theme }) => ({
   margin: theme.spacing(2, 0),
 }));
 
-const UrlDisplay = styled(Typography)(({ theme }) => ({
+const StyledUrlDisplay = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
@@ -31,21 +30,17 @@ const UrlDisplay = styled(Typography)(({ theme }) => ({
 const TournamentCreationCompletePage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const [tournament, setTournament] = useState<Tournament | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchTournament = async () => {
-      try {
-        const tournamentData = await tournamentApiClient.get(id);
-        setTournament(tournamentData);
-      } catch (error) {
-        console.error('Failed to fetch tournament', error);
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', id],
+    queryFn: () => {
+      if (!id) {
+        throw new Error('Tournament ID is not defined');
       }
-    };
-
-    fetchTournament();
-  }, [id]);
+      return tournamentApiClient.get(id);
+    },
+    enabled: !!id,
+  });
 
   const portalUrl = `${window.location.origin}${pathToTournamentPortal(id || '')}`;
 
@@ -63,22 +58,22 @@ const TournamentCreationCompletePage = () => {
       </Typography>
 
       {tournament && (
-        <InfoPaper elevation={3}>
+        <StyledInfoPaper elevation={3}>
           <Typography variant="h6">大会名: {tournament.name}</Typography>
-          <InfoBox>
+          <StyledInfoBox>
             <Typography variant="subtitle2">▼ 参加者への招待URL (大会ポータルページ)</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <UrlDisplay>{portalUrl}</UrlDisplay>
+              <StyledUrlDisplay>{portalUrl}</StyledUrlDisplay>
               <Button variant="outlined" onClick={() => copyToClipboard(portalUrl)}>
                 コピー
               </Button>
             </Box>
-          </InfoBox>
-          <InfoBox>
+          </StyledInfoBox>
+          <StyledInfoBox>
             <Typography variant="subtitle2">▼ 管理用パスワード</Typography>
-            <UrlDisplay>{location.state?.password || '********'} (あなたが設定したパスワード)</UrlDisplay>
-          </InfoBox>
-        </InfoPaper>
+            <StyledUrlDisplay>{location.state?.password || '********'} (あなたが設定したパスワード)</StyledUrlDisplay>
+          </StyledInfoBox>
+        </StyledInfoPaper>
       )}
 
       <Box sx={{ mt: 3 }}>

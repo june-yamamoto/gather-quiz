@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 
@@ -10,12 +11,12 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const Form = styled('form')(({ theme }) => ({
+const StyledForm = styled('form')(({ theme }) => ({
   width: '100%',
   marginTop: theme.spacing(1),
 }));
 
-const SubmitButton = styled(Button)(({ theme }) => ({
+const StyledSubmitButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(2),
 }));
 
@@ -30,23 +31,25 @@ const TournamentCreationPage = () => {
   const [points, setPoints] = useState('10,20,30');
   const [regulation, setRegulation] = useState('');
 
+  const { data: tournamentData } = useQuery({
+    queryKey: ['tournament', tournamentId],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.get(tournamentId);
+    },
+    enabled: isEditMode && !!tournamentId,
+  });
+
   useEffect(() => {
-    if (isEditMode && tournamentId) {
-      const fetchTournament = async () => {
-        try {
-          const tournament = await tournamentApiClient.get(tournamentId);
-          setName(tournament.name);
-          setQuestionsPerParticipant(tournament.questionsPerParticipant);
-          setPoints(tournament.points);
-          setRegulation(tournament.regulation || '');
-        } catch (error) {
-          console.error(error);
-          alert('大会情報の取得に失敗しました。');
-        }
-      };
-      fetchTournament();
+    if (tournamentData) {
+      setName(tournamentData.name);
+      setQuestionsPerParticipant(tournamentData.questionsPerParticipant);
+      setPoints(tournamentData.points);
+      setRegulation(tournamentData.regulation || '');
     }
-  }, [isEditMode, tournamentId]);
+  }, [tournamentData]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -81,7 +84,7 @@ const TournamentCreationPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         {isEditMode ? '大会概要を編集' : '新しいクイズ大会を作成'}
       </Typography>
-      <Form onSubmit={handleSubmit}>
+      <StyledForm onSubmit={handleSubmit}>
         <TextField
           label="大会名"
           fullWidth
@@ -125,10 +128,10 @@ const TournamentCreationPage = () => {
           value={regulation}
           onChange={(e) => setRegulation(e.target.value)}
         />
-        <SubmitButton type="submit" variant="contained" color="primary" fullWidth>
+        <StyledSubmitButton type="submit" variant="contained" color="primary" fullWidth>
           {isEditMode ? 'この内容で更新する' : 'この内容で大会を作成する'}
-        </SubmitButton>
-      </Form>
+        </StyledSubmitButton>
+      </StyledForm>
     </StyledContainer>
   );
 };

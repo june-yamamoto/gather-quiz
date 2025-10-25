@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Paper, Grid, ButtonBase } from '@mui/material';
+import { Container, Typography, Paper, Grid, ButtonBase, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Tournament } from '../models/Tournament';
+import { useQuery } from '@tanstack/react-query';
 import { Participant } from '../models/Participant';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizDisplay } from '../helpers/route-helpers';
@@ -13,7 +12,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const QuizCard = styled(Paper)(({ theme }) => ({
+const StyledQuizCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   textAlign: 'center',
   width: '100%',
@@ -27,27 +26,40 @@ const QuizCard = styled(Paper)(({ theme }) => ({
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
-  const [tournament, setTournament] = useState<Tournament | null>(null);
 
-  useEffect(() => {
-    if (!tournamentId) return;
-    const fetchBoardData = async () => {
-      try {
-        const data = await tournamentApiClient.getBoard(tournamentId);
-        setTournament(data);
-      } catch (error) {
-        console.error(error);
+  const {
+    data: tournament,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['tournament', tournamentId, 'board'],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
       }
-    };
-    fetchBoardData();
-  }, [tournamentId]);
+      return tournamentApiClient.getBoard(tournamentId);
+    },
+    enabled: !!tournamentId,
+  });
 
   const handleQuizSelect = (quizId: string) => {
     navigate(pathToQuizDisplay(quizId));
   };
 
-  if (!tournament) {
-    return <Typography>Loading...</Typography>;
+  if (isLoading) {
+    return (
+      <StyledContainer maxWidth="xl" sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error || !tournament) {
+    return (
+      <StyledContainer maxWidth="xl">
+        <Typography color="error">エラー: {error?.message || 'ボードの読み込みに失敗しました。'}</Typography>
+      </StyledContainer>
+    );
   }
 
   const points = tournament.points.split(',').map(Number);
@@ -77,12 +89,12 @@ const QuizBoardPage = () => {
                 <Grid item xs={true} key={`${p.id}-${point}`}>
                   {quiz ? (
                     <ButtonBase sx={{ width: '100%' }} onClick={() => handleQuizSelect(quiz.id)}>
-                      <QuizCard elevation={3}>
+                      <StyledQuizCard elevation={3}>
                         <Typography variant="h6">{point}点</Typography>
-                      </QuizCard>
+                      </StyledQuizCard>
                     </ButtonBase>
                   ) : (
-                    <QuizCard elevation={1} sx={{ backgroundColor: 'grey.200' }} />
+                    <StyledQuizCard elevation={1} sx={{ backgroundColor: 'grey.200' }} />
                   )}
                 </Grid>
               );

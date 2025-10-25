@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Paper, Button } from '@mui/material';
+import { Container, Typography, Box, Paper, Button, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Quiz } from '../models/Quiz';
+import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
 import { quizApiClient } from '../api/QuizApiClient';
 
@@ -15,7 +14,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   minHeight: '80vh',
 }));
 
-const QuizContentPaper = styled(Paper)(({ theme }) => ({
+const StyledQuizContentPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   width: '100%',
   maxWidth: '900px',
@@ -24,20 +23,21 @@ const QuizContentPaper = styled(Paper)(({ theme }) => ({
 const QuizDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
 
-  useEffect(() => {
-    if (!quizId) return;
-    const fetchQuiz = async () => {
-      try {
-        const quizData = await quizApiClient.get(quizId);
-        setQuiz(quizData);
-      } catch (error) {
-        console.error(error);
+  const {
+    data: quiz,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['quiz', quizId],
+    queryFn: () => {
+      if (!quizId) {
+        throw new Error('Quiz ID is not defined');
       }
-    };
-    fetchQuiz();
-  }, [quizId]);
+      return quizApiClient.get(quizId);
+    },
+    enabled: !!quizId,
+  });
 
   const showAnswer = () => {
     if (quizId) {
@@ -45,13 +45,25 @@ const QuizDisplayPage = () => {
     }
   };
 
-  if (!quiz) {
-    return <Typography>Loading...</Typography>;
+  if (isLoading) {
+    return (
+      <StyledContainer sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error || !quiz) {
+    return (
+      <StyledContainer>
+        <Typography color="error">エラー: {error?.message || 'クイズの読み込みに失敗しました。'}</Typography>
+      </StyledContainer>
+    );
   }
 
   return (
     <StyledContainer>
-      <QuizContentPaper elevation={3}>
+      <StyledQuizContentPaper elevation={3}>
         <Typography variant="h6" color="text.secondary" align="right">
           {quiz.point}点問題
         </Typography>
@@ -59,7 +71,7 @@ const QuizDisplayPage = () => {
           Q. {quiz.questionText}
         </Typography>
         {/* TODO: Display image and link if they exist */}
-      </QuizContentPaper>
+      </StyledQuizContentPaper>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={showAnswer}>
           正解を見る
