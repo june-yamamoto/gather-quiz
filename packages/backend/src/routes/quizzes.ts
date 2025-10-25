@@ -67,6 +67,13 @@ router.put(
     const { id } = req.params;
     const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink } = req.body;
 
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+    });
+    if (!quiz) {
+      throw new NotFoundError('The requested resource was not found.');
+    }
+
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
       data: {

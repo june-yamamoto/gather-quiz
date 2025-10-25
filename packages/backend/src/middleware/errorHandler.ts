@@ -8,7 +8,13 @@ import { HttpError } from '../errors/HttpErrors';
  * @param {Response} res - Expressレスポンスオブジェクト
  * @param {NextFunction} next - 次のミドルウェアへの関数
  */
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction
+) => {
   // HttpErrorのインスタンスかチェック
   if (err instanceof HttpError) {
     return res.status(err.statusCode).json({ error: err.message });

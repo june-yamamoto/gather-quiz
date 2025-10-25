@@ -146,6 +146,13 @@ router.put(
     const { id } = req.params;
     const { name, password, questionsPerParticipant, points, regulation } = req.body;
 
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+    });
+    if (!tournament) {
+      throw new NotFoundError('The requested resource was not found.');
+    }
+
     const updatedTournament = await prisma.tournament.update({
       where: { id },
       data: {
@@ -165,6 +172,14 @@ router.patch(
   tournamentsRouterPath(pathToTournamentStart(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+    });
+    if (!tournament) {
+      throw new NotFoundError('The requested resource was not found.');
+    }
+
     const updatedTournament = await prisma.tournament.update({
       where: { id },
       data: {
@@ -197,7 +212,6 @@ router.get(
     // Prismaのレスポンスをモデルクラスのインスタンスに変換する
     const participants = tournamentWithRelations.participants.map((p) => {
       const quizzes = p.quizzes.map((q) => new Quiz(q));
-      // @ts-ignore
       return new Participant({ ...p, quizzes });
     });
 
