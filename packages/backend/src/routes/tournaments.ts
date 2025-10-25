@@ -1,4 +1,3 @@
-import { Quiz } from '../model/Quiz';
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import participantsRouter from './participants';
@@ -9,9 +8,12 @@ import {
   pathToTournamentStatus,
   pathToTournamentStart,
   pathToTournamentBoard,
+  asyncHandler,
 } from '../api-helper';
 import { Tournament } from '../model/Tournament';
 import { Participant } from '../model/Participant';
+import { Quiz } from '../model/Quiz';
+import { NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -21,8 +23,9 @@ const tournamentsRouterPath = (path: string) => path.substring(pathToTournaments
 
 router.use(tournamentsRouterPath(pathToParticipants(':tournamentId')), participantsRouter);
 
-router.post('/', async (req: Request, res: Response) => {
-  try {
+router.post(
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
     const { name, password, questionsPerParticipant, points, regulation } = req.body;
     const tournament = await prisma.tournament.create({
       data: {
@@ -34,14 +37,12 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
     res.json(new Tournament(tournament));
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    res.status(500).json({ error: 'Tournament creation failed' });
-  }
-});
+  })
+);
 
-router.get('/:id', async (req: Request, res: Response) => {
-  try {
+router.get(
+  '/:id',
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const tournament = await prisma.tournament.findUnique({
       where: { id },
@@ -49,16 +50,14 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (tournament) {
       res.json(new Tournament(tournament));
     } else {
-      res.status(404).json({ error: 'Tournament not found' });
+      throw new NotFoundError('Tournament not found');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve tournament' });
-  }
-});
+  })
+);
 
-router.post(tournamentsRouterPath(pathToParticipants(':id')), async (req: Request, res: Response) => {
-  try {
+router.post(
+  tournamentsRouterPath(pathToParticipants(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
 
@@ -77,14 +76,12 @@ router.post(tournamentsRouterPath(pathToParticipants(':id')), async (req: Reques
       },
     });
     res.json(new Participant(participant));
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Participant creation failed' });
-  }
-});
+  })
+);
 
-router.post(tournamentsRouterPath(pathToTournamentLogin(':id')), async (req: Request, res: Response) => {
-  try {
+router.post(
+  tournamentsRouterPath(pathToTournamentLogin(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { password } = req.body;
 
@@ -93,23 +90,21 @@ router.post(tournamentsRouterPath(pathToTournamentLogin(':id')), async (req: Req
     });
 
     if (!tournament) {
-      return res.status(404).json({ error: 'Tournament not found' });
+      throw new NotFoundError('Tournament not found');
     }
 
     if (tournament.password === password) {
       // 本番環境ではセッション管理のためにJWTなどのトークンを発行するが、ここでは成功ステータスのみ返す
       res.json({ success: true, message: 'Login successful' });
     } else {
-      res.status(401).json({ success: false, message: 'Invalid password' });
+      throw new UnauthorizedError('Invalid password');
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Login failed' });
-  }
-});
+  })
+);
 
-router.get(tournamentsRouterPath(pathToTournamentStatus(':id')), async (req: Request, res: Response) => {
-  try {
+router.get(
+  tournamentsRouterPath(pathToTournamentStatus(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const tournament = await prisma.tournament.findUnique({
       where: { id },
@@ -125,7 +120,7 @@ router.get(tournamentsRouterPath(pathToTournamentStatus(':id')), async (req: Req
     });
 
     if (!tournament) {
-      return res.status(404).json({ error: 'Tournament not found' });
+      throw new NotFoundError('Tournament not found');
     }
 
     const participantStatus = tournament.participants.map(
@@ -142,14 +137,12 @@ router.get(tournamentsRouterPath(pathToTournamentStatus(':id')), async (req: Req
       tournamentName: tournament.name,
       participants: participantStatus,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve tournament status' });
-  }
-});
+  })
+);
 
-router.put('/:id', async (req: Request, res: Response) => {
-  try {
+router.put(
+  '/:id',
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, password, questionsPerParticipant, points, regulation } = req.body;
 
@@ -165,14 +158,12 @@ router.put('/:id', async (req: Request, res: Response) => {
     });
 
     res.json(new Tournament(updatedTournament));
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to update tournament' });
-  }
-});
+  })
+);
 
-router.patch(tournamentsRouterPath(pathToTournamentStart(':id')), async (req: Request, res: Response) => {
-  try {
+router.patch(
+  tournamentsRouterPath(pathToTournamentStart(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const updatedTournament = await prisma.tournament.update({
       where: { id },
@@ -181,14 +172,12 @@ router.patch(tournamentsRouterPath(pathToTournamentStart(':id')), async (req: Re
       },
     });
     res.json(new Tournament(updatedTournament));
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to start tournament' });
-  }
-});
+  })
+);
 
-router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Request, res: Response) => {
-  try {
+router.get(
+  tournamentsRouterPath(pathToTournamentBoard(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const tournamentWithRelations = await prisma.tournament.findUnique({
       where: { id },
@@ -202,7 +191,7 @@ router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Requ
     });
 
     if (!tournamentWithRelations) {
-      return res.status(404).json({ error: 'Tournament not found' });
+      throw new NotFoundError('Tournament not found');
     }
 
     // Prismaのレスポンスをモデルクラスのインスタンスに変換する
@@ -215,10 +204,7 @@ router.get(tournamentsRouterPath(pathToTournamentBoard(':id')), async (req: Requ
     const tournament = new Tournament({ ...tournamentWithRelations, participants });
 
     res.json(tournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve board data' });
-  }
-});
+  })
+);
 
 export default router;

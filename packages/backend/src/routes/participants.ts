@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { pathToParticipantQuizzes, pathToParticipants } from '../api-helper';
+import { pathToParticipantQuizzes, pathToParticipants, asyncHandler } from '../api-helper';
 import { Quiz } from '../model/Quiz';
+import { NotFoundError } from '../errors/HttpErrors';
 
 const prisma = new PrismaClient();
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
@@ -12,40 +13,35 @@ const participantsRouterPath = (path: string) => path.substring(pathToParticipan
 
 router.get(
   participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')),
-  async (req: Request, res: Response) => {
-    try {
-      const { participantId } = req.params;
+  asyncHandler(async (req: Request, res: Response) => {
+    const { participantId } = req.params;
 
-      const participant = await prisma.participant.findUnique({
-        where: { id: participantId },
-        include: {
-          // 残りの問題数を計算するために大会情報が必要
-          tournament: true,
-          // 作成済みのクイズ一覧を返すためにクイズ情報が必要
-          quizzes: true,
-        },
-      });
+    const participant = await prisma.participant.findUnique({
+      where: { id: participantId },
+      include: {
+        // 残りの問題数を計算するために大会情報が必要
+        tournament: true,
+        // 作成済みのクイズ一覧を返すためにクイズ情報が必要
+        quizzes: true,
+      },
+    });
 
-      if (!participant) {
-        return res.status(404).json({ error: 'Participant not found' });
-      }
-
-      const requiredQuestions = participant.tournament.questionsPerParticipant;
-      const createdQuizzes = participant.quizzes.map((q) => new Quiz(q));
-      const createdQuestionsCount = createdQuizzes.length;
-      const remainingQuestions = requiredQuestions - createdQuestionsCount;
-
-      res.json({
-        createdQuizzes,
-        remainingQuestions,
-        requiredQuestions,
-        createdQuestionsCount,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Failed to retrieve quiz status' });
+    if (!participant) {
+      throw new NotFoundError('Participant not found');
     }
-  }
+
+    const requiredQuestions = participant.tournament.questionsPerParticipant;
+    const createdQuizzes = participant.quizzes.map((q) => new Quiz(q));
+    const createdQuestionsCount = createdQuizzes.length;
+    const remainingQuestions = requiredQuestions - createdQuestionsCount;
+
+    res.json({
+      createdQuizzes,
+      remainingQuestions,
+      requiredQuestions,
+      createdQuestionsCount,
+    });
+  })
 );
 
 export default router;

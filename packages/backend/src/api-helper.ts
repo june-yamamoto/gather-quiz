@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from 'express';
+
 const API_ROOT = '/api';
 
 export const pathToTournaments = () => `${API_ROOT}/tournaments`;
@@ -15,3 +17,15 @@ export const pathToQuizzes = () => `${API_ROOT}/quizzes`;
 export const pathToQuiz = (id: string) => `${pathToQuizzes()}/${id}`;
 
 export const pathToUploadImage = () => `${API_ROOT}/upload/image`;
+
+type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<any>;
+
+/**
+ * 非同期なExpressルートハンドラをラップし、発生したエラーをnext()に渡すことで、
+ * Expressの共通エラーハンドリングミドルウェアで処理できるようにするユーティリティ関数。
+ * @param {AsyncRequestHandler} fn - ラップする非同期ルートハンドラ
+ * @returns Expressのルートハンドラとして使用できる関数
+ */
+export const asyncHandler = (fn: AsyncRequestHandler) => (req: Request, res: Response, next: NextFunction) => {
+  return Promise.resolve(fn(req, res, next)).catch(next);
+};
