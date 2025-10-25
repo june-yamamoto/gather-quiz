@@ -83,8 +83,20 @@ jobs:
       - name: Install Playwright browsers and dependencies
         run: pnpm exec playwright install --with-deps
 
+      - name: Generate Prisma client
+        run: pnpm --filter backend exec prisma generate
+        env:
+          DATABASE_URL: "file:./test.db"
+
+      - name: Apply database schema
+        run: pnpm --filter backend exec prisma db push
+        env:
+          DATABASE_URL: "file:./test.db"
+
       - name: Run E2E tests
         run: npm run test:e2e
+        env:
+          DATABASE_URL: "file:./test.db"
 
       - name: Upload Playwright report
         if: always()
