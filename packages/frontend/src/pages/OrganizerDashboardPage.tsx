@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -15,9 +14,9 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useQuery } from '@tanstack/react-query';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -34,14 +33,20 @@ const OrganizerDashboardPage = () => {
   const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
-  const fetchTournamentStatus = useCallback(() => {
-    if (!tournamentId) {
-      return Promise.reject(new Error('Tournament ID is not defined'));
-    }
-    return tournamentApiClient.getStatus(tournamentId);
-  }, [tournamentId]);
-
-  const { data: status, error, isLoading } = useApi(fetchTournamentStatus);
+  const {
+    data: status,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['tournament', tournamentId, 'status'],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.getStatus(tournamentId);
+    },
+    enabled: !!tournamentId, // tournamentId が存在する場合のみクエリを実行
+  });
 
   const handleStartTournament = async () => {
     if (!tournamentId) return;

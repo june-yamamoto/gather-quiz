@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Button,
@@ -13,9 +12,9 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useQuery } from '@tanstack/react-query';
 import { pathToQuizCreator } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -30,14 +29,20 @@ const StyledStatusPaper = styled(Paper)(({ theme }) => ({
 const ParticipantDashboardPage = () => {
   const { tournamentId, participantId } = useParams();
 
-  const fetchQuizStatus = useCallback(() => {
-    if (!participantId || !tournamentId) {
-      return Promise.reject(new Error('ID is not defined'));
-    }
-    return participantApiClient.getQuizzes(tournamentId, participantId);
-  }, [participantId, tournamentId]);
-
-  const { data: status, error, isLoading } = useApi(fetchQuizStatus);
+  const {
+    data: status,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['participant', participantId, 'quizzes'],
+    queryFn: () => {
+      if (!tournamentId || !participantId) {
+        throw new Error('ID is not defined');
+      }
+      return participantApiClient.getQuizzes(tournamentId, participantId);
+    },
+    enabled: !!tournamentId && !!participantId,
+  });
 
   if (isLoading) {
     return (

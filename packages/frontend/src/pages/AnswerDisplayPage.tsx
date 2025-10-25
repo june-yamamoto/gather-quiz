@@ -1,10 +1,9 @@
-import { useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { pathToQuizBoard } from '../helpers/route-helpers';
 import { Container, Typography, Box, Paper, Button, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useQuery } from '@tanstack/react-query';
 import { quizApiClient } from '../api/QuizApiClient';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -25,14 +24,20 @@ const AnswerDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
 
-  const fetchQuiz = useCallback(() => {
-    if (!quizId) {
-      return Promise.reject(new Error('Quiz ID is not defined'));
-    }
-    return quizApiClient.get(quizId);
-  }, [quizId]);
-
-  const { data: quiz, error, isLoading } = useApi(fetchQuiz);
+  const {
+    data: quiz,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['quiz', quizId],
+    queryFn: () => {
+      if (!quizId) {
+        throw new Error('Quiz ID is not defined');
+      }
+      return quizApiClient.get(quizId);
+    },
+    enabled: !!quizId,
+  });
 
   const backToBoard = () => {
     if (quiz) {

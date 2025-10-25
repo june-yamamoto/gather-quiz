@@ -1,12 +1,11 @@
-import { useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Paper, Grid, ButtonBase, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useQuery } from '@tanstack/react-query';
 import { Participant } from '../models/Participant';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizDisplay } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -28,14 +27,20 @@ const QuizBoardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
 
-  const fetchBoardData = useCallback(() => {
-    if (!tournamentId) {
-      return Promise.reject(new Error('Tournament ID is not defined'));
-    }
-    return tournamentApiClient.getBoard(tournamentId);
-  }, [tournamentId]);
-
-  const { data: tournament, error, isLoading } = useApi(fetchBoardData);
+  const {
+    data: tournament,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['tournament', tournamentId, 'board'],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.getBoard(tournamentId);
+    },
+    enabled: !!tournamentId,
+  });
 
   const handleQuizSelect = (quizId: string) => {
     navigate(pathToQuizDisplay(quizId));
@@ -52,7 +57,7 @@ const QuizBoardPage = () => {
   if (error || !tournament) {
     return (
       <StyledContainer maxWidth="xl">
-        <Typography color="error">エラー: {error?.message || 'トーナメントの読み込みに失敗しました。'}</Typography>
+        <Typography color="error">エラー: {error?.message || 'ボードの読み込みに失敗しました。'}</Typography>
       </StyledContainer>
     );
   }

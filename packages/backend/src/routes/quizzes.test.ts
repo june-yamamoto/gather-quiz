@@ -3,11 +3,13 @@ import request from 'supertest';
 import express from 'express';
 import quizzesRouter from './quizzes';
 import { PrismaClient, Tournament, Participant, Quiz } from '@prisma/client';
+import { errorHandler } from '../middleware/errorHandler';
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 app.use('/quizzes', quizzesRouter);
+app.use(errorHandler);
 
 describe('クイズAPI', () => {
   let tournament: Tournament;
@@ -106,7 +108,7 @@ describe('クイズAPI', () => {
       const res = await request(app).put('/quizzes/nonexistent_id').send(updatedData);
 
       expect(res.statusCode).toBe(404);
-      expect(res.body.error).toBe('Quiz not found');
+      expect(res.body.error).toBe('The requested resource was not found.');
     });
 
     it('必須フィールドが不足している場合でも更新できること (部分更新)', async () => {

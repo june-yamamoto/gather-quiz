@@ -1,10 +1,9 @@
-import { useCallback } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { pathToTournamentPortal } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -32,14 +31,16 @@ const TournamentCreationCompletePage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
 
-  const fetchTournament = useCallback(() => {
-    if (!id) {
-      return Promise.reject(new Error('Tournament ID is not defined'));
-    }
-    return tournamentApiClient.get(id);
-  }, [id]);
-
-  const { data: tournament } = useApi(fetchTournament);
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', id],
+    queryFn: () => {
+      if (!id) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.get(id);
+    },
+    enabled: !!id,
+  });
 
   const portalUrl = `${window.location.origin}${pathToTournamentPortal(id || '')}`;
 

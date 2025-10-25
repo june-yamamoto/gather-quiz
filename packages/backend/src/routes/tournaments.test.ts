@@ -3,11 +3,13 @@ import request from 'supertest';
 import express from 'express';
 import tournamentsRouter from './tournaments';
 import { PrismaClient, Tournament } from '@prisma/client';
+import { errorHandler } from '../middleware/errorHandler';
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 app.use('/tournaments', tournamentsRouter);
+app.use(errorHandler);
 
 describe('大会API', () => {
   let tournament: Tournament;
@@ -121,7 +123,7 @@ describe('大会API', () => {
     it('間違ったパスワードでログインが失敗すること', async () => {
       const res = await request(app).post(`/tournaments/${tournament.id}/login`).send({ password: 'wrong-password' });
       expect(res.statusCode).toBe(401);
-      expect(res.body.success).toBe(false);
+      expect(res.body.error).toBe('Invalid password');
     });
   });
 
@@ -178,8 +180,8 @@ describe('大会API', () => {
       };
       const res = await request(app).put('/tournaments/nonexistent_id').send(updatedData);
 
-      // Prismaで存在しないレコードを更新しようとすると500エラーが返るため、それを検証する
-      expect(res.statusCode).toBe(500);
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('The requested resource was not found.');
     });
   });
 
@@ -194,8 +196,8 @@ describe('大会API', () => {
     it('存在しないIDの場合、404エラーを返すこと', async () => {
       const res = await request(app).patch('/tournaments/nonexistent_id/start');
 
-      // Prismaで存在しないレコードを更新しようとすると500エラーが返るため、それを検証する
-      expect(res.statusCode).toBe(500);
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('The requested resource was not found.');
     });
   });
 

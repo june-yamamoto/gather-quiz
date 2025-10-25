@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   Button,
   Container,
@@ -13,9 +13,9 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
-import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -28,14 +28,16 @@ const TournamentPortalPage = () => {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
 
-  const fetchTournament = useCallback(() => {
-    if (!id) {
-      return Promise.reject(new Error('Tournament ID is not defined'));
-    }
-    return tournamentApiClient.get(id);
-  }, [id]);
-
-  const { data: tournament } = useApi(fetchTournament);
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', id],
+    queryFn: () => {
+      if (!id) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.get(id);
+    },
+    enabled: !!id,
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
