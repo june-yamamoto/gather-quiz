@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ServiceTopPage from './pages/ServiceTopPage';
 import TournamentCreationPage from './pages/TournamentCreationPage';
 import TournamentCreationCompletePage from './pages/TournamentCreationCompletePage';
@@ -24,13 +24,13 @@ import {
   pathToQuizDisplay,
   pathToAnswerDisplay,
   pathToTournamentPortal,
-  pathToErrorPage,
 } from './helpers/route-helpers';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Navigate to={pathToServiceTop()} replace />} />
         <Route path={pathToServiceTop()} element={<ServiceTopPage />} />
         <Route path={pathToTournamentCreation()} element={<TournamentCreationPage />} />
         <Route path={pathToTournamentCreationComplete(':id')} element={<TournamentCreationCompletePage />} />
@@ -47,7 +47,7 @@ const App = () => {
         <Route path={pathToAnswerDisplay(':quizId')} element={<AnswerDisplayPage />} />
         <Route path={pathToTournamentPortal(':id')} element={<TournamentPortalPage />} />
         {/* Catch-all route for 404 Not Found */}
-        <Route path={pathToErrorPage()} element={<ErrorPage />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   );

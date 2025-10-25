@@ -1,9 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
 
 const createTournamentFromUI = async (page: Page, tournamentName: string) => {
-  await page.goto('/');
+  await page.goto('/gather/');
   await page.getByRole('link', { name: 'クイズ大会を新しく作成する' }).click();
-  await page.waitForURL('/tournaments/new');
+  await page.waitForURL('/gather/tournaments/new');
 
   await page.getByRole('textbox', { name: '大会名' }).fill(tournamentName);
   await page.getByRole('textbox', { name: '管理用パスワード' }).fill('organizer-password');
@@ -13,30 +13,30 @@ const createTournamentFromUI = async (page: Page, tournamentName: string) => {
 
   await page.getByRole('button', { name: 'この内容で大会を作成する' }).click();
 
-  await page.waitForURL(new RegExp('/tournaments/.*/created'));
+  await page.waitForURL(new RegExp('/gather/tournaments/.*/created'));
   const url = page.url();
-  return url.split('/')[4]; // Extract tournament ID from URL
+  return url.split('/')[5]; // Extract tournament ID from URL
 };
 
 const registerParticipant = async (page: Page, tournamentId: string, participantName: string) => {
-  await page.goto(`/tournaments/${tournamentId}`);
+  await page.goto(`/gather/tournaments/${tournamentId}`);
   await page.getByRole('link', { name: '参加者として新規登録' }).click();
-  await page.waitForURL(`/tournaments/${tournamentId}/register`);
+  await page.waitForURL(`/gather/tournaments/${tournamentId}/register`);
   await page.getByLabel('あなたの名前').fill(participantName);
 
-  const responsePromise = page.waitForResponse(resp => resp.url().includes('/participants') && resp.status() === 200);
+  const responsePromise = page.waitForResponse((resp) => resp.url().includes('/participants') && resp.status() === 200);
   await page.getByRole('button', { name: 'この名前で参加する' }).click();
   const response = await responsePromise;
   const participant = await response.json();
 
-  await page.waitForURL(`/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
+  await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
   return participant.id;
 };
 
 test.describe('主催者ログインとダッシュボードフロー', () => {
   test('主催者がログインして正しいダッシュボードのステータスを確認できること', async ({ page }) => {
     const tournamentName = `Organizer UI Flow Test ${Date.now()}`;
-    
+
     // 1. Create a tournament via UI and get its ID
     const tournamentId = await createTournamentFromUI(page, tournamentName);
 
@@ -44,11 +44,13 @@ test.describe('主催者ログインとダッシュボードフロー', () => {
     await registerParticipant(page, tournamentId, 'Participant A');
     await registerParticipant(page, tournamentId, 'Participant B');
 
-    // 3. Navigate to the portal and log in as organizer
-    await page.goto(`/tournaments/${tournamentId}`);
+
+    await page.goto(`/gather/tournaments/${tournamentId}`);
     await page.getByRole('button', { name: '主催者としてログイン' }).click();
     await page.getByLabel('管理用パスワード').fill('organizer-password');
     await page.getByRole('button', { name: 'ログイン' }).click();
+
+    await page.waitForURL(`/gather/tournaments/${tournamentId}/admin`);
 
     // 4. Assert navigation to the admin dashboard
     await expect(page.getByRole('heading', { name: `管理ページ: ${tournamentName}` })).toBeVisible();

@@ -131,6 +131,7 @@ router.get(tournamentsRouterPath(pathToTournamentStatus(':id')), async (req: Req
         name: p.name,
         created: p._count.quizzes,
         required: tournament.questionsPerParticipant,
+        tournamentId: tournament.id,
       })
     );
 
