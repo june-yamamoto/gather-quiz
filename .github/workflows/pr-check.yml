@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter backend exec prisma generate
+
       - name: Run unit tests
         run: npm run test:backend && npm run test:frontend
 
