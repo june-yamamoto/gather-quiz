@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { pathToQuiz, pathToQuizzes } from '../api-helper';
+import { Quiz } from '../model/Quiz';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -39,7 +40,7 @@ router.post('/', async (req: Request, res: Response) => {
         participant: { connect: { id: participantId } },
       },
     });
-    res.status(201).json(quiz);
+    res.status(201).json(new Quiz(quiz));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Quiz creation failed' });
@@ -53,7 +54,7 @@ router.get(quizzesRouterPath(pathToQuiz(':id')), async (req: Request, res: Respo
       where: { id },
     });
     if (quiz) {
-      res.json(quiz);
+      res.json(new Quiz(quiz));
     } else {
       res.status(404).json({ error: 'Quiz not found' });
     }
@@ -80,7 +81,7 @@ router.put(quizzesRouterPath(pathToQuiz(':id')), async (req: Request, res: Respo
         answerLink,
       },
     });
-    res.status(200).json(updatedQuiz);
+    res.status(200).json(new Quiz(updatedQuiz));
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: 'Quiz not found' });
