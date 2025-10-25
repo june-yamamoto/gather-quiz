@@ -12,7 +12,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const Section = styled(Box)(({ theme }) => ({
+const StyledSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
@@ -78,7 +78,7 @@ const QuizCreatorPage = () => {
         />
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Section>
+            <StyledSection>
               <Typography variant="h6" gutterBottom>
                 問題の作成
               </Typography>
@@ -113,10 +113,10 @@ const QuizCreatorPage = () => {
                 value={questionLink}
                 onChange={(e) => setQuestionLink(e.target.value)}
               />
-            </Section>
+            </StyledSection>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Section>
+            <StyledSection>
               <Typography variant="h6" gutterBottom>
                 解答の作成
               </Typography>
@@ -151,7 +151,7 @@ const QuizCreatorPage = () => {
                 value={answerLink}
                 onChange={(e) => setAnswerLink(e.target.value)}
               />
-            </Section>
+            </StyledSection>
           </Grid>
         </Grid>
         <Box sx={{ mt: 4, textAlign: 'center' }}>

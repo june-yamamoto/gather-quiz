@@ -23,7 +23,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const HeaderPaper = styled(Paper)(({ theme }) => ({
+const StyledHeaderPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
 }));
@@ -66,7 +66,7 @@ const OrganizerDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="lg">
-      <HeaderPaper elevation={3}>
+      <StyledHeaderPaper elevation={3}>
         <Typography variant="h4" component="h1" gutterBottom>
           管理ページ: {tournamentName}
         </Typography>
@@ -80,7 +80,7 @@ const OrganizerDashboardPage = () => {
         <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined" sx={{ mt: 2 }}>
           大会概要を編集する
         </Button>
-      </HeaderPaper>
+      </StyledHeaderPaper>
 
       <Typography variant="h5" component="h2" gutterBottom>
         参加者の問題作成状況

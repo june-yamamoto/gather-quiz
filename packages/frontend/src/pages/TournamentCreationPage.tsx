@@ -10,12 +10,12 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const Form = styled('form')(({ theme }) => ({
+const StyledForm = styled('form')(({ theme }) => ({
   width: '100%',
   marginTop: theme.spacing(1),
 }));
 
-const SubmitButton = styled(Button)(({ theme }) => ({
+const StyledSubmitButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(2),
 }));
 
@@ -81,7 +81,7 @@ const TournamentCreationPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         {isEditMode ? '大会概要を編集' : '新しいクイズ大会を作成'}
       </Typography>
-      <Form onSubmit={handleSubmit}>
+      <StyledForm onSubmit={handleSubmit}>
         <TextField
           label="大会名"
           fullWidth
@@ -125,10 +125,10 @@ const TournamentCreationPage = () => {
           value={regulation}
           onChange={(e) => setRegulation(e.target.value)}
         />
-        <SubmitButton type="submit" variant="contained" color="primary" fullWidth>
+        <StyledSubmitButton type="submit" variant="contained" color="primary" fullWidth>
           {isEditMode ? 'この内容で更新する' : 'この内容で大会を作成する'}
-        </SubmitButton>
-      </Form>
+        </StyledSubmitButton>
+      </StyledForm>
     </StyledContainer>
   );
 };

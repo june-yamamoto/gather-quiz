@@ -15,7 +15,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   minHeight: '80vh',
 }));
 
-const QuizContentPaper = styled(Paper)(({ theme }) => ({
+const StyledQuizContentPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   width: '100%',
   maxWidth: '900px',
@@ -51,7 +51,7 @@ const QuizDisplayPage = () => {
 
   return (
     <StyledContainer>
-      <QuizContentPaper elevation={3}>
+      <StyledQuizContentPaper elevation={3}>
         <Typography variant="h6" color="text.secondary" align="right">
           {quiz.point}点問題
         </Typography>
@@ -59,7 +59,7 @@ const QuizDisplayPage = () => {
           Q. {quiz.questionText}
         </Typography>
         {/* TODO: Display image and link if they exist */}
-      </QuizContentPaper>
+      </StyledQuizContentPaper>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={showAnswer}>
           正解を見る

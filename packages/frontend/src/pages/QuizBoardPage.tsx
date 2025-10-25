@@ -13,7 +13,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const QuizCard = styled(Paper)(({ theme }) => ({
+const StyledQuizCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   textAlign: 'center',
   width: '100%',
@@ -77,12 +77,12 @@ const QuizBoardPage = () => {
                 <Grid item xs={true} key={`${p.id}-${point}`}>
                   {quiz ? (
                     <ButtonBase sx={{ width: '100%' }} onClick={() => handleQuizSelect(quiz.id)}>
-                      <QuizCard elevation={3}>
+                      <StyledQuizCard elevation={3}>
                         <Typography variant="h6">{point}点</Typography>
-                      </QuizCard>
+                      </StyledQuizCard>
                     </ButtonBase>
                   ) : (
-                    <QuizCard elevation={1} sx={{ backgroundColor: 'grey.200' }} />
+                    <StyledQuizCard elevation={1} sx={{ backgroundColor: 'grey.200' }} />
                   )}
                 </Grid>
               );

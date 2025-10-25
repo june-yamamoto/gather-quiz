@@ -11,7 +11,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const StatusPaper = styled(Paper)(({ theme }) => ({
+const StyledStatusPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
 }));
@@ -44,7 +44,7 @@ const ParticipantDashboardPage = () => {
         参加者ダッシュボード
       </Typography>
 
-      <StatusPaper elevation={3}>
+      <StyledStatusPaper elevation={3}>
         <Typography variant="h6" gutterBottom>
           問題作成ステータス
         </Typography>
@@ -65,7 +65,7 @@ const ParticipantDashboardPage = () => {
             新しい問題を作成する
           </Button>
         </Box>
-      </StatusPaper>
+      </StyledStatusPaper>
 
       <Typography variant="h5" component="h2" gutterBottom>
         作成済みの問題

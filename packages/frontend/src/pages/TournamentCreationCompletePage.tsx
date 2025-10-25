@@ -11,16 +11,16 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const InfoPaper = styled(Paper)(({ theme }) => ({
+const StyledInfoPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginTop: theme.spacing(3),
 }));
 
-const InfoBox = styled(Box)(({ theme }) => ({
+const StyledInfoBox = styled(Box)(({ theme }) => ({
   margin: theme.spacing(2, 0),
 }));
 
-const UrlDisplay = styled(Typography)(({ theme }) => ({
+const StyledUrlDisplay = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
@@ -63,22 +63,22 @@ const TournamentCreationCompletePage = () => {
       </Typography>
 
       {tournament && (
-        <InfoPaper elevation={3}>
+        <StyledInfoPaper elevation={3}>
           <Typography variant="h6">大会名: {tournament.name}</Typography>
-          <InfoBox>
+          <StyledInfoBox>
             <Typography variant="subtitle2">▼ 参加者への招待URL (大会ポータルページ)</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <UrlDisplay>{portalUrl}</UrlDisplay>
+              <StyledUrlDisplay>{portalUrl}</StyledUrlDisplay>
               <Button variant="outlined" onClick={() => copyToClipboard(portalUrl)}>
                 コピー
               </Button>
             </Box>
-          </InfoBox>
-          <InfoBox>
+          </StyledInfoBox>
+          <StyledInfoBox>
             <Typography variant="subtitle2">▼ 管理用パスワード</Typography>
-            <UrlDisplay>{location.state?.password || '********'} (あなたが設定したパスワード)</UrlDisplay>
-          </InfoBox>
-        </InfoPaper>
+            <StyledUrlDisplay>{location.state?.password || '********'} (あなたが設定したパスワード)</StyledUrlDisplay>
+          </StyledInfoBox>
+        </StyledInfoPaper>
       )}
 
       <Box sx={{ mt: 3 }}>
