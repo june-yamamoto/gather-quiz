@@ -85,7 +85,6 @@ export const pathToUploadImage = () => `${API_ROOT}/upload/image`;
 
 type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<unknown>;
 
-
 /**
  * 非同期なExpressルートハンドラをラップし、発生したエラーをnext()に渡すことで、
  * Expressの共通エラーハンドリングミドルウェアで処理できるようにするユーティリティ関数。
