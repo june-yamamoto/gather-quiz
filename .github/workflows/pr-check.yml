@@ -47,9 +47,13 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm --filter backend exec prisma generate
+        env:
+          DATABASE_URL: "file::memory:?cache=shared"
 
       - name: Run unit tests
         run: npm run test:backend && npm run test:frontend
+        env:
+          DATABASE_URL: "file::memory:?cache=shared"
 
   e2e-tests:
     runs-on: ubuntu-latest
