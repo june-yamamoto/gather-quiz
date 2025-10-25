@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Paper, Grid, ButtonBase } from '@mui/material';
+import { Container, Typography, Paper, Grid, ButtonBase, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Tournament } from '../models/Tournament';
 import { Participant } from '../models/Participant';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizDisplay } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
+import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -27,27 +27,34 @@ const StyledQuizCard = styled(Paper)(({ theme }) => ({
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
-  const [tournament, setTournament] = useState<Tournament | null>(null);
 
-  useEffect(() => {
-    if (!tournamentId) return;
-    const fetchBoardData = async () => {
-      try {
-        const data = await tournamentApiClient.getBoard(tournamentId);
-        setTournament(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchBoardData();
+  const fetchBoardData = useCallback(() => {
+    if (!tournamentId) {
+      return Promise.reject(new Error('Tournament ID is not defined'));
+    }
+    return tournamentApiClient.getBoard(tournamentId);
   }, [tournamentId]);
+
+  const { data: tournament, error, isLoading } = useApi(fetchBoardData);
 
   const handleQuizSelect = (quizId: string) => {
     navigate(pathToQuizDisplay(quizId));
   };
 
-  if (!tournament) {
-    return <Typography>Loading...</Typography>;
+  if (isLoading) {
+    return (
+      <StyledContainer maxWidth="xl" sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error || !tournament) {
+    return (
+      <StyledContainer maxWidth="xl">
+        <Typography color="error">エラー: {error?.message || 'トーナメントの読み込みに失敗しました。'}</Typography>
+      </StyledContainer>
+    );
   }
 
   const points = tournament.points.split(',').map(Number);

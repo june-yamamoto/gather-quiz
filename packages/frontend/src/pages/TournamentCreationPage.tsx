@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { TextField, Button, Container, Typography } from '@mui/material';
 import { pathToOrganizerDashboard, pathToTournamentCreationComplete } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
+import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -30,23 +31,23 @@ const TournamentCreationPage = () => {
   const [points, setPoints] = useState('10,20,30');
   const [regulation, setRegulation] = useState('');
 
-  useEffect(() => {
+  const fetchTournament = useCallback(() => {
     if (isEditMode && tournamentId) {
-      const fetchTournament = async () => {
-        try {
-          const tournament = await tournamentApiClient.get(tournamentId);
-          setName(tournament.name);
-          setQuestionsPerParticipant(tournament.questionsPerParticipant);
-          setPoints(tournament.points);
-          setRegulation(tournament.regulation || '');
-        } catch (error) {
-          console.error(error);
-          alert('大会情報の取得に失敗しました。');
-        }
-      };
-      fetchTournament();
+      return tournamentApiClient.get(tournamentId);
     }
+    return Promise.resolve(null);
   }, [isEditMode, tournamentId]);
+
+  const { data: tournamentData } = useApi(fetchTournament);
+
+  useEffect(() => {
+    if (tournamentData) {
+      setName(tournamentData.name);
+      setQuestionsPerParticipant(tournamentData.questionsPerParticipant);
+      setPoints(tournamentData.points);
+      setRegulation(tournamentData.regulation || '');
+    }
+  }, [tournamentData]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

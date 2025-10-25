@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -12,11 +12,12 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Participant } from '../models/Participant';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
+import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -33,25 +34,14 @@ const OrganizerDashboardPage = () => {
   const navigate = useNavigate();
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [tournamentName, setTournamentName] = useState('');
-
-  useEffect(() => {
-    if (!tournamentId) return;
-
-    const fetchTournamentStatus = async () => {
-      try {
-        const data = await tournamentApiClient.getStatus(tournamentId);
-        setTournamentName(data.tournamentName);
-        setParticipants(data.participants);
-      } catch (error) {
-        console.error(error);
-        // TODO: エラーが発生した際に、ユーザーにフィードバックを示すUIを実装する
-      }
-    };
-
-    fetchTournamentStatus();
+  const fetchTournamentStatus = useCallback(() => {
+    if (!tournamentId) {
+      return Promise.reject(new Error('Tournament ID is not defined'));
+    }
+    return tournamentApiClient.getStatus(tournamentId);
   }, [tournamentId]);
+
+  const { data: status, error, isLoading } = useApi(fetchTournamentStatus);
 
   const handleStartTournament = async () => {
     if (!tournamentId) return;
@@ -64,11 +54,27 @@ const OrganizerDashboardPage = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <StyledContainer maxWidth="lg" sx={{ textAlign: 'center' }}>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <StyledContainer maxWidth="lg">
+        <Typography color="error">エラー: {error.message}</Typography>
+      </StyledContainer>
+    );
+  }
+
   return (
     <StyledContainer maxWidth="lg">
       <StyledHeaderPaper elevation={3}>
         <Typography variant="h4" component="h1" gutterBottom>
-          管理ページ: {tournamentName}
+          管理ページ: {status?.tournamentName}
         </Typography>
         <Box>
           <Typography variant="subtitle1">招待URL</Typography>
@@ -94,7 +100,7 @@ const OrganizerDashboardPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {participants.map((p) => (
+            {status?.participants.map((p) => (
               <TableRow key={p.id}>
                 <TableCell component="th" scope="row">
                   {p.name}

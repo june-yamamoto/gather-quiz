@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Button,
   Container,
@@ -14,8 +14,8 @@ import {
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
-import { Tournament } from '../models/Tournament';
 import { tournamentApiClient } from '../api/TournamentApiClient';
+import { useApi } from '../hooks/useApi';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -27,20 +27,15 @@ const TournamentPortalPage = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
-  const [tournament, setTournament] = useState<Tournament | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchTournament = async () => {
-      try {
-        const tournamentData = await tournamentApiClient.get(id);
-        setTournament(tournamentData);
-      } catch (error) {
-        console.error('Failed to fetch tournament', error);
-      }
-    };
-    fetchTournament();
+  const fetchTournament = useCallback(() => {
+    if (!id) {
+      return Promise.reject(new Error('Tournament ID is not defined'));
+    }
+    return tournamentApiClient.get(id);
   }, [id]);
+
+  const { data: tournament } = useApi(fetchTournament);
 
   const handleClickOpen = () => {
     setOpen(true);
