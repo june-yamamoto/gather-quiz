@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -15,8 +16,6 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -25,16 +24,24 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run lint
-        run: npm run lint-fix
+        run: npm run lint
 
-      - name: Run backend tests
-        run: npm run test:backend
+      - name: Run unit tests
+        run: npm run test:backend && npm run test:frontend
 
-      - name: Run frontend tests
-        run: npm run test:frontend
+      - name: Install Playwright browsers and dependencies
+        run: pnpm exec playwright install --with-deps
 
       - name: Run E2E tests
         run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
