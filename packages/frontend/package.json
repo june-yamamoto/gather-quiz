@@ -49,6 +49,7 @@
     "msw-storybook-addon": "^2.0.3",
     "prettier": "^3.6.2",
     "storybook": "^8.6.14",
+    "storybook-addon-react-router-v6": "^2.0.15",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.7",

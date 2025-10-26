@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
+import { Container, Typography, Box, Grid } from '@mui/material';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { Quiz } from '../models/Quiz';
 import { uploadApiClient } from '../api/UploadApiClient';
 import { quizApiClient } from '../api/QuizApiClient';
+import { Input } from '../components/design-system/Input/Input';
+import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -67,9 +69,8 @@ const QuizCreatorPage = () => {
         問題作成・編集
       </Typography>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
-        <TextField
+        <Input
           label="配点"
-          variant="outlined"
           type="number"
           required
           value={point}
@@ -82,9 +83,8 @@ const QuizCreatorPage = () => {
               <Typography variant="h6" gutterBottom>
                 問題の作成
               </Typography>
-              <TextField
+              <Input
                 label="問題文"
-                variant="outlined"
                 fullWidth
                 multiline
                 rows={4}
@@ -106,9 +106,8 @@ const QuizCreatorPage = () => {
                   選択中のファイル: {questionImageFile.name}
                 </Typography>
               )}
-              <TextField
+              <Input
                 label="参考リンク"
-                variant="outlined"
                 fullWidth
                 value={questionLink}
                 onChange={(e) => setQuestionLink(e.target.value)}
@@ -120,9 +119,8 @@ const QuizCreatorPage = () => {
               <Typography variant="h6" gutterBottom>
                 解答の作成
               </Typography>
-              <TextField
+              <Input
                 label="解答文"
-                variant="outlined"
                 fullWidth
                 multiline
                 rows={4}
@@ -144,13 +142,7 @@ const QuizCreatorPage = () => {
                   選択中のファイル: {answerImageFile.name}
                 </Typography>
               )}
-              <TextField
-                label="参考リンク"
-                variant="outlined"
-                fullWidth
-                value={answerLink}
-                onChange={(e) => setAnswerLink(e.target.value)}
-              />
+              <Input label="参考リンク" fullWidth value={answerLink} onChange={(e) => setAnswerLink(e.target.value)} />
             </StyledSection>
           </Grid>
         </Grid>

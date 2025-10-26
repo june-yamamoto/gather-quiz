@@ -1,29 +1,15 @@
 import { useParams, Link } from 'react-router-dom';
-import {
-  Button,
-  Container,
-  Typography,
-  Box,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  CircularProgress,
-} from '@mui/material';
+import { Container, Typography, Box, List, ListItem, ListItemText, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { pathToQuizCreator } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
+import { Button } from '../components/design-system/Button/Button';
+import { Card } from '../components/design-system/Card/Card';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(4),
-}));
-
-const StyledStatusPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  marginBottom: theme.spacing(3),
 }));
 
 const ParticipantDashboardPage = () => {
@@ -66,18 +52,18 @@ const ParticipantDashboardPage = () => {
         参加者ダッシュボード
       </Typography>
 
-      <StyledStatusPaper elevation={3}>
+      <Card sx={{ my: 4, textAlign: 'left' }}>
         <Typography variant="h6" gutterBottom>
           問題作成ステータス
         </Typography>
         <Typography variant="body1">
           あと{' '}
-          <Typography component="span" variant="h5" color="secondary">
+          <Typography component="span" variant="h5" color="primary" sx={{ fontWeight: 'bold' }}>
             {status?.remainingQuestions ?? 0}
           </Typography>{' '}
           問、作成してください。
         </Typography>
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 3 }}>
           <Button
             component={Link}
             to={pathToQuizCreator(tournamentId || '', participantId || '')}
@@ -87,27 +73,27 @@ const ParticipantDashboardPage = () => {
             新しい問題を作成する
           </Button>
         </Box>
-      </StyledStatusPaper>
+      </Card>
 
       <Typography variant="h5" component="h2" gutterBottom>
         作成済みの問題
       </Typography>
-      <Paper>
+      <Card sx={{ textAlign: 'left', p: 0 }}>
         <List>
           {status?.createdQuizzes.map((quiz, index) => (
             <div key={quiz.id}>
-              <ListItem>
+              <ListItem sx={{ py: 2 }}>
                 <ListItemText
                   primary={quiz.questionText || '（問題文がありません）'}
                   secondary={`正解: ${quiz.answerText || '（解答文がありません）'}`}
                 />
                 {/* TODO: 作成した問題を編集・削除できるように、今後ボタンをここに追加する */}
               </ListItem>
-              {index < status.createdQuizzes.length - 1 && <Divider />}
+              {index < status.createdQuizzes.length - 1 && <Divider component="li" />}
             </div>
           ))}
         </List>
-      </Paper>
+      </Card>
     </StyledContainer>
   );
 };

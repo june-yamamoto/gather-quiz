@@ -1,11 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ParticipantDashboardPage from '../../pages/ParticipantDashboardPage';
 
 const meta: Meta<typeof ParticipantDashboardPage> = {
-  title: '画面/参加者ダッシュボード',
+  title: '画面/参加者/参加者ダッシュボード',
   component: ParticipantDashboardPage,
   parameters: {
+    reactRouter: {
+      route: '/tournaments/:tournamentId/participants/:participantId',
+      path: '/tournaments/test-tourney-id/participants/test-participant-id',
+    },
     mockData: [
       {
         url: '/api/participants/test-participant-id/quizzes',
@@ -18,15 +21,6 @@ const meta: Meta<typeof ParticipantDashboardPage> = {
       },
     ],
   },
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/tournaments/test-tourney-id/participants/test-participant-id']}>
-        <Routes>
-          <Route path="/tournaments/:tournamentId/participants/:participantId" element={<Story />} />
-        </Routes>
-      </MemoryRouter>
-    ),
-  ],
 };
 
 export default meta;

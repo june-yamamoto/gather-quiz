@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import ServiceTopPage from './pages/ServiceTopPage';
 import TournamentCreationPage from './pages/TournamentCreationPage';
 import TournamentCreationCompletePage from './pages/TournamentCreationCompletePage';
@@ -11,6 +11,10 @@ import QuizBoardPage from './pages/QuizBoardPage';
 import QuizDisplayPage from './pages/QuizDisplayPage';
 import AnswerDisplayPage from './pages/AnswerDisplayPage';
 import ErrorPage from './pages/ErrorPage';
+import { Layout } from './components/Layout';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import ContactPage from './pages/ContactPage';
 import {
   pathToServiceTop,
   pathToTournamentCreation,
@@ -28,8 +32,8 @@ import {
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
+      <Route element={<Layout />}>
         <Route path="/" element={<Navigate to={pathToServiceTop()} replace />} />
         <Route path={pathToServiceTop()} element={<ServiceTopPage />} />
         <Route path={pathToTournamentCreation()} element={<TournamentCreationPage />} />
@@ -46,10 +50,13 @@ const App = () => {
         <Route path={pathToQuizDisplay(':quizId')} element={<QuizDisplayPage />} />
         <Route path={pathToAnswerDisplay(':quizId')} element={<AnswerDisplayPage />} />
         <Route path={pathToTournamentPortal(':id')} element={<TournamentPortalPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         {/* Catch-all route for 404 Not Found */}
         <Route path="*" element={<ErrorPage />} />
-      </Routes>
-    </BrowserRouter>
+      </Route>
+    </Routes>
   );
 };
 
