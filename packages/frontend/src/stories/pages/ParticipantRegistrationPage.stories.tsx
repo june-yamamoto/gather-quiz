@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import ParticipantRegistrationPage from '../../pages/ParticipantRegistrationPage';
 
 const meta: Meta<typeof ParticipantRegistrationPage> = {
-  title: '画面/参加者登録ページ',
+  title: '画面/参加者/参加者登録ページ',
   component: ParticipantRegistrationPage,
   parameters: {
     reactRouter: {

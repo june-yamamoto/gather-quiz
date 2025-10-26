@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import TournamentCreationCompletePage from '../../pages/TournamentCreationCompletePage';
 
 const meta: Meta<typeof TournamentCreationCompletePage> = {
-  title: '画面/大会作成完了ページ',
+  title: '画面/主催者/大会作成完了ページ',
   component: TournamentCreationCompletePage,
   parameters: {
     reactRouter: {

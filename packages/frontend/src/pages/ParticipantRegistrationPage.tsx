@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Container, Typography, Box, TextField } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { pathToQuizCreator } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
+import { Input } from '../components/design-system/Input/Input';
+import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -39,9 +41,8 @@ const ParticipantRegistrationPage = () => {
         参加者登録
       </Typography>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
-        <TextField
+        <Input
           label="あなたの名前"
-          variant="outlined"
           fullWidth
           required
           value={name}

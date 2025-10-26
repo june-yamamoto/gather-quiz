@@ -1,9 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Paper, Button, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
 import { quizApiClient } from '../api/QuizApiClient';
+import { Button } from '../components/design-system/Button/Button';
+import { Card } from '../components/design-system/Card/Card';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -11,13 +13,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  minHeight: '80vh',
-}));
-
-const StyledQuizContentPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  width: '100%',
-  maxWidth: '900px',
+  minHeight: '80vh', // Adjust as needed
 }));
 
 const QuizDisplayPage = () => {
@@ -62,16 +58,28 @@ const QuizDisplayPage = () => {
   }
 
   return (
-    <StyledContainer>
-      <StyledQuizContentPaper elevation={3}>
-        <Typography variant="h6" color="text.secondary" align="right">
+    <StyledContainer maxWidth="md">
+      <Card sx={{ width: '100%' }}>
+        <Typography variant="h5" color="text.secondary" align="right">
           {quiz.point}点問題
         </Typography>
-        <Typography variant="h3" align="center" gutterBottom sx={{ my: 4 }}>
+        <Typography
+          variant="h3"
+          align="center"
+          gutterBottom
+          sx={{
+            my: 8,
+            fontSize: {
+              xs: '2rem',
+              sm: '2.5rem',
+              md: '3rem',
+            },
+          }}
+        >
           Q. {quiz.questionText}
         </Typography>
         {/* TODO: Display image and link if they exist */}
-      </StyledQuizContentPaper>
+      </Card>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={showAnswer}>
           正解を見る

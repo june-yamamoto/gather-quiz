@@ -1,31 +1,16 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  Button,
-  Container,
-  Typography,
-  Box,
-  Paper,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  CircularProgress,
-} from '@mui/material';
+import { Container, Typography, Box, TableHead, TableRow, TableCell, TableBody, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
+import { Button } from '../components/design-system/Button/Button';
+import { Card } from '../components/design-system/Card/Card';
+import { Table, TableContainer } from '../components/design-system/Table/Table';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(4),
-}));
-
-const StyledHeaderPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  marginBottom: theme.spacing(3),
 }));
 
 const OrganizerDashboardPage = () => {
@@ -77,26 +62,33 @@ const OrganizerDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="lg">
-      <StyledHeaderPaper elevation={3}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          管理ページ: {status?.tournamentName}
+      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
+        管理ページ: {status?.tournamentName}
+      </Typography>
+
+      <Card sx={{ mb: 4, textAlign: 'left' }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          大会情報
         </Typography>
         <Box>
-          <Typography variant="subtitle1">招待URL</Typography>
+          <Typography variant="subtitle1" component="p" sx={{ fontWeight: 'bold' }}>
+            招待URL
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {portalUrl}
           </Typography>
         </Box>
-
-        <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined" sx={{ mt: 2 }}>
-          大会概要を編集する
-        </Button>
-      </StyledHeaderPaper>
+        <Box sx={{ mt: 2 }}>
+          <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined">
+            大会概要を編集する
+          </Button>
+        </Box>
+      </Card>
 
       <Typography variant="h5" component="h2" gutterBottom>
         参加者の問題作成状況
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>

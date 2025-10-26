@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import TournamentCreationPage from '../../pages/TournamentCreationPage';
 
 const meta: Meta<typeof TournamentCreationPage> = {
-  title: '画面/大会作成・編集ページ',
+  title: '画面/主催者/大会作成・編集ページ',
   component: TournamentCreationPage,
 };
 

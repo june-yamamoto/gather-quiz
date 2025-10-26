@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import OrganizerDashboardPage from '../../pages/OrganizerDashboardPage';
 
 const meta: Meta<typeof OrganizerDashboardPage> = {
-  title: '画面/主催者ダッシュボード',
+  title: '画面/主催者/主催者ダッシュボード',
   component: OrganizerDashboardPage,
   parameters: {
     reactRouter: {

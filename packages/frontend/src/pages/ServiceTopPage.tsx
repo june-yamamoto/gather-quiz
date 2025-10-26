@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Button, Container, Typography, Box } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import { pathToTournamentCreation } from '../helpers/route-helpers';
+import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',

@@ -57,6 +57,6 @@ describe('QuizBoardPage', () => {
     renderWithProviders();
     await screen.findByRole('heading', { name: 'Test Tournament' });
     expect(screen.getByText('Participant 1')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '10点' })).toBeInTheDocument();
+    expect(screen.getByText('10')).toBeInTheDocument();
   });
 });

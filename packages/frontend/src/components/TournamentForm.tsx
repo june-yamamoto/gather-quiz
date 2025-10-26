@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { TextField, Button, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { Tournament } from '../models/Tournament';
+import { Input } from './design-system/Input/Input';
+import { Button } from './design-system/Button/Button';
 
 const StyledForm = styled('form')(({ theme }) => ({
   width: '100%',
@@ -58,16 +60,10 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
     <StyledForm onSubmit={handleSubmit}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <TextField
-            label="大会名"
-            fullWidth
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <Input label="大会名" fullWidth required value={name} onChange={(e) => setName(e.target.value)} />
         </Grid>
         <Grid item xs={12}>
-          <TextField
+          <Input
             label={isEditMode ? '管理用パスワード (変更する場合のみ入力)' : '管理用パスワード'}
             type="password"
             fullWidth
@@ -77,7 +73,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <Input
             label="参加者1人あたりの問題作成数"
             type="number"
             fullWidth
@@ -87,7 +83,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <Input
             label="各問題の配点 (カンマ区切り)"
             fullWidth
             required
@@ -96,7 +92,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
           />
         </Grid>
         <Grid item xs={12}>
-          <TextField
+          <Input
             label="レギュレーション"
             multiline
             rows={4}

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import QuizCreatorPage from '../../pages/QuizCreatorPage';
 
 const meta: Meta<typeof QuizCreatorPage> = {
-  title: '画面/問題作成・編集ページ',
+  title: '画面/参加者/問題作成・編集ページ',
   component: QuizCreatorPage,
   parameters: {
     reactRouter: {

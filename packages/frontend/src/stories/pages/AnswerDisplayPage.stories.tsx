@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import AnswerDisplayPage from '../../pages/AnswerDisplayPage';
 
 const meta: Meta<typeof AnswerDisplayPage> = {
-  title: '画面/解答表示ページ',
+  title: '画面/大会実施/解答表示ページ',
   component: AnswerDisplayPage,
   parameters: {
     reactRouter: {

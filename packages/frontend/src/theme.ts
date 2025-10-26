@@ -4,13 +4,16 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#00529B', // 落ち着いた青色
+      main: '#00529B', // プライマリカラー（青）
     },
     secondary: {
-      main: '#FFC107', // アクセントとなる黄色
+      main: '#0D8E53', // アクションカラー（緑）
     },
     background: {
-      default: '#f5f5f5', // 薄いグレー
+      default: '#FFFFFF', // 背景色（白）
+    },
+    text: {
+      primary: '#1A1A1A', // テキストカラー
     },
   },
   typography: {
