@@ -6,7 +6,13 @@ import { MemoryRouter } from 'react-router-dom';
 import { theme } from '../src/theme';
 
 // Initialize MSW
-initialize();
+initialize({
+  serviceWorker: {
+    // GitHub Pagesでサブディレクトリにデプロイされるため、
+    // Service Workerのパスを環境変数から動的に設定する
+    url: `${process.env.BASE_URL || ''}mockServiceWorker.js`,
+  },
+});
 
 const queryClient = new QueryClient();
 
