@@ -1,11 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import QuizBoardPage from '../../pages/QuizBoardPage';
 
 const meta: Meta<typeof QuizBoardPage> = {
   title: '画面/問題選択ボードページ',
   component: QuizBoardPage,
   parameters: {
+    reactRouter: {
+      route: '/tournaments/:tournamentId/board',
+      path: '/tournaments/test-board-id/board',
+    },
     mockData: [
       {
         url: '/api/tournaments/test-board-id/board',
@@ -33,15 +36,6 @@ const meta: Meta<typeof QuizBoardPage> = {
       },
     ],
   },
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/tournaments/test-board-id/board']}>
-        <Routes>
-          <Route path="/tournaments/:tournamentId/board" element={<Story />} />
-        </Routes>
-      </MemoryRouter>
-    ),
-  ],
 };
 
 export default meta;

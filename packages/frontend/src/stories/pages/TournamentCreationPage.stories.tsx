@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import TournamentCreationPage from '../../pages/TournamentCreationPage';
 
 const meta: Meta<typeof TournamentCreationPage> = {
@@ -12,20 +11,21 @@ type Story = StoryObj<typeof meta>;
 
 export const CreateMode: Story = {
   name: '作成モード',
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/tournaments/new']}>
-        <Routes>
-          <Route path="/tournaments/new" element={<Story />} />
-        </Routes>
-      </MemoryRouter>
-    ),
-  ],
+  parameters: {
+    reactRouter: {
+      route: '/tournaments/new',
+      path: '/tournaments/new',
+    },
+  },
 };
 
 export const EditMode: Story = {
   name: '編集モード',
   parameters: {
+    reactRouter: {
+      route: '/tournaments/:tournamentId/edit',
+      path: '/tournaments/test-edit-id/edit',
+    },
     mockData: [
       {
         url: '/api/tournaments/test-edit-id',
@@ -41,13 +41,4 @@ export const EditMode: Story = {
       },
     ],
   },
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/tournaments/test-edit-id/edit']}>
-        <Routes>
-          <Route path="/tournaments/:tournamentId/edit" element={<Story />} />
-        </Routes>
-      </MemoryRouter>
-    ),
-  ],
 };

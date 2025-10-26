@@ -11,10 +11,32 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 const ServiceTopPage = () => {
   return (
     <StyledContainer maxWidth="md">
-      <Typography variant="h2" component="h1" gutterBottom>
+      <Typography
+        variant="h2"
+        component="h1"
+        gutterBottom
+        sx={{
+          fontSize: {
+            xs: '2.5rem', // for extra-small screens
+            sm: '3.5rem', // for small screens
+            md: '4rem', // for medium screens
+          },
+        }}
+      >
         GatherQuiz
       </Typography>
-      <Typography variant="h5" component="h2" color="textSecondary" paragraph>
+      <Typography
+        variant="h5"
+        component="h2"
+        color="textSecondary"
+        paragraph
+        sx={{
+          fontSize: {
+            xs: '1rem', // for extra-small screens
+            sm: '1.25rem', // for small screens
+          },
+        }}
+      >
         みんなで問題を持ち寄る、クイズ大会開催ツール
       </Typography>
       <Box sx={{ mt: 4 }}>

@@ -1,11 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import AnswerDisplayPage from '../../pages/AnswerDisplayPage';
 
 const meta: Meta<typeof AnswerDisplayPage> = {
   title: '画面/解答表示ページ',
   component: AnswerDisplayPage,
   parameters: {
+    reactRouter: {
+      route: '/quizzes/:quizId/answer',
+      path: '/quizzes/test-answer-id/answer',
+    },
     mockData: [
       {
         url: '/api/quizzes/test-answer-id',
@@ -21,15 +24,6 @@ const meta: Meta<typeof AnswerDisplayPage> = {
       },
     ],
   },
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/quizzes/test-answer-id/answer']}>
-        <Routes>
-          <Route path="/quizzes/:quizId/answer" element={<Story />} />
-        </Routes>
-      </MemoryRouter>
-    ),
-  ],
 };
 
 export default meta;
