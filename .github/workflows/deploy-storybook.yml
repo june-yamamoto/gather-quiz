@@ -39,7 +39,7 @@ jobs:
         run: pnpm --filter frontend build-storybook
         env:
           # GitHub Pagesのサブディレクトリ設定（例: /<リポジトリ名>/）
-          BASE_URL: /${{ github.event.repository.name }}/
+          VITE_BASE_URL: /${{ github.event.repository.name }}/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
