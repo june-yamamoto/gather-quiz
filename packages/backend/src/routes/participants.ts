@@ -8,9 +8,25 @@ const prisma = new PrismaClient();
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
 const router = Router({ mergeParams: true });
 
+/**
+ * @file 参加者（Participant）に関連するAPIエンドポイントのルーター
+ * @module routes/participants
+ * @see module:routes/tournaments
+ */
+
 /** 参加者オブジェクトに関するAPIのrouter向けパスを取得する関数 */
 const participantsRouterPath = (path: string) => path.substring(pathToParticipants(':tournamentId').length);
 
+/**
+ * 指定された参加者が作成したクイズの一覧と、問題の作成状況を取得するエンドポイント
+ * @route GET /:participantId/quizzes
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.tournamentId - 対象の大会ID (親ルーターから引き継ぎ)
+ * @param {string} req.params.participantId - 対象の参加者ID
+ * @returns {object} 作成済みクイズリストと問題作成状況を含むオブジェクト
+ * @throws {NotFoundError} 指定されたIDの参加者が見つからない場合
+ */
 router.get(
   participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')),
   asyncHandler(async (req: Request, res: Response) => {

@@ -4,6 +4,11 @@ import { Participant } from '../models/Participant';
 import { ApiError } from '../errors/ApiError';
 
 /**
+ * @file 大会（Tournament）関連のAPIエンドポイントと通信するためのクライアントクラス
+ * @module api/TournamentApiClient
+ */
+
+/**
  * 大会関連のAPI呼び出しをまとめたクラス
  */
 class TournamentApiClient {
@@ -22,6 +27,7 @@ class TournamentApiClient {
    * 指定されたIDの大会情報を取得します。
    * @param {string} id - 大会ID
    * @returns {Promise<Tournament>} 大会情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async get(id: string): Promise<Tournament> {
     try {
@@ -39,6 +45,7 @@ class TournamentApiClient {
    * 大会のステータス（参加者情報など）を取得します。
    * @param {string} id - 大会ID
    * @returns {Promise<any>} 大会のステータス情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async getStatus(id: string): Promise<{ tournamentName: string; participants: Participant[] }> {
     try {
@@ -59,6 +66,7 @@ class TournamentApiClient {
    * 大会ボードの情報を取得します。
    * @param {string} id - 大会ID
    * @returns {Promise<Tournament>} ボード情報を含む大会情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async getBoard(id: string): Promise<Tournament> {
     try {
@@ -76,6 +84,7 @@ class TournamentApiClient {
    * 新しい大会を作成します。
    * @param {object} tournamentData - 作成する大会のデータ
    * @returns {Promise<Tournament>} 作成された大会情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async create(tournamentData: object): Promise<Tournament> {
     try {
@@ -94,6 +103,7 @@ class TournamentApiClient {
    * @param {string} id - 大会ID
    * @param {string} password - パスワード
    * @returns {Promise<{success: boolean}>} ログイン成否
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async login(id: string, password: string): Promise<{ success: boolean }> {
     try {
@@ -112,6 +122,7 @@ class TournamentApiClient {
    * @param {string} id - 大会ID
    * @param {object} tournamentData - 更新する大会のデータ
    * @returns {Promise<Tournament>} 更新された大会情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async update(id: string, tournamentData: object): Promise<Tournament> {
     try {
@@ -129,6 +140,7 @@ class TournamentApiClient {
    * 大会を開始します。
    * @param {string} id - 大会ID
    * @returns {Promise<void>}
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async start(id: string): Promise<void> {
     try {
@@ -146,6 +158,7 @@ class TournamentApiClient {
    * @param {string} tournamentId - 大会ID
    * @param {object} participantData - 参加者データ
    * @returns {Promise<Participant>} 登録された参加者情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async createParticipant(tournamentId: string, participantData: { name: string }): Promise<Participant> {
     try {

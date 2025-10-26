@@ -2,6 +2,11 @@ import axios, { type AxiosInstance } from 'axios';
 import { ApiError } from '../errors/ApiError';
 
 /**
+ * @file 画像アップロード関連のAPIエンドポイントと通信するためのクライアントクラス
+ * @module api/UploadApiClient
+ */
+
+/**
  * アップロード関連のAPI呼び出しをまとめたクラス
  */
 class UploadApiClient {
@@ -17,9 +22,11 @@ class UploadApiClient {
   }
 
   /**
-   * 画像アップロード用の署名付きURLを取得します。
+   * サーバーにリクエストを送信し、画像アップロード用の署名付きURLを取得します。
+   * @private
    * @param {File} file - アップロードするファイル
    * @returns {Promise<{ signedUrl: string, objectUrl: string }>} 署名付きURLとオブジェクトURL
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   private async getSignedUrl(file: File): Promise<{ signedUrl: string; objectUrl: string }> {
     try {
@@ -38,9 +45,10 @@ class UploadApiClient {
 
   /**
    * S3に画像をアップロードします。
+   * 内部で署名付きURLを取得し、そのURLに対してファイルをPUTします。
    * @param {File} file - アップロードするファイル
    * @returns {Promise<string>} アップロードされた画像のURL
-   * @throws {ApiError} アップロードに失敗した場合
+   * @throws {ApiError} 署名付きURLの取得またはアップロードに失敗した場合
    */
   public async uploadImage(file: File): Promise<string> {
     const { signedUrl, objectUrl } = await this.getSignedUrl(file);

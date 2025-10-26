@@ -3,6 +3,11 @@ import { Quiz } from '../models/Quiz';
 import { ApiError } from '../errors/ApiError';
 
 /**
+ * @file クイズ（Quiz）関連のAPIエンドポイントと通信するためのクライアントクラス
+ * @module api/QuizApiClient
+ */
+
+/**
  * クイズ関連のAPI呼び出しをまとめたクラス
  */
 class QuizApiClient {
@@ -21,6 +26,7 @@ class QuizApiClient {
    * 指定されたIDのクイズ情報を取得します。
    * @param {string} id - クイズID
    * @returns {Promise<Quiz>} クイズ情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async get(id: string): Promise<Quiz> {
     try {
@@ -38,6 +44,7 @@ class QuizApiClient {
    * 新しいクイズを作成します。
    * @param {object} quizData - 作成するクイズのデータ
    * @returns {Promise<Quiz>} 作成されたクイズ情報
+   * @throws {ApiError} APIリクエストが失敗した場合
    */
   public async create(quizData: object): Promise<Quiz> {
     try {
