@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TournamentCreationPage from '../pages/TournamentCreationPage';
 import { tournamentApiClient } from '../api/TournamentApiClient';
+import { Tournament } from '../models/Tournament';
 
 // APIクライアントをモック
 vi.mock('../api/TournamentApiClient');
@@ -32,7 +33,16 @@ describe('TournamentCreationPage', () => {
   it('フォームを送信すると大会作成APIが呼ばれること', async () => {
     const createMock = vi
       .spyOn(tournamentApiClient, 'create')
-      .mockResolvedValue({ id: 'new-id' } as Partial<Tournament>);
+      .mockResolvedValue(
+        new Tournament({
+          id: 'new-id',
+          name: 'Test Tournament',
+          questionsPerParticipant: 0,
+          points: '',
+          status: 'pending',
+          participants: [],
+        })
+      );
     const { container } = renderWithProviders(<TournamentCreationPage />);
 
     fireEvent.change(screen.getByRole('textbox', { name: '大会名' }), { target: { value: 'Test Tournament' } });

@@ -7,13 +7,11 @@ describe('TournamentForm', () => {
   const mockTournament = new Tournament({
     id: 'test-id',
     name: 'Test Tournament',
-    password: 'password',
     questionsPerParticipant: 5,
     points: '10,20,30,40,50',
     regulation: 'Test Regulation',
     status: 'pending',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    participants: [],
   });
 
   it('新規作成モードで正しくレンダリングされること', () => {

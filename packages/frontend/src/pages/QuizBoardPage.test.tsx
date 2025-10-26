@@ -6,6 +6,7 @@ import QuizBoardPage from '../pages/QuizBoardPage';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Tournament } from '../models/Tournament';
 import { Participant } from '../models/Participant';
+import { Quiz } from '../models/Quiz';
 
 vi.mock('../api/TournamentApiClient');
 
@@ -14,22 +15,25 @@ const queryClient = new QueryClient();
 const mockTournament = new Tournament({
   id: 'test-id',
   name: 'Test Tournament',
-  password: '',
   questionsPerParticipant: 1,
   points: '10',
   regulation: '',
   status: 'in_progress',
-  createdAt: new Date(),
-  updatedAt: new Date(),
   participants: [
     new Participant({
       id: 'p-1',
       name: 'Participant 1',
-      password: '',
       tournamentId: 'test-id',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      quizzes: [{ id: 'q-1', point: 10 } as Partial<Quiz>],
+      created: 1,
+      required: 1,
+      quizzes: [
+        new Quiz({
+          id: 'q-1',
+          point: 10,
+          tournamentId: 'test-id',
+          participantId: 'p-1',
+        }),
+      ],
     }),
   ],
 });

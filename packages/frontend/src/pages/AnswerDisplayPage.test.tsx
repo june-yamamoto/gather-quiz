@@ -21,8 +21,6 @@ const mockQuiz = new Quiz({
   answerLink: null,
   tournamentId: 't-1',
   participantId: 'p-1',
-  createdAt: new Date(),
-  updatedAt: new Date(),
 });
 
 const renderWithProviders = () => {

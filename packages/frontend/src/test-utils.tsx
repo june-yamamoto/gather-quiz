@@ -1,5 +1,6 @@
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement, FC } from 'react';
+import { render } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import type { ReactElement, FC } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

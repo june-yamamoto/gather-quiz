@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import QuizCreatorPage from '../pages/QuizCreatorPage';
 import { quizApiClient } from '../api/QuizApiClient';
+import { Quiz } from '../models/Quiz';
 
 vi.mock('../api/QuizApiClient');
 
@@ -34,7 +35,14 @@ describe('QuizCreatorPage', () => {
   });
 
   it('フォームを送信するとクイズ作成APIが呼ばれること', async () => {
-    const createMock = vi.spyOn(quizApiClient, 'create').mockResolvedValue({ id: 'new-quiz' } as Partial<Quiz>);
+    const createMock = vi.spyOn(quizApiClient, 'create').mockResolvedValue(
+      new Quiz({
+        id: 'new-quiz',
+        point: 0,
+        tournamentId: 't-id',
+        participantId: 'p-id',
+      })
+    );
     renderWithProviders();
 
     fireEvent.change(screen.getByLabelText('問題文'), { target: { value: 'Test Question' } });
