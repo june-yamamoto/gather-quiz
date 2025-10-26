@@ -14,5 +14,10 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  async viteFinal(config) {
+    // BASE_URL 環境変数に基づいて `base` を設定
+    config.base = process.env.BASE_URL || config.base;
+    return config;
+  },
 };
 export default config;
