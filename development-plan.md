@@ -106,15 +106,27 @@
 
 AWS CloudFormationを用いたデプロイを進行中。
 
-- **本番環境用ACM証明書 (`gather-quiz.june-yamamoto.com`)**:
-    - ✅ `us-east-1` リージョンで証明書をリクエスト済み。
-    - ✅ Route 53でのDNS検証レコード追加完了。
-    - ⏳ AWSによる検証完了待ち。
+### 5.1. フロントエンド (開発環境)
 
-- **開発環境用ACM証明書 (`dev.gather-quiz.june-yamamoto.com`)**:
-    - ✅ `us-east-1` リージョンで証明書をリクエスト済み。
-    - ⏳ Route 53でのDNS検証レコード追加待ち。
+- ✅ **ACM証明書**: `dev.gather-quiz.june-yamamoto.com` の証明書発行と検証が完了。
+- ✅ **インフラ構築**: `frontend-stack.yaml` を使用してS3 + CloudFrontの環境を `us-east-1` リージョンにデプロイ済み (`gather-quiz-frontend-dev`)。
+- ✅ **ベーシック認証**: CloudFront Functionsを使い、サイト全体にベーシック認証を設定済み。
+- ✅ **コンテンツデプロイ**: フロントエンドのビルド成果物をS3にアップロードし、CloudFrontのキャッシュを無効化済み。
+- ✅ **DNS設定**: Route 53でCNAMEレコードを設定し、`https://dev.gather-quiz.june-yamamoto.com` でアクセス可能。
 
+### 5.2. バックエンド (開発環境)
+
+- ✅ **ネットワークインフラ**: `vpc-stack.yaml` を使用して、`ap-northeast-1` リージョンにVPC、サブネット、セキュリティグループ等を作成済み (`gather-quiz-vpc-dev`)。
+- ✅ **コンテナリポジトリ**: `backend-stack.yaml` (一部) を使用して、ECRリポジトリを作成済み (`gather-quiz-backend-dev-ecr`)。
+- ✅ **コンテナイメージ**: バックエンドアプリケーションのDockerfileを作成し、ビルドしたイメージをECRにプッシュ済み。
+- ⏳ **DB & アプリケーションデプロイ**: `backend-stack.yaml` を使用してRDSとApp Runnerのデプロイを試行中。
+    - **現状**: 最新のデプロイが失敗し、現在CloudFormationスタックがロールバック処理を実行中。
+    - **次のアクション**: ロールバック完了後、`aws cloudformation describe-stack-events` を実行して失敗の原因を特定する。
+
+### 5.3. 本番環境
+
+- **ACM証明書 (`gather-quiz.june-yamamoto.com`)**:
+    - ✅ `us-east-1` リージョンで証明書をリクエストし、検証完了済み。
 - **インフラ構成**:
     - **フロントエンド**: Amazon S3 + Amazon CloudFront
     - **バックエンド**: AWS App Runner

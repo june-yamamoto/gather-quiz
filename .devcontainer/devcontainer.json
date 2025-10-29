@@ -5,7 +5,9 @@
 	},
 
 	// Features to add to the dev container.
-	"features": {},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
 
 	// Use 'forwardPorts' to make a list of ports available locally.
 	"forwardPorts": [3000, 5173, 9323],
