@@ -117,11 +117,10 @@ AWS CloudFormationを用いたデプロイを進行中。
 ### 5.2. バックエンド (開発環境)
 
 - ✅ **ネットワークインフラ**: `vpc-stack.yaml` を使用して、`ap-northeast-1` リージョンにVPC、サブネット、セキュリティグループ等を作成済み (`gather-quiz-vpc-dev`)。
-- ✅ **コンテナリポジトリ**: `backend-stack.yaml` (一部) を使用して、ECRリポジトリを作成済み (`gather-quiz-backend-dev-ecr`)。
-- ✅ **コンテナイメージ**: バックエンドアプリケーションのDockerfileを作成し、ビルドしたイメージをECRにプッシュ済み。
-- ⏳ **DB & アプリケーションデプロイ**: `backend-stack.yaml` を使用してRDSとApp Runnerのデプロイを試行中。
-    - **現状**: 最新のデプロイが失敗し、現在CloudFormationスタックがロールバック処理を実行中。
-    - **次のアクション**: ロールバック完了後、`aws cloudformation describe-stack-events` を実行して失敗の原因を特定する。
+- ✅ **コンテナリポジトリ**: ECRリポジトリを作成済み (`gather-quiz-backend-dev-ecr`)。
+- ✅ **コンテナイメージ**: pnpmワークスペース環境におけるビルドの問題を解決したDockerfileを `packages/backend` に配置。修正したイメージをECRにプッシュ済み。
+- ✅ **データベース**: 認証情報をリセットするため、`rds-stack.yaml` を使用してRDSインスタンスを再作成済み (`gather-quiz-rds-dev`)。
+- ✅ **アプリケーションデプロイ**: `apprunner-stack.yaml` を使用して、App Runnerサービスを正常にデプロイ済み (`gather-quiz-apprunner-dev`)。
 
 ### 5.3. 本番環境
 
