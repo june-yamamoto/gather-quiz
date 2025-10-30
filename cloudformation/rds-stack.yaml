@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for GatherQuiz RDS Database
+
+Parameters:
+  DbUser:
+    Type: String
+    Description: The master username for the RDS database
+    NoEcho: true
+  DbPassword:
+    Type: String
+    Description: The master password for the RDS database
+    NoEcho: true
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The ID of the VPC to launch resources in
+  PrivateSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: A list of private subnet IDs for the RDS database
+  DbSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The security group ID for the RDS database
+
+Resources:
+  # RDS Database Subnet Group
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for GatherQuiz RDS
+      SubnetIds: !Ref PrivateSubnetIds
+
+  # RDS Database Instance
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub ${AWS::StackName}-db
+      Engine: postgres
+      EngineVersion: '15'
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: '20'
+      MasterUsername: !Ref DbUser
+      MasterUserPassword: !Ref DbPassword
+      DBName: gatherquiz
+      PubliclyAccessible: false
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DbSecurityGroupId
+
+Outputs:
+  DbEndpoint:
+    Description: The endpoint of the RDS database
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-DbEndpoint
+  DbPort:
+    Description: The port of the RDS database
+    Value: !GetAtt DatabaseInstance.Endpoint.Port
+    Export:
+      Name: !Sub ${AWS::StackName}-DbPort
