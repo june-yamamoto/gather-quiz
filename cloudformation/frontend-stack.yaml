@@ -11,6 +11,9 @@ Parameters:
   AcmCertificateArn:
     Type: String
     Description: The ARN of the ACM certificate (must be in us-east-1)
+  AppRunnerServiceUrl:
+    Type: String
+    Description: The URL of the App Runner service (without https://)
   BasicAuthUser:
     Type: String
     Description: The username for Basic Authentication
@@ -66,6 +69,22 @@ Resources:
           - !Ref DomainName
         Comment: CloudFront distribution for GatherQuiz frontend
         Enabled: true
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: app-runner-origin
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+                - Content-Type
+              Cookies:
+                Forward: all
+            MinTTL: 0
+            DefaultTTL: 0
+            MaxTTL: 0
         DefaultCacheBehavior:
           TargetOriginId: s3-origin
           ViewerProtocolPolicy: redirect-to-https
@@ -86,6 +105,11 @@ Resources:
             DomainName: !GetAtt FrontendBucket.DomainName
             OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
             S3OriginConfig: {}
+          - Id: app-runner-origin
+            DomainName: !Ref AppRunnerServiceUrl
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
         ViewerCertificate:
           AcmCertificateArn: !Ref AcmCertificateArn
           SslSupportMethod: sni-only

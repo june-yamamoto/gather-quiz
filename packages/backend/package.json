@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier --write .",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "db:push": "pnpm exec prisma db push",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
