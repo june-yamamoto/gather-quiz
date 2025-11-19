@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for GatherQuiz Backend (Lambda + API Gateway)
+
+Parameters:
+  VpcStackName:
+    Type: String
+    Description: The name of the VPC CloudFormation stack to import outputs from.
+  RdsStackName:
+    Type: String
+    Description: The name of the RDS CloudFormation stack to import outputs from.
+  DbUser:
+    Type: String
+    Description: The master username for the RDS database.
+    NoEcho: true
+  DbPassword:
+    Type: String
+    Description: The master password for the RDS database.
+    NoEcho: true
+  LambdaS3Bucket:
+    Type: String
+    Description: The S3 bucket containing the Lambda function deployment package.
+  LambdaS3Key:
+    Type: String
+    Description: The S3 key for the Lambda function deployment package (.zip file).
+  LambdaLayerS3Bucket:
+    Type: String
+    Description: The S3 bucket containing the Lambda layer deployment package.
+  LambdaLayerS3Key:
+    Type: String
+    Description: The S3 key for the Lambda layer deployment package (.zip file).
+
+Resources:
+  # IAM Role for Lambda Execution
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+  # Lambda Layer for node_modules
+  DependenciesLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub ${AWS::StackName}-DependenciesLayer
+      Description: "Node.js dependencies for the GatherQuiz backend"
+      Content:
+        S3Bucket: !Ref LambdaLayerS3Bucket
+        S3Key: !Ref LambdaLayerS3Key
+      CompatibleRuntimes:
+        - nodejs20.x
+
+  # Lambda Function
+  BackendLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-BackendLambda
+      Handler: dist/lambda.handler
+      Runtime: nodejs20.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Layers:
+        - !Ref DependenciesLayer
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+              'Fn::Sub': '${VpcStackName}-LambdaSecurityGroupId'
+        SubnetIds:
+          'Fn::Split':
+            - ','
+            - !ImportValue
+                'Fn::Sub': '${VpcStackName}-PrivateSubnetIds'
+      Environment:
+        Variables:
+          DATABASE_URL: !Sub
+            - "postgresql://${DbUser}:${DbPassword}@${DbEndpoint}:${DbPort}/gatherquiz?schema=public"
+            - DbEndpoint: !ImportValue
+                'Fn::Sub': '${RdsStackName}-DbEndpoint'
+              DbPort: !ImportValue
+                'Fn::Sub': '${RdsStackName}-DbPort'
+      Timeout: 30
+
+  # HTTP API Gateway
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-HttpApi
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - "*" # In a real production environment, restrict this to the frontend domain
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+
+  # API Gateway Integration with Lambda
+  HttpApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt BackendLambda.Arn
+      PayloadFormatVersion: '2.0'
+
+  # API Gateway Default Route
+  HttpApiDefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: $default
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref HttpApiIntegration
+
+  # API Gateway Stage
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: $default
+      AutoDeploy: true
+
+  # Permission for API Gateway to invoke Lambda
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt BackendLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*"
+
+Outputs:
+  ApiGatewayEndpoint:
+    Description: The URL of the API Gateway endpoint
+    Value: !GetAtt HttpApi.ApiEndpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ApiGatewayEndpoint

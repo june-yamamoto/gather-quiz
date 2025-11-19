@@ -75,56 +75,67 @@
 
 ---
 
-## 4. 次期開発計画
+## 4. サーバーレスアーキテクチャへの移行 (完了)
 
-開発環境のデプロイが完了したため、次のフェーズとして本番環境の構築と運用改善に着手する。
+**目的:** 開発環境の運用コスト削減と、本番環境を見据えたモダンなサーバーレス構成への移行。
 
-### 4.1. CI/CDの構築
-
-- [ ] **デプロイワークフローの作成**: `main`ブランチにマージされた際に、フロントエンドとバックエンドを自動で本番環境へデプロイするGitHub Actionsを構築する。
-
-### 4.2. 本番環境のインフラ構成見直し
-
-- [ ] **低コスト構成への移行**:
-    - [ ] 現在のApp Runnerベースの構成から、よりコスト効率の高いサーバーレスアーキテクチャへの移行を検討・実装する。
-    - [ ] 検討アーキテクチャ案: CloudFront + API Gateway + Lambda + DynamoDB (またはRDS)
-
-### 4.3. 機能追加に伴うインフラ構築
-
-- [ ] **画像アップロード機能のインフラ対応**: 開発環境で実装済みの画像アップロード機能（S3署名付きURL方式）について、本番環境用のインフラ（S3バケット、IAMポリシー等）をCloudFormationで定義・構築する。
-
----
-*保留中のタスク：UI/UXの全体的改善（ヘッダー/フッター導入、デザイン精緻化、レスポンシブ対応）*
+**主な作業内容:**
+- ✅ **バックエンドのLambda対応**:
+    - Expressアプリケーションを`@vendia/serverless-express`でラップし、Lambda関数として実行可能に。
+    - `lambda.ts`ハンドラを新規作成。
+- ✅ **インフラのコード化 (CloudFormation)**:
+    - API Gateway (HTTP API), Lambda関数, IAMロールを定義する`backend-lambda-stack.yaml`を新規作成。
+    - LambdaからRDSへのアクセスを許可するため`vpc-stack.yaml`を更新し、`LambdaSecurityGroup`を追加。
+- ✅ **デプロイパッケージの最適化**:
+    - Lambdaのサイズ制限(250MB)をクリアするため、依存関係をLambdaレイヤーとして分離。
+    - `build-for-lambda.sh`スクリプトを新規作成。
+    - スクリプト内で`npm install`と`node-prune`、Prisma Engineのバイナリ削減(`binaryTargets`)を組み合わせ、レイヤーサイズを最適化。
+- ✅ **デプロイと動作確認**:
+    - 作成したパッケージをS3にアップロードし、CloudFormationでデプロイ。
+    - `curl`コマンドでAPI Gatewayのエンドポイントを叩き、正常な応答を確認。
 
 ---
 
-## 5. デプロイ計画 (進行中)
+## 5. 今後の開発計画
 
-AWS CloudFormationを用いたデプロイを進行中。
+### 5.1. 新バックエンドへの完全移行
 
-### 5.1. フロントエンド (開発環境)
+1.  [ ] **フロントエンドの接続先変更**:
+    - フロントエンドのAPIリクエスト先を、旧App Runnerエンドポイントから、今回作成した新しいAPI Gatewayエンドポイント (`https://gyyhuclush.execute-api.ap-northeast-1.amazonaws.com/`) へ変更する。
+2.  [ ] **E2Eテストの実施**:
+    - 新しいアーキテクチャで、既存のE2Eテストがすべてパスすることを確認する。
+3.  [ ] **旧インフラの廃止**:
+    - 新構成での動作に問題がないことを確認後、コスト削減のため旧App Runnerの関連リソース（`apprunner-stack.yaml`）をAWS上から削除する。
 
-- ✅ **ACM証明書**: `dev.gather-quiz.june-yamamoto.com` の証明書発行と検証が完了。
-- ✅ **インフラ構築**: `frontend-stack.yaml` を使用してS3 + CloudFrontの環境を `us-east-1` リージョンにデプロイ済み (`gather-quiz-frontend-dev`)。
-- ✅ **ベーシック認証**: CloudFront Functionsを使い、サイト全体にベーシック認証を設定済み。
-- ✅ **コンテンツデプロイ**: フロントエンドのビルド成果物をS3にアップロードし、CloudFrontのキャッシュを無効化済み。
-- ✅ **DNS設定**: Route 53でCNAMEレコードを設定し、`https://dev.gather-quiz.june-yamamoto.com` でアクセス可能。
+### 5.2. バックログタスク
 
-### 5.2. バックエンド (開発環境)
+- [ ] **CI/CDの構築**: `main`ブランチへのマージ時に自動デプロイするGitHub Actionsを構築する。
+- [ ] **画像アップロード機能のインフラ構築**: 本番環境用の画像アップロード基盤を構築する。
+- [ ] **UI/UXの全体的改善**: 保留中のUI/UX改善タスク（ヘッダー/フッター導入、デザイン精緻化、レスポンシブ対応）に着手する。
 
-- ✅ **ネットワークインフラ**: `vpc-stack.yaml` を使用して、`ap-northeast-1` リージョンにVPC、サブネット、セキュリティグループ等を作成済み (`gather-quiz-vpc-dev`)。
-- ✅ **コンテナリポジトリ**: ECRリポジトリを作成済み (`gather-quiz-backend-dev-ecr`)。
-- ✅ **コンテナイメージ**: pnpmワークスペース環境におけるビルドの問題を解決したDockerfileを `packages/backend` に配置。修正したイメージをECRにプッシュ済み。
-- ✅ **データベース**: 認証情報をリセットするため、`rds-stack.yaml` を使用してRDSインスタンスを再作成済み (`gather-quiz-rds-dev`)。
-- ✅ **アプリケーションデプロイ**: `apprunner-stack.yaml` を使用して、App Runnerサービスを正常にデプロイ済み (`gather-quiz-apprunner-dev`)。
+---
 
-### 5.3. 本番環境
+## 6. デプロイ状況 (2025/11/08時点)
 
-- **ACM証明書 (`gather-quiz.june-yamamoto.com`)**:
-    - ✅ `us-east-1` リージョンで証明書をリクエストし、検証完了済み。
-- **インフラ構成**:
-    - **フロントエンド**: Amazon S3 + Amazon CloudFront
-    - **バックエンド**: AWS App Runner
-    - **データベース**: Amazon RDS (PostgreSQL)
-- **DNS管理**:
-    - ドメイン全体の管理をRoute 53へ移管済み。
+### 6.1. フロントエンド (開発環境)
+
+- ✅ **DNS**: `https://dev.gather-quiz.june-yamamoto.com`
+- ✅ **インフラ**: S3 + CloudFront (`gather-quiz-frontend-dev`)
+
+### 6.2. バックエンド (新構成: Lambda)
+
+- ✅ **ステータス**: **稼働中**
+- ✅ **エンドポイント**: `https://gyyhuclush.execute-api.ap-northeast-1.amazonaws.com/`
+- ✅ **インフラ**: API Gateway + Lambda (`gather-quiz-backend-lambda-dev`)
+
+### 6.3. バックエンド (旧構成: App Runner)
+
+- ⚠️ **ステータス**: **廃止予定**
+- ✅ **インフラ**: App Runner (`gather-quiz-apprunner-dev`)
+
+### 6.4. 共通インフラ
+
+- ✅ **ネットワーク**: VPC, サブネット, セキュリティグループ (`gather-quiz-vpc-dev`)
+- ✅ **データベース**: RDS PostgreSQL (`gather-quiz-rds-dev`)
+    - インスタンスタイプはコスト最適化のため`db.t4g.micro`に更新済み。
+- ✅ **成果物格納場所**: S3 (`gather-quiz-lambda-artifacts-251108`)
