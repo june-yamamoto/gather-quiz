@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import quizzesRouter from './quizzes';
-import { PrismaClient, Tournament, Participant, Quiz } from '@prisma/client';
+import { Tournament, Participant, Quiz } from '@prisma/client';
 import { errorHandler } from '../middleware/errorHandler';
 
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 const app = express();
 app.use(express.json());
 app.use('/quizzes', quizzesRouter);

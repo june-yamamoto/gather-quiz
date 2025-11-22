@@ -11,9 +11,9 @@ Parameters:
   AcmCertificateArn:
     Type: String
     Description: The ARN of the ACM certificate (must be in us-east-1)
-  AppRunnerServiceUrl:
+  ApiGatewayEndpoint:
     Type: String
-    Description: The URL of the App Runner service (without https://)
+    Description: The endpoint of the API Gateway (without https://)
   BasicAuthUser:
     Type: String
     Description: The username for Basic Authentication
@@ -71,7 +71,7 @@ Resources:
         Enabled: true
         CacheBehaviors:
           - PathPattern: /api/*
-            TargetOriginId: app-runner-origin
+            TargetOriginId: api-gateway-origin
             ViewerProtocolPolicy: https-only
             AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
             CachedMethods: [GET, HEAD, OPTIONS]
@@ -105,8 +105,8 @@ Resources:
             DomainName: !GetAtt FrontendBucket.DomainName
             OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
             S3OriginConfig: {}
-          - Id: app-runner-origin
-            DomainName: !Ref AppRunnerServiceUrl
+          - Id: api-gateway-origin
+            DomainName: !Ref ApiGatewayEndpoint
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only

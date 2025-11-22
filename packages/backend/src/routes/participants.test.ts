@@ -5,9 +5,9 @@ import participantsRouter from './participants';
 // テストデータ作成のために大会APIも利用する
 import tournamentsRouter from './tournaments';
 import { errorHandler } from '../middleware/errorHandler';
-import { PrismaClient, Tournament, Participant, Quiz } from '@prisma/client';
+import { Tournament, Participant, Quiz } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 const app = express();
 app.use(express.json());
 // テスト対象のAPIエンドポイントをマウントする

@@ -1,10 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { pathToQuiz, pathToQuizzes, asyncHandler } from '../api-helper';
-import { Quiz } from '../model/Quiz';
+import { prisma } from '../db';
+import { asyncHandler, pathToQuizzes, pathToQuiz } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
-
-const prisma = new PrismaClient();
+import { Quiz } from '../model/Quiz';
 const router = Router();
 
 /**

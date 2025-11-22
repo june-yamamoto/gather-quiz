@@ -6,12 +6,15 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest --run",
+    "pretest": "sed -i 's/provider = \"postgresql\"/provider = \"sqlite\"/' prisma/schema.prisma && sed -i 's|url      = env(\"DATABASE_URL\")|url      = \"file:./test.db\"|' prisma/schema.prisma && pnpm exec prisma generate && pnpm exec prisma db push",
+    "posttest": "git restore prisma/schema.prisma",
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier --write .",
     "dev": "tsx src/index.ts",
     "db:push": "pnpm exec prisma db push",
+    "test:generate": "pnpm exec prisma generate --schema=./prisma/schema.test.prisma",
     "postinstall": "prisma generate"
   },
   "keywords": [],
@@ -21,14 +24,18 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.913.0",
     "@aws-sdk/s3-request-presigner": "^3.913.0",
+    "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^6.17.1",
+    "@vendia/serverless-express": "^4.12.6",
     "express": "^5.1.0",
-    "@vendia/serverless-express": "^4.12.6"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@types/aws-lambda": "^8.10.142",
     "@types/express": "^5.0.3",
     "@types/node": "^24.7.2",
+    "@types/pg": "^8.15.6",
     "@types/supertest": "^6.0.3",
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
@@ -38,8 +45,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.16.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0",
-    "@types/aws-lambda": "^8.10.142"
+    "typescript-eslint": "^8.46.0"
   },
   "prisma": {
     "binaryTargets": [

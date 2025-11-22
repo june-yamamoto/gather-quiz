@@ -1,21 +1,19 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import participantsRouter from './participants';
+import { prisma } from '../db';
 import {
-  pathToParticipants,
+  asyncHandler,
   pathToTournaments,
+  pathToParticipants,
   pathToTournamentLogin,
   pathToTournamentStatus,
   pathToTournamentStart,
   pathToTournamentBoard,
-  asyncHandler,
 } from '../api-helper';
+import { NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
 import { Tournament } from '../model/Tournament';
 import { Participant } from '../model/Participant';
 import { Quiz } from '../model/Quiz';
-import { NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
-
-const prisma = new PrismaClient();
+import participantsRouter from './participants';
 const router = Router();
 
 /**

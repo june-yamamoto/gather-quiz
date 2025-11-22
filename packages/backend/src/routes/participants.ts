@@ -1,10 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { pathToParticipantQuizzes, pathToParticipants, asyncHandler } from '../api-helper';
-import { Quiz } from '../model/Quiz';
+import { prisma } from '../db';
+import { asyncHandler, pathToParticipants, pathToParticipantQuizzes } from '../api-helper';
 import { NotFoundError } from '../errors/HttpErrors';
-
-const prisma = new PrismaClient();
+import { Quiz } from '../model/Quiz';
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
 const router = Router({ mergeParams: true });
 

@@ -26,3 +26,15 @@ yarn-error.log*
 
 # AWS CloudFormation parameter files
 *parameters.json
+
+# Build artifacts
+*.zip
+*.db
+
+# Temporary files
+cname-record.json
+
+.env
+.accesskey
+
+.pnpm-store/v10/files/**/*

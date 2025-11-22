@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import tournamentsRouter from './tournaments';
-import { PrismaClient, Tournament } from '@prisma/client';
+import { Tournament } from '@prisma/client';
 import { errorHandler } from '../middleware/errorHandler';
 
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 const app = express();
 app.use(express.json());
 app.use('/tournaments', tournamentsRouter);

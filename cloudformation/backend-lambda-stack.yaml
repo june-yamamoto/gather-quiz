@@ -16,18 +16,9 @@ Parameters:
     Type: String
     Description: The master password for the RDS database.
     NoEcho: true
-  LambdaS3Bucket:
+  EcrImageUri:
     Type: String
-    Description: The S3 bucket containing the Lambda function deployment package.
-  LambdaS3Key:
-    Type: String
-    Description: The S3 key for the Lambda function deployment package (.zip file).
-  LambdaLayerS3Bucket:
-    Type: String
-    Description: The S3 bucket containing the Lambda layer deployment package.
-  LambdaLayerS3Key:
-    Type: String
-    Description: The S3 key for the Lambda layer deployment package (.zip file).
+    Description: The URI of the ECR image for the Lambda function.
 
 Resources:
   # IAM Role for Lambda Execution
@@ -46,31 +37,15 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 
-  # Lambda Layer for node_modules
-  DependenciesLayer:
-    Type: AWS::Lambda::LayerVersion
-    Properties:
-      LayerName: !Sub ${AWS::StackName}-DependenciesLayer
-      Description: "Node.js dependencies for the GatherQuiz backend"
-      Content:
-        S3Bucket: !Ref LambdaLayerS3Bucket
-        S3Key: !Ref LambdaLayerS3Key
-      CompatibleRuntimes:
-        - nodejs20.x
-
-  # Lambda Function
+  # Lambda Function from Container Image
   BackendLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}-BackendLambda
-      Handler: dist/lambda.handler
-      Runtime: nodejs20.x
-      Role: !GetAtt LambdaExecutionRole.Arn
+      PackageType: Image
       Code:
-        S3Bucket: !Ref LambdaS3Bucket
-        S3Key: !Ref LambdaS3Key
-      Layers:
-        - !Ref DependenciesLayer
+        ImageUri: !Ref EcrImageUri
+      Role: !GetAtt LambdaExecutionRole.Arn
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -88,7 +63,8 @@ Resources:
                 'Fn::Sub': '${RdsStackName}-DbEndpoint'
               DbPort: !ImportValue
                 'Fn::Sub': '${RdsStackName}-DbPort'
-      Timeout: 30
+      Timeout: 60
+      MemorySize: 1024
 
   # HTTP API Gateway
   HttpApi:
