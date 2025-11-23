@@ -4,7 +4,6 @@
 
 ドキュメントに基づき、本アプリケーション「GatherQuiz」を以下の技術スタックと方針で開発する。
 
-- **モノリポ構成**: フロントエンド、バックエンド、データベース関連のプロジェクトを一つのリポジトリ内で個別のディレクトリとして管理する。
 - **技術スタック**:
     - **フロントエンド**: React (TypeScript) + Vite
         - UIフレームワーク: Material-UI (MUI) with Emotion `styled` API
@@ -13,7 +12,23 @@
     - **バックエンド**: Node.js (TypeScript) + Express
         - データベース: SQLite (開発時), PostgreSQL (本番想定)
         - ORM: Prisma
-    - **パッケージ管理**: pnpm (ワークスペース機能を利用)
+    - **パッケージ管理**: npm (各パッケージで独立して管理)
+
+---
+
+### 静的解析とテストの実行コマンドについて
+
+プロジェクト全体の静的解析 (lint, format) およびテスト (test) を実行する場合、以下のルートコマンドを使用します。
+これらのコマンドは、backend および frontend の各パッケージで定義された対応するスクリプトを呼び出します。
+
+- **静的解析の実行**:
+    - `npm run lint`
+    - `npm run lint-fix`
+    - `npm run format`
+- **テストの実行**:
+    - `npm test` (または `npm run test:all`)
+
+各パッケージ単体で実行する場合は、それぞれのディレクトリに移動して `npm run <script-name>` を実行してください。
 
 ---
 

@@ -2,6 +2,9 @@
 ARG VARIANT="20-bookworm"
 FROM mcr.microsoft.com/devcontainers/typescript-node:${VARIANT}
 
+ENV DEFAULT_MODEL="gemini-2.5-pro"
+ENV FALLBACK_MODELS ="gemini-2.5-flash,gemini-1.5-pro"
+
 # Install pnpm
 RUN npm install -g pnpm
 

@@ -5,22 +5,21 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "vitest --run",
-    "pretest": "sed -i 's/provider = \"postgresql\"/provider = \"sqlite\"/' prisma/schema.prisma && sed -i 's|url      = env(\"DATABASE_URL\")|url      = \"file:./test.db\"|' prisma/schema.prisma && pnpm exec prisma generate && pnpm exec prisma db push",
-    "posttest": "git restore prisma/schema.prisma",
-    "test:watch": "vitest",
-    "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
+    "test": "./node_modules/.bin/vitest --run",
+    "pretest": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.test.prisma prisma/schema.prisma && prisma generate && prisma db push",
+    "posttest": "mv prisma/schema.original.prisma prisma/schema.prisma",
+    "test:watch": "./node_modules/.bin/vitest",
+    "lint": "./node_modules/.bin/eslint .",
+    "lint-fix": "./node_modules/.bin/eslint . --fix",
     "format": "prettier --write .",
     "dev": "tsx src/index.ts",
-    "db:push": "pnpm exec prisma db push",
-    "test:generate": "pnpm exec prisma generate --schema=./prisma/schema.test.prisma",
+    "db:push": "prisma db push",
+    "test:generate": "prisma generate --schema=./prisma/schema.test.prisma",
     "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.2",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.913.0",
     "@aws-sdk/s3-request-presigner": "^3.913.0",
@@ -45,7 +44,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.16.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0"
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^3.2.4"
   },
   "prisma": {
     "binaryTargets": [

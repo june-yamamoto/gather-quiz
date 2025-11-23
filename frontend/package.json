@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint-fix": "eslint . --fix",
     "format": "prettier --write .",
-    "test": "vitest --run",
-    "test:watch": "vitest",
+    "test": "./node_modules/.bin/vitest --run",
+    "test:watch": "./node_modules/.bin/vitest",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

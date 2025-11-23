@@ -1,19 +1,19 @@
-import globals from "globals";
-import tseslint from "typescript-eslint";
-import eslintJs from "@eslint/js";
+const globals = require("globals");
+const tseslint = require("typescript-eslint");
+const eslintJs = require("@eslint/js");
 
-export default [
+module.exports = [
   // グローバルな無視設定を配列の先頭に配置
   {
     ignores: [
       "**/dist/**",
       "**/node_modules/**",
       "storybook-static/**",
-      "packages/frontend/public/**",
-      "packages/frontend/storybook-static/**",
-      "packages/frontend/vite.config.ts",
-      "packages/frontend/vitest.shims.d.ts",
-      "packages/backend/vitest.config.ts",
+      "frontend/public/**",
+      "frontend/storybook-static/**",
+      "frontend/vite.config.ts",
+      "frontend/vitest.shims.d.ts",
+      "backend/vitest.config.ts",
     ],
   },
 
@@ -23,7 +23,7 @@ export default [
 
   // フロントエンド用の設定
   {
-    files: ["packages/frontend/**/*.{ts,tsx}"],
+    files: ["frontend/**/*.{ts,tsx}"],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -39,11 +39,11 @@ export default [
 
   // バックエンド用の設定
   {
-    files: ["packages/backend/**/*.{ts,js,mjs,cjs}"],
+    files: ["backend/**/*.{ts,js,mjs,cjs}"],
     languageOptions: {
       parserOptions: {
         project: true,
-        tsconfigRootDir: "/workspaces/gather-quiz/packages/backend",
+        tsconfigRootDir: "/workspaces/gather-quiz/backend",
       },
       globals: {
         ...globals.node,
