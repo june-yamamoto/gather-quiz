@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import participantsRouter from './participants';
+import participantsRouter from '../../src/routes/participants';
 // テストデータ作成のために大会APIも利用する
-import tournamentsRouter from './tournaments';
-import { errorHandler } from '../middleware/errorHandler';
+import tournamentsRouter from '../../src/routes/tournaments';
+import { errorHandler } from '../../src/middleware/errorHandler';
 import { Tournament, Participant, Quiz } from '@prisma/client';
 
-import { prisma } from '../db';
+import { prisma } from '../../src/db';
 const app = express();
 app.use(express.json());
 // テスト対象のAPIエンドポイントをマウントする
