@@ -20,10 +20,10 @@ app.use(express.json());
 app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
 });
-app.use(pathToQuizzes(), quizzesRouter);
-app.use(pathToParticipants(':tournamentId'), participantsRouter);
-app.use(pathToTournaments(), tournamentsRouter);
-app.use(pathToUploadImage().replace('/image', ''), uploadRouter);
+app.use('/', tournamentsRouter);
+app.use('/', quizzesRouter);
+app.use('/', participantsRouter);
+app.use('/', uploadRouter);
 
 // Error handling middleware must be last
 app.use(errorHandler);

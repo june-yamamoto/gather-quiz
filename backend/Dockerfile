@@ -4,51 +4,38 @@ FROM public.ecr.aws/lambda/nodejs:20 AS build
 WORKDIR /var/task
 ENV CI=true
 
-# pnpmをグローバルにインストール
-RUN npm install -g pnpm
+# npm を使用するため、pnpm のインストールは不要
 
 # 依存関係定義ファイルをコピー
-COPY pnpm-lock.yaml .
-COPY pnpm-workspace.yaml .
 COPY package.json .
-COPY packages/backend/package.json ./packages/backend/
-COPY packages/frontend/package.json ./packages/frontend/
+COPY package-lock.json .
+# packages/frontend/package.json のコピーは不要になりました
 
-# ソースコード全体をコピー
+# ソースコード全体をコピー (Lambdaハンドラがあるディレクトリ)
 COPY . .
 
-# 依存関係をすべてインストール
-RUN pnpm install --filter backend --ignore-scripts
+# 依存関係をインストール (npm)
+RUN npm cache clean --force && npm install && npm rebuild
 
 # Prisma Clientを生成
-RUN pnpm --filter backend exec prisma generate
+RUN rm -rf node_modules/.prisma && npm exec prisma generate
 
 # TypeScriptコードをビルド
-RUN pnpm --filter backend build
+RUN npm run build
 
-# ステージ2: 最終イメージ
+# ステージ2: 最終イメージ (ランタイムイメージ)
 FROM public.ecr.aws/lambda/nodejs:20
 
 WORKDIR ${LAMBDA_TASK_ROOT}
-ENV CI=true
 ENV NODE_ENV=production
 
-# pnpmをグローバルにインストール
-RUN npm install -g pnpm
-
-# 依存関係定義ファイルをコピー
-COPY pnpm-lock.yaml .
-COPY pnpm-workspace.yaml .
-COPY package.json .
-COPY packages/backend/package.json ./packages/backend/
-COPY packages/frontend/package.json ./packages/frontend/
-
-# 本番用の依存関係のみをインストール
-RUN pnpm install --filter backend --prod --ignore-scripts
-
 # ビルドステージからビルド成果物とprismaスキーマをコピー
-COPY --from=build /var/task/packages/backend/dist .
-COPY --from=build /var/task/packages/backend/prisma ./prisma
+# dist ディレクトリの代わりに、ビルドされた js ファイルと map ファイルをコピー
+COPY --from=build /var/task/dist/* .
+COPY --from=build /var/task/prisma ./prisma
+
+# Node.js ランタイムでモジュールを解決できるように node_modules をコピー
+COPY --from=build /var/task/node_modules ./node_modules
 
 # Lambdaハンドラを指定
 CMD [ "lambda.handler" ]

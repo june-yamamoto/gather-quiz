@@ -96,17 +96,25 @@
 
 **現状:**
 - Lambdaのデプロイ方式をコンテナイメージ形式に変更し、デプロイ自体には成功。
-- しかし、APIを呼び出すと`500 Internal Server Error`が発生する問題が継続しており、現在原因を調査中。
-- デバッグの一環として、`lint`および`test`コマンドをすべて実行し、コードベースの静的解析とユニットテストが正常に完了することは確認済み。
+- APIを呼び出すと`500 Internal Server Error`が発生する問題が継続しており、`PrismaClientKnownRequestError: User was denied access on the database (code: 'P1010')`エラーがCloudWatch Logsで確認された。これはRDSデータベースへの接続認証情報、権限、またはネットワーク接続の問題が原因と推測される。
+- `500 Internal Server Error`が解消された後も、Expressアプリケーションのルート定義とAPI Gatewayのパスの不一致により`404 Not Found`が発生していたが、これはExpressアプリケーションのルート定義を修正することで解消された。
 
 **主な作業内容:**
 - ✅ **方針転換**: zip形式でのデプロイで発生したサイズ上限問題を解決するため、コンテナイメージ形式でのデプロイに方針を転換。
 - ✅ **ECRリポジトリ作成**: Lambdaコンテナイメージ用のECRリポジトリ (`gather-quiz-lambda-ecr`) を作成。
-- ✅ **DockerfileのLambda対応**: Lambdaコンテナイメージとして実行可能なDockerfileを実装。
+- ✅ **DockerfileのLambda対応**: Lambdaコンテナイメージとして実行可能なDockerfileを実装し、pnpmからnpmベースに移行。
 - ✅ **CloudFormationの修正**: `backend-lambda-stack.yaml`をコンテナイメージ参照方式に修正。
 - ✅ **Prisma Driver Adapter導入**: Prismaのクエリエンジンバイナリを不要にし、デプロイパッケージのサイズを削減するため、`@prisma/adapter-pg`を導入。
 - ✅ **デプロイ**: 上記の修正を反映したコンテナイメージをビルドし、ECRにプッシュ後、CloudFormationスタックを正常にデプロイ完了。
-- ⏳ **デバッグ**: デプロイされたLambda関数で発生する500エラーの原因をCloudWatch Logsを用いて調査中。
+- ✅ **backendのtsconfig.json修正**: `paths`設定と`moduleResolution`を追加し、`@prisma/client`の型定義を正しく解決できるようにした。
+- ✅ **backendのprismaスキーマ修正**: `schema.prisma`の`provider`を`postgresql`に、`output`パスを`../node_modules/.prisma/client`に修正。`schema.e2e.prisma`と`schema.test.prisma`も同様に修正。
+- ✅ **backendのlambda.ts修正**: LambdaハンドラーをCommonJS形式に修正し、`execSync`による`db push`処理を削除。
+- ✅ **backendのindex.ts修正**: Expressアプリケーションのルート定義から`/api`プレフィックスを削除。
+- ✅ **E2Eテスト環境の修正**: テストファイルを`backend/src`から`backend/test`に移動し、`playwright.config.ts`、`backend/tsconfig.json`、`backend/tsconfig.test.json`を更新。
+- ✅ **Lambdaデプロイプロセスの修正**: `Dockerfile`に`npm cache clean --force`と`npm rebuild`を追加し、`npm exec prisma generate`の前に`rm -rf node_modules/.prisma`を追加してPrisma Clientの再生成を強制。
+- ✅ **RDSスタックの再作成**: `gather-quiz-backend-lambda-dev`スタックが`gather-quiz-rds-dev`スタックに依存しているため、`gather-quiz-backend-lambda-dev`スタックを削除後、`gather-quiz-rds-dev`スタックを削除。`gather-quiz-vpc-dev`スタックから情報を取得し、`cloudformation/rds-stack.yaml`を使用して新しい`gather-quiz-rds-dev`スタックを作成。
+- ✅ **Lambdaスタックの再作成**: 新しい`gather-quiz-rds-dev`スタックのエンドポイント情報で`gather-quiz-backend-lambda-dev`スタックを再作成。
+- ⏳ **デバッグ**: `P1010`エラー (`User was denied access on the database`) が発生しており、RDSデータベースへの接続認証情報または権限の問題が原因と推測される。
 
 ---
 
@@ -114,7 +122,7 @@
 
 ### 5.1. 新バックエンドへの完全移行
 
-1.  [ ] **バグ修正**: 現在発生している500エラーを解決し、バックエンドが正常に動作するように修正する。
+1.  [ ] **バグ修正**: 現在発生しているP1010エラーを解決し、バックエンドが正常に動作するように修正する。
 2.  [ ] **フロントエンドの接続先変更**:
     - フロントエンドのAPIリクエスト先を、新しいAPI Gatewayエンドポイントへ変更する。
 3.  [ ] **E2Eテストの実施**:
@@ -130,7 +138,7 @@
 
 ---
 
-## 6. デプロイ状況 (2025/11/08時点)
+## 6. デプロイ状況 (2025/11/24時点)
 
 ### 6.1. フロントエンド (開発環境)
 
@@ -139,8 +147,8 @@
 
 ### 6.2. バックエンド (新構成: Lambda)
 
-- ✅ **ステータス**: **稼働中**
-- ✅ **エンドポイント**: `https://gyyhuclush.execute-api.ap-northeast-1.amazonaws.com/`
+- ✅ **ステータス**: **デバッグ中**
+- ✅ **エンドポイント**: `https://e8vanyorr4.execute-api.ap-northeast-1.amazonaws.com/`
 - ✅ **インフラ**: API Gateway + Lambda (`gather-quiz-backend-lambda-dev`)
 
 ### 6.3. バックエンド (旧構成: App Runner)
