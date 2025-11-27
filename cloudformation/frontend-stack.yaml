@@ -111,9 +111,10 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
         ViewerCertificate:
-          AcmCertificateArn: !Ref AcmCertificateArn
-          SslSupportMethod: sni-only
-          MinimumProtocolVersion: TLSv1.2_2019
+          CloudFrontDefaultCertificate: true
+          # AcmCertificateArn: !Ref AcmCertificateArn
+          # SslSupportMethod: sni-only
+          # MinimumProtocolVersion: TLSv1.2_2019
         DefaultRootObject: index.html
         CustomErrorResponses:
           - ErrorCachingMinTTL: 300
