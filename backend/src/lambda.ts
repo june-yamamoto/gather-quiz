@@ -7,27 +7,13 @@
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import serverless from '@vendia/serverless-express';
 import { app } from './index';
+import { initPrisma } from './db';
 
 let serverlessExpressInstance: Handler;
-// let isDbMigrated = false; // 不要になったため削除
 
 async function setup(event: APIGatewayProxyEvent, context: Context) {
-  // Run migration only on cold start
-  // if (!isDbMigrated) { // 不要になったため削除
-  //   console.log('Running database migration...');
-  //   try {
-  //     // Using execSync to wait for the migration to complete.
-  //     // The path to the prisma CLI is/var/task/node_modules/@prisma/client/bin/prisma relative to the package root in the Lambda environment.
-  //     execSync('npx prisma db push', { stdio: 'inherit' });
-  //     console.log('Database migration successful.');
-  //     isDbMigrated = true;
-  //   } catch (error) {
-  //     console.error('Database migration failed:', error);
-  //     // Depending on the strategy, you might want to throw an error here
-  //     // to fail the invocation, or allow it to continue.
-  //     // For now, we'll log the error and continue.
-  //   }
-  // }
+  // Initialize Prisma Client (retrieve secrets if necessary)
+  await initPrisma();
 
   serverlessExpressInstance = serverless({ app });
   return serverlessExpressInstance(event, context, () => {});
@@ -35,6 +21,7 @@ async function setup(event: APIGatewayProxyEvent, context: Context) {
 
 // CommonJS形式でハンドラーをエクスポート
 exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  // コールドスタート対策: インスタンスがあれば再利用
   if (serverlessExpressInstance) {
     return serverlessExpressInstance(event, context, () => {});
   }
