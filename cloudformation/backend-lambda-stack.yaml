@@ -1,24 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for GatherQuiz Backend (Lambda + API Gateway)
+Description: GatherQuizバックエンド(Lambda + API Gateway)用CloudFormationテンプレート
 
 Parameters:
   VpcStackName:
     Type: String
-    Description: The name of the VPC CloudFormation stack to import outputs from.
+    Description: 出力をインポートするVPC CloudFormationスタックの名前
   RdsStackName:
     Type: String
-    Description: The name of the RDS CloudFormation stack to import outputs from.
+    Description: 出力をインポートするRDS CloudFormationスタックの名前
   DbUser:
     Type: String
-    Description: The master username for the RDS database.
+    Description: RDSデータベースのマスターユーザー名
     NoEcho: true
   DbPassword:
     Type: String
-    Description: The master password for the RDS database.
+    Description: RDSデータベースのマスターパスワード
     NoEcho: true
   EcrImageUri:
     Type: String
-    Description: The URI of the ECR image for the Lambda function.
+    Description: Lambda関数のECRイメージURI
 
 Resources:
   # IAM Role for Lambda Execution
@@ -74,7 +74,7 @@ Resources:
       ProtocolType: HTTP
       CorsConfiguration:
         AllowOrigins:
-          - "*" # In a real production environment, restrict this to the frontend domain
+          - "*" # 本番環境では、フロントエンドのドメインのみに制限することを推奨
         AllowMethods:
           - GET
           - POST
@@ -125,7 +125,7 @@ Resources:
 
 Outputs:
   ApiGatewayEndpoint:
-    Description: The URL of the API Gateway endpoint
+    Description: API GatewayエンドポイントのURL
     Value: !GetAtt HttpApi.ApiEndpoint
     Export:
       Name: !Sub ${AWS::StackName}-ApiGatewayEndpoint

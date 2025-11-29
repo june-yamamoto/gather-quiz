@@ -1,24 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for GatherQuiz RDS Database
+Description: GatherQuiz RDSデータベース用CloudFormationテンプレート
 
 Parameters:
   DbUser:
     Type: String
-    Description: The master username for the RDS database
+    Description: RDSデータベースのマスターユーザー名
     NoEcho: true
   DbPassword:
     Type: String
-    Description: The master password for the RDS database
+    Description: RDSデータベースのマスターパスワード
     NoEcho: true
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: The ID of the VPC to launch resources in
+    Description: リソースを起動するVPCのID
   PrivateSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: A list of private subnet IDs for the RDS database
+    Description: RDSデータベース用プライベートサブネットIDのリスト
   DbSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
-    Description: The security group ID for the RDS database
+    Description: RDSデータベース用セキュリティグループのID
 
 Resources:
   # RDS Database Subnet Group
@@ -47,12 +47,12 @@ Resources:
 
 Outputs:
   DbEndpoint:
-    Description: The endpoint of the RDS database
+    Description: RDSデータベースのエンドポイント
     Value: !GetAtt DatabaseInstance.Endpoint.Address
     Export:
       Name: !Sub ${AWS::StackName}-DbEndpoint
   DbPort:
-    Description: The port of the RDS database
+    Description: RDSデータベースのポート番号
     Value: !GetAtt DatabaseInstance.Endpoint.Port
     Export:
       Name: !Sub ${AWS::StackName}-DbPort

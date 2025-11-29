@@ -1,13 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for GatherQuiz Image Upload (S3 Bucket and IAM Role)
+Description: GatherQuiz画像アップロード用CloudFormationテンプレート(S3バケットとIAMロール)
 
 Parameters:
   ProjectName:
     Type: String
-    Description: The name of the project (e.g., GatherQuiz)
+    Description: プロジェクト名 (例: GatherQuiz)
   Environment:
     Type: String
-    Description: The deployment environment (e.g., dev, prod)
+    Description: デプロイ環境 (例: dev, prod)
 
 Resources:
   # S3 Bucket for Image Uploads
@@ -27,7 +27,7 @@ Resources:
   ImageUploadPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      Description: Policy for allowing pre-signed URL generation and S3 PUT access
+      Description: 署名付きURL生成とS3 PUTアクセスを許可するポリシー
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -41,7 +41,7 @@ Resources:
               - s3:ListBucket
             Resource: !Sub arn:aws:s3:::${ImageUploadBucket}
 
-  # IAM Role for Backend Service to Assume (e.g., App Runner)
+  # IAM Role for Backend Service to Assume (e.g., Lambda)
   BackendServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -51,7 +51,7 @@ Resources:
           - Effect: Allow
             Principal:
               Service:
-                - apprunner.amazonaws.com # Adjust if using a different compute service
+                - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
       ManagedPolicyArns:
@@ -59,12 +59,12 @@ Resources:
 
 Outputs:
   ImageUploadBucketName:
-    Description: Name of the S3 bucket for image uploads
+    Description: 画像アップロード用S3バケットの名前
     Value: !Ref ImageUploadBucket
     Export:
       Name: !Sub ${ProjectName}-${Environment}-ImageUploadBucketName
   BackendServiceRoleArn:
-    Description: ARN of the IAM Role for the backend service
+    Description: バックエンドサービス用IAMロールのARN
     Value: !GetAtt BackendServiceRole.Arn
     Export:
       Name: !Sub ${ProjectName}-${Environment}-BackendServiceRoleArn

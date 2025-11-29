@@ -90,45 +90,38 @@
 
 ---
 
-## 4. サーバーレスアーキテクチャへの移行 (デバッグ中)
+## 4. サーバーレスアーキテクチャへの移行 (中断中)
 
 **目的:** 開発環境の運用コスト削減と、本番環境を見据えたモダンなサーバーレス構成への移行。
 
 **現状:**
-- Lambdaのデプロイ方式をコンテナイメージ形式に変更し、デプロイ自体には成功。
-- APIを呼び出すと`500 Internal Server Error`が発生する問題が継続しており、`PrismaClientKnownRequestError: User was denied access on the database (code: 'P1010')`エラーがCloudWatch Logsで確認された。これはRDSデータベースへの接続認証情報、権限、またはネットワーク接続の問題が原因と推測される。
-- `500 Internal Server Error`が解消された後も、Expressアプリケーションのルート定義とAPI Gatewayのパスの不一致により`404 Not Found`が発生していたが、これはExpressアプリケーションのルート定義を修正することで解消された。
+- **dev環境リソースの全削除**: デバッグと構成見直しのため、`gather-quiz-frontend-dev`, `gather-quiz-backend-lambda-dev`, `gather-quiz-rds-dev`, `gather-quiz-vpc-dev` の全CloudFormationスタックを削除しました。
+- **フロントエンド設定変更**: APIリクエスト先を環境変数 `VITE_API_BASE_URL` で制御するように修正し、CloudFrontのカスタムドメイン設定を一時的に無効化しました。
+- **パッケージ管理**: モノレポ構成を解体し、npm ベースの個別パッケージ管理に移行完了。
 
 **主な作業内容:**
-- ✅ **方針転換**: zip形式でのデプロイで発生したサイズ上限問題を解決するため、コンテナイメージ形式でのデプロイに方針を転換。
-- ✅ **ECRリポジトリ作成**: Lambdaコンテナイメージ用のECRリポジトリ (`gather-quiz-lambda-ecr`) を作成。
-- ✅ **DockerfileのLambda対応**: Lambdaコンテナイメージとして実行可能なDockerfileを実装し、pnpmからnpmベースに移行。
-- ✅ **CloudFormationの修正**: `backend-lambda-stack.yaml`をコンテナイメージ参照方式に修正。
-- ✅ **Prisma Driver Adapter導入**: Prismaのクエリエンジンバイナリを不要にし、デプロイパッケージのサイズを削減するため、`@prisma/adapter-pg`を導入。
-- ✅ **デプロイ**: 上記の修正を反映したコンテナイメージをビルドし、ECRにプッシュ後、CloudFormationスタックを正常にデプロイ完了。
-- ✅ **backendのtsconfig.json修正**: `paths`設定と`moduleResolution`を追加し、`@prisma/client`の型定義を正しく解決できるようにした。
-- ✅ **backendのprismaスキーマ修正**: `schema.prisma`の`provider`を`postgresql`に、`output`パスを`../node_modules/.prisma/client`に修正。`schema.e2e.prisma`と`schema.test.prisma`も同様に修正。
-- ✅ **backendのlambda.ts修正**: LambdaハンドラーをCommonJS形式に修正し、`execSync`による`db push`処理を削除。
-- ✅ **backendのindex.ts修正**: Expressアプリケーションのルート定義から`/api`プレフィックスを削除。
-- ✅ **E2Eテスト環境の修正**: テストファイルを`backend/src`から`backend/test`に移動し、`playwright.config.ts`、`backend/tsconfig.json`、`backend/tsconfig.test.json`を更新。
-- ✅ **Lambdaデプロイプロセスの修正**: `Dockerfile`に`npm cache clean --force`と`npm rebuild`を追加し、`npm exec prisma generate`の前に`rm -rf node_modules/.prisma`を追加してPrisma Clientの再生成を強制。
-- ✅ **RDSスタックの再作成**: `gather-quiz-backend-lambda-dev`スタックが`gather-quiz-rds-dev`スタックに依存しているため、`gather-quiz-backend-lambda-dev`スタックを削除後、`gather-quiz-rds-dev`スタックを削除。`gather-quiz-vpc-dev`スタックから情報を取得し、`cloudformation/rds-stack.yaml`を使用して新しい`gather-quiz-rds-dev`スタックを作成。
-- ✅ **Lambdaスタックの再作成**: 新しい`gather-quiz-rds-dev`スタックのエンドポイント情報で`gather-quiz-backend-lambda-dev`スタックを再作成。
-- ⏳ **デバッグ**: `P1010`エラー (`User was denied access on the database`) が発生しており、RDSデータベースへの接続認証情報または権限の問題が原因と推測される。
+- ✅ **パッケージ分離とnpm移行**: `packages/backend`, `packages/frontend` をルート直下に移動し、pnpm から npm へ移行。
+- ✅ **Backend Lambda対応**: `Dockerfile`, `lambda.ts`, `schema.prisma` などを修正し、Prisma Client の初期化エラー (P1010) の解決に向けた調整を実施。
+- ✅ **Frontend API設定**: `src/api/*ApiClient.ts` の `baseURL` を修正し、環境変数経由でエンドポイントを指定可能に。
+- ✅ **dev環境クリーンアップ**: 既存の CloudFormation スタックをすべて削除。
+- ✅ **CloudFormationテンプレートとパラメータの整理**:
+    - パラメータファイルをルート直下から `cloudformation/parameters/` ディレクトリへ移動。
+    - `apprunner-stack.yaml` を削除し、Lambda/API Gateway構成へ一本化。
+    - 各テンプレート(`vpc-stack.yaml`, `backend-lambda-stack.yaml`, `frontend-stack.yaml`等)のDescriptionを日本語化し、不要なコメントアウトを整理。
 
 ---
 
 ## 5. 今後の開発計画
 
-### 5.1. 新バックエンドへの完全移行
+### 5.1. 新バックエンドへの完全移行 (再デプロイ)
 
-1.  [ ] **バグ修正**: 現在発生しているP1010エラーを解決し、バックエンドが正常に動作するように修正する。
-2.  [ ] **フロントエンドの接続先変更**:
-    - フロントエンドのAPIリクエスト先を、新しいAPI Gatewayエンドポイントへ変更する。
+1.  [ ] **インフラ再構築**:
+    - `gather-quiz-vpc-dev`, `gather-quiz-rds-dev`, `gather-quiz-backend-lambda-dev`, `gather-quiz-frontend-dev` スタックを順次再デプロイする。
+2.  [ ] **動作確認**:
+    - 再デプロイされた環境で、Lambda関数が正常に起動し、データベース接続 (P1010エラーの解消) が成功することを確認する。
+    - フロントエンドからAPIへの接続を確認する。
 3.  [ ] **E2Eテストの実施**:
     - 新しいアーキテクチャで、既存のE2Eテストがすべてパスすることを確認する。
-4.  [ ] **旧インフラの廃止**:
-    - 新構成での動作に問題がないことを確認後、コスト削減のため旧App Runnerの関連リソースをAWS上から削除する。
 
 ### 5.2. バックログタスク
 
@@ -142,23 +135,21 @@
 
 ### 6.1. フロントエンド (開発環境)
 
-- ✅ **DNS**: `https://dev.gather-quiz.june-yamamoto.com`
-- ✅ **インフラ**: S3 + CloudFront (`gather-quiz-frontend-dev`)
+- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
+- **インフラ**: S3 + CloudFront (`gather-quiz-frontend-dev`)
 
 ### 6.2. バックエンド (新構成: Lambda)
 
-- ✅ **ステータス**: **デバッグ中**
-- ✅ **エンドポイント**: `https://e8vanyorr4.execute-api.ap-northeast-1.amazonaws.com/`
-- ✅ **インフラ**: API Gateway + Lambda (`gather-quiz-backend-lambda-dev`)
+- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
+- **インフラ**: API Gateway + Lambda (`gather-quiz-backend-lambda-dev`)
 
 ### 6.3. バックエンド (旧構成: App Runner)
 
-- ⚠️ **ステータス**: **廃止予定**
-- ✅ **インフラ**: App Runner (`gather-quiz-apprunner-dev`)
+- ⛔ **ステータス**: **廃止** (スタック削除済み)
 
 ### 6.4. 共通インフラ
 
-- ✅ **ネットワーク**: VPC, サブネット, セキュリティグループ (`gather-quiz-vpc-dev`)
-- ✅ **データベース**: RDS PostgreSQL (`gather-quiz-rds-dev`)
-    - インスタンスタイプはコスト最適化のため`db.t4g.micro`に更新済み。
-- ✅ **成果物格納場所**: S3 (`gather-quiz-lambda-artifacts-251108`)
+- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
+- **ネットワーク**: VPC (`gather-quiz-vpc-dev`)
+- **データベース**: RDS PostgreSQL (`gather-quiz-rds-dev`)
+- **成果物格納場所**: S3 (`gather-quiz-lambda-artifacts-251108`)

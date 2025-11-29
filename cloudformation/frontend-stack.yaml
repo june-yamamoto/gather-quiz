@@ -1,26 +1,26 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template for GatherQuiz Frontend (S3 and CloudFront)
+Description: GatherQuizフロントエンド(S3とCloudFront)用CloudFormationテンプレート
 
 Parameters:
   DomainName:
     Type: String
-    Description: The domain name for the CloudFront distribution (e.g., gather-quiz.yourdomain.com)
+    Description: CloudFrontディストリビューションのドメイン名 (例: gather-quiz.yourdomain.com)
   SubdomainName:
     Type: String
-    Description: The subdomain part for the S3 bucket name (e.g., gather-quiz.yourdomain.com -> gather-quiz)
+    Description: S3バケット名に使用するサブドメイン部分 (例: gather-quiz.yourdomain.com -> gather-quiz)
   AcmCertificateArn:
     Type: String
-    Description: The ARN of the ACM certificate (must be in us-east-1)
+    Description: ACM証明書のARN (us-east-1にある必要があります)
   ApiGatewayEndpoint:
     Type: String
-    Description: The endpoint of the API Gateway (without https://)
+    Description: API Gatewayのエンドポイント (https://なし)
   BasicAuthUser:
     Type: String
-    Description: The username for Basic Authentication
+    Description: Basic認証のユーザー名
     NoEcho: true
   BasicAuthPass:
     Type: String
-    Description: The password for Basic Authentication
+    Description: Basic認証のパスワード
     NoEcho: true
 
 Resources:
@@ -111,10 +111,9 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
-          # AcmCertificateArn: !Ref AcmCertificateArn
-          # SslSupportMethod: sni-only
-          # MinimumProtocolVersion: TLSv1.2_2019
+          AcmCertificateArn: !Ref AcmCertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
         DefaultRootObject: index.html
         CustomErrorResponses:
           - ErrorCachingMinTTL: 300
@@ -189,17 +188,17 @@ Resources:
 
 Outputs:
   FrontendBucketName:
-    Description: Name of the S3 bucket for the frontend
+    Description: フロントエンド用S3バケットの名前
     Value: !Ref FrontendBucket
     Export:
       Name: !Sub ${AWS::StackName}-FrontendBucketName
   CloudFrontDistributionId:
-    Description: ID of the CloudFront Distribution
+    Description: CloudFrontディストリビューションのID
     Value: !Ref FrontendCloudFrontDistribution
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDistributionId
   CloudFrontDomainName:
-    Description: Domain name of the CloudFront Distribution
+    Description: CloudFrontディストリビューションのドメイン名
     Value: !GetAtt FrontendCloudFrontDistribution.DomainName
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDomainName
