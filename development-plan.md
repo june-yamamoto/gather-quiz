@@ -108,6 +108,7 @@
     - パラメータファイルをルート直下から `cloudformation/parameters/` ディレクトリへ移動。
     - `apprunner-stack.yaml` を削除し、Lambda/API Gateway構成へ一本化。
     - 各テンプレート(`vpc-stack.yaml`, `backend-lambda-stack.yaml`, `frontend-stack.yaml`等)のDescriptionを日本語化し、不要なコメントアウトを整理。
+    - **構成変更**: コスト削減のため、LambdaをVPC外に配置し、RDSをパブリックアクセス可能に変更（`vpc-stack.yaml`の簡素化）。
 
 ---
 

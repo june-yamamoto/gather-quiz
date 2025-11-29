@@ -2,20 +2,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: GatherQuizバックエンド(Lambda + API Gateway)用CloudFormationテンプレート
 
 Parameters:
-  VpcStackName:
-    Type: String
-    Description: 出力をインポートするVPC CloudFormationスタックの名前
   RdsStackName:
     Type: String
     Description: 出力をインポートするRDS CloudFormationスタックの名前
-  DbUser:
-    Type: String
-    Description: RDSデータベースのマスターユーザー名
-    NoEcho: true
-  DbPassword:
-    Type: String
-    Description: RDSデータベースのマスターパスワード
-    NoEcho: true
   EcrImageUri:
     Type: String
     Description: Lambda関数のECRイメージURI
@@ -35,7 +24,16 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !ImportValue
+                  'Fn::Sub': '${RdsStackName}-DbSecretArn'
 
   # Lambda Function from Container Image
   BackendLambda:
@@ -46,23 +44,12 @@ Resources:
       Code:
         ImageUri: !Ref EcrImageUri
       Role: !GetAtt LambdaExecutionRole.Arn
-      VpcConfig:
-        SecurityGroupIds:
-          - !ImportValue
-              'Fn::Sub': '${VpcStackName}-LambdaSecurityGroupId'
-        SubnetIds:
-          'Fn::Split':
-            - ','
-            - !ImportValue
-                'Fn::Sub': '${VpcStackName}-PrivateSubnetIds'
       Environment:
         Variables:
-          DATABASE_URL: !Sub
-            - "postgresql://${DbUser}:${DbPassword}@${DbEndpoint}:${DbPort}/gatherquiz?schema=public"
-            - DbEndpoint: !ImportValue
-                'Fn::Sub': '${RdsStackName}-DbEndpoint'
-              DbPort: !ImportValue
-                'Fn::Sub': '${RdsStackName}-DbPort'
+          # DATABASE_URLはSecrets Managerから動的に構築するため削除
+          # アプリケーションコード側でSECRET_IDを使って値を取得する必要がある
+          SECRET_ID: !ImportValue
+            'Fn::Sub': '${RdsStackName}-DbSecretArn'
       Timeout: 60
       MemorySize: 1024
 

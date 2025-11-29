@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: GatherQuizアプリケーション用VPCスタック
+Description: GatherQuizアプリケーション用VPCスタック (パブリックサブネットのみ)
 
 Resources:
   # VPC
@@ -13,7 +13,7 @@ Resources:
         - Key: Name
           Value: !Sub ${AWS::StackName}-VPC
 
-  # Subnets
+  # Subnets (RDS配置用パブリックサブネット)
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -35,26 +35,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PublicSubnet2
-
-  PrivateSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.3.0/24
-      AvailabilityZone: !Select [0, !GetAZs ""]
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateSubnet1
-
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.4.0/24
-      AvailabilityZone: !Select [1, !GetAZs ""]
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateSubnet2
 
   # Internet Gateway
   InternetGateway:
@@ -78,14 +58,6 @@ Resources:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PublicRouteTable
   
-  PrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateRouteTable
-
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
@@ -106,98 +78,21 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
 
-  PrivateSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PrivateSubnet1
-      RouteTableId: !Ref PrivateRouteTable
-
-  PrivateSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PrivateSubnet2
-      RouteTableId: !Ref PrivateRouteTable
-
   # Security Groups
-  VpcEndpointSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub ${AWS::StackName}-VpcEndpointSG
-      GroupDescription: "Security group for VPC Endpoints"
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          SourceSecurityGroupId: !Ref LambdaSecurityGroup
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-VpcEndpointSG
-
   DatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub ${AWS::StackName}-DatabaseSG
-      GroupDescription: "Security group for RDS"
+      GroupDescription: "Security group for RDS (Public Access)"
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
-          SourceSecurityGroupId: !Ref LambdaSecurityGroup
+          CidrIp: 0.0.0.0/0 # 警告: 全世界からのアクセスを許可しています。強力なパスワードを使用してください。
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-DatabaseSG
-
-  LambdaSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub ${AWS::StackName}-LambdaSG
-      GroupDescription: "Security group for Backend Lambda"
-      VpcId: !Ref VPC
-      SecurityGroupEgress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-LambdaSG
-
-  # VPC Endpoints for ECR and S3
-  EcrApiEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VPC
-      ServiceName: !Sub "com.amazonaws.${AWS::Region}.ecr.api"
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref VpcEndpointSecurityGroup
-
-  EcrDkrEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VPC
-      ServiceName: !Sub "com.amazonaws.${AWS::Region}.ecr.dkr"
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref VpcEndpointSecurityGroup
-
-  S3GatewayEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcId: !Ref VPC
-      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
-      VpcEndpointType: Gateway
-      RouteTableIds:
-        - !Ref PublicRouteTable
-        - !Ref PrivateRouteTable
 
 Outputs:
   VpcId:
@@ -205,18 +100,13 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub ${AWS::StackName}-VpcId
-  PrivateSubnetIds:
-    Description: プライベートサブネットのIDリスト
-    Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
+  PublicSubnetIds:
+    Description: パブリックサブネットのIDリスト
+    Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnetIds
+      Name: !Sub ${AWS::StackName}-PublicSubnetIds
   DatabaseSecurityGroupId:
     Description: データベース用セキュリティグループのID
     Value: !Ref DatabaseSecurityGroup
     Export:
       Name: !Sub ${AWS::StackName}-DatabaseSecurityGroupId
-  LambdaSecurityGroupId:
-    Description: Lambda用セキュリティグループのID
-    Value: !Ref LambdaSecurityGroup
-    Export:
-      Name: !Sub ${AWS::StackName}-LambdaSecurityGroupId
