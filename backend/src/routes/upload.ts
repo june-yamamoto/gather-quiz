@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { v4 as uuidv4 } from 'uuid';
 import { pathToUploadImage } from '../api-helper';
 
 const router = Router();
@@ -17,10 +18,10 @@ router.post(uploadRouterPath(pathToUploadImage()), async (req: Request, res: Res
   const awsRegion = process.env.AWS_REGION || 'ap-northeast-1';
 
   try {
-    const { fileName, fileType } = req.body;
+    const { fileName, fileType, tournamentId, participantId } = req.body;
 
-    if (!fileName || !fileType) {
-      return res.status(400).json({ error: 'fileName and fileType are required' });
+    if (!fileName || !fileType || !tournamentId || !participantId) {
+      return res.status(400).json({ error: 'fileName, fileType, tournamentId, and participantId are required' });
     }
 
     if (!imageUploadBucket) {
@@ -29,7 +30,9 @@ router.post(uploadRouterPath(pathToUploadImage()), async (req: Request, res: Res
     }
 
     const s3Client = getS3Client();
-    const key = `uploads/${Date.now()}-${fileName}`;
+    // ファイル名の衝突を避けるためにUUIDを使用し、ディレクトリ構造を整理する
+    const fileUuid = uuidv4();
+    const key = `uploads/${tournamentId}/${participantId}/${fileUuid}-${fileName}`;
 
     const putObjectCommand = new PutObjectCommand({
       Bucket: imageUploadBucket,

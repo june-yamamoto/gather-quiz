@@ -34,10 +34,17 @@ const QuizCreatorPage = () => {
     event.preventDefault();
 
     try {
-      const questionImageUrl = questionImageFile ? await uploadApiClient.uploadImage(questionImageFile) : null;
+      const tId = tournamentId || '';
+      const pId = participantId || '';
+
+      const questionImageUrl = questionImageFile
+        ? await uploadApiClient.uploadImage(questionImageFile, tId, pId)
+        : null;
       if (questionImageFile && !questionImageUrl) return;
 
-      const answerImageUrl = answerImageFile ? await uploadApiClient.uploadImage(answerImageFile) : null;
+      const answerImageUrl = answerImageFile
+        ? await uploadApiClient.uploadImage(answerImageFile, tId, pId)
+        : null;
       if (answerImageFile && !answerImageUrl) return;
 
       const quiz = new Quiz({

@@ -25,14 +25,22 @@ class UploadApiClient {
    * サーバーにリクエストを送信し、画像アップロード用の署名付きURLを取得します。
    * @private
    * @param {File} file - アップロードするファイル
+   * @param {string} tournamentId - 大会ID
+   * @param {string} participantId - 参加者ID
    * @returns {Promise<{ signedUrl: string, objectUrl: string }>} 署名付きURLとオブジェクトURL
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  private async getSignedUrl(file: File): Promise<{ signedUrl: string; objectUrl: string }> {
+  private async getSignedUrl(
+    file: File,
+    tournamentId: string,
+    participantId: string
+  ): Promise<{ signedUrl: string; objectUrl: string }> {
     try {
       const response = await this.client.post('/upload/image', {
         fileName: file.name,
         fileType: file.type,
+        tournamentId,
+        participantId,
       });
       return response.data;
     } catch (error) {
@@ -47,11 +55,13 @@ class UploadApiClient {
    * S3に画像をアップロードします。
    * 内部で署名付きURLを取得し、そのURLに対してファイルをPUTします。
    * @param {File} file - アップロードするファイル
+   * @param {string} tournamentId - 大会ID
+   * @param {string} participantId - 参加者ID
    * @returns {Promise<string>} アップロードされた画像のURL
    * @throws {ApiError} 署名付きURLの取得またはアップロードに失敗した場合
    */
-  public async uploadImage(file: File): Promise<string> {
-    const { signedUrl, objectUrl } = await this.getSignedUrl(file);
+  public async uploadImage(file: File, tournamentId: string, participantId: string): Promise<string> {
+    const { signedUrl, objectUrl } = await this.getSignedUrl(file, tournamentId, participantId);
 
     try {
       await axios.put(signedUrl, file, {

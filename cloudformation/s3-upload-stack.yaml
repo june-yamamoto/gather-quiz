@@ -4,10 +4,14 @@ Description: GatherQuiz画像アップロード用CloudFormationテンプレー�
 Parameters:
   ProjectName:
     Type: String
-    Description: プロジェクト名 (例: GatherQuiz)
+    Description: "プロジェクト名 (例: GatherQuiz)"
   Environment:
     Type: String
-    Description: デプロイ環境 (例: dev, prod)
+    Description: "デプロイ環境 (例: dev, prod)"
+  AllowedOrigin:
+    Type: String
+    Description: "CORSで許可するオリジン (例: https://example.com)"
+    Default: "*"
 
 Resources:
   # S3 Bucket for Image Uploads
@@ -19,9 +23,35 @@ Resources:
         Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
-        BlockPublicPolicy: true
+        BlockPublicPolicy: false # ポリシーによる公開を許可
         IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        RestrictPublicBuckets: false # 公開バケット制限を解除
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - PUT
+              - GET
+              - HEAD
+            AllowedOrigins:
+              - !Ref AllowedOrigin
+            ExposedHeaders:
+              - ETag
+
+  # S3 Bucket Policy for Public Read Access
+  ImageUploadBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ImageUploadBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${ImageUploadBucket}/*
 
   # IAM Policy for S3 Upload Access
   ImageUploadPolicy:

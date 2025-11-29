@@ -17,8 +17,8 @@ const mockQuiz = new Quiz({
   questionImage: null,
   questionLink: null,
   answerText: 'This is the answer.',
-  answerImage: null,
-  answerLink: null,
+  answerImage: 'http://example.com/answer.png',
+  answerLink: 'http://example.com/answer',
   tournamentId: 't-1',
   participantId: 'p-1',
 });
@@ -42,6 +42,8 @@ describe('AnswerDisplayPage', () => {
     renderWithProviders();
     await screen.findByText(/Q. This is a test question./);
     expect(screen.getByText('A. This is the answer.')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '解答画像' })).toHaveAttribute('src', 'http://example.com/answer.png');
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com/answer');
     expect(screen.getByRole('button', { name: 'ボードに戻る' })).toBeInTheDocument();
   });
 });

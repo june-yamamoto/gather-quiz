@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lambda.js",
   "scripts": {
     "build": "tsc",
     "test": "./node_modules/.bin/vitest --run",
@@ -14,8 +14,7 @@
     "format": "prettier --write .",
     "dev": "tsx src/index.ts",
     "db:push": "prisma db push",
-    "test:generate": "prisma generate --schema=./prisma/schema.test.prisma",
-    "postinstall": "prisma generate"
+    "test:generate": "prisma generate --schema=./prisma/schema.test.prisma"
   },
   "keywords": [],
   "author": "",
@@ -30,9 +29,11 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.7.2",
     "@types/pg": "^8.15.6",
+    "@types/uuid": "^9.0.8",
     "@vendia/serverless-express": "^4.12.6",
     "express": "^5.1.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
@@ -50,8 +51,7 @@
   },
   "prisma": {
     "binaryTargets": [
-      "native",
-      "linux-arm64-openssl-3.0.x"
+      "linux-x86_64-openssl-3.0.x"
     ]
   }
 }

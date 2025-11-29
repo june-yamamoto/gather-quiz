@@ -80,7 +80,20 @@ const AnswerDisplayPage = () => {
         >
           A. {quiz.answerText}
         </Typography>
-        {/* TODO: 画像やリンクが存在する場合に表示する処理を追加する */}
+        {quiz.answerImage && (
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <img
+              src={quiz.answerImage}
+              alt="解答画像"
+              style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+            />
+          </Box>
+        )}
+        {quiz.answerLink && (
+          <Typography variant="body1" align="center" gutterBottom>
+            参考リンク: <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer">{quiz.answerLink}</a>
+          </Typography>
+        )}
       </Card>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={backToBoard}>

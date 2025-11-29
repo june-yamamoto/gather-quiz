@@ -4,10 +4,10 @@ Description: GatherQuizフロントエンド(S3とCloudFront)用CloudFormation�
 Parameters:
   DomainName:
     Type: String
-    Description: CloudFrontディストリビューションのドメイン名 (例: gather-quiz.yourdomain.com)
+    Description: "CloudFrontディストリビューションのドメイン名 (例: gather-quiz.yourdomain.com)"
   SubdomainName:
     Type: String
-    Description: S3バケット名に使用するサブドメイン部分 (例: gather-quiz.yourdomain.com -> gather-quiz)
+    Description: "S3バケット名に使用するサブドメイン部分 (例: gather-quiz.yourdomain.com -> gather-quiz)"
   AcmCertificateArn:
     Type: String
     Description: ACM証明書のARN (us-east-1にある必要があります)
@@ -102,7 +102,7 @@ Resources:
               FunctionARN: !GetAtt BasicAuthFunction.FunctionARN
         Origins:
           - Id: s3-origin
-            DomainName: !GetAtt FrontendBucket.DomainName
+            DomainName: !Sub ${FrontendBucket}.s3.${AWS::Region}.amazonaws.com
             OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
             S3OriginConfig: {}
           - Id: api-gateway-origin

@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: GatherQuiz RDSデータベース用CloudFormationテンプレート
 
 Parameters:
+  VpcStackName:
+    Type: String
+    Description: 出力をインポートするVPC CloudFormationスタックの名前
   DbUser:
     Type: String
     Description: RDSデータベースのマスターユーザー名
@@ -10,15 +13,6 @@ Parameters:
     Type: String
     Description: RDSデータベースのマスターパスワード
     NoEcho: true
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    Description: リソースを起動するVPCのID
-  PublicSubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: RDSデータベース用パブリックサブネットIDのリスト
-  DbSecurityGroupId:
-    Type: AWS::EC2::SecurityGroup::Id
-    Description: RDSデータベース用セキュリティグループのID
 
 Resources:
   # RDS Database Subnet Group
@@ -26,7 +20,11 @@ Resources:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: Subnet group for GatherQuiz RDS
-      SubnetIds: !Ref PublicSubnetIds
+      SubnetIds:
+        'Fn::Split':
+          - ','
+          - !ImportValue
+              'Fn::Sub': '${VpcStackName}-PublicSubnetIds'
 
   # RDS Parameter Group (SSL強制用)
   DbParameterGroup:
@@ -53,7 +51,8 @@ Resources:
       DBSubnetGroupName: !Ref DbSubnetGroup
       DBParameterGroupName: !Ref DbParameterGroup # SSL強制パラメータグループを適用
       VPCSecurityGroups:
-        - !Ref DbSecurityGroupId
+        - !ImportValue
+            'Fn::Sub': '${VpcStackName}-DatabaseSecurityGroupId'
 
   # Secrets Manager Secret for DB Credentials
   DbSecret:

@@ -78,7 +78,20 @@ const QuizDisplayPage = () => {
         >
           Q. {quiz.questionText}
         </Typography>
-        {/* TODO: Display image and link if they exist */}
+        {quiz.questionImage && (
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <img
+              src={quiz.questionImage}
+              alt="問題画像"
+              style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+            />
+          </Box>
+        )}
+        {quiz.questionLink && (
+          <Typography variant="body1" align="center" gutterBottom>
+            参考リンク: <a href={quiz.questionLink} target="_blank" rel="noopener noreferrer">{quiz.questionLink}</a>
+          </Typography>
+        )}
       </Card>
       <Box sx={{ mt: 4 }}>
         <Button variant="contained" size="large" onClick={showAnswer}>
