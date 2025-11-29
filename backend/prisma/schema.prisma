@@ -6,20 +6,20 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./test.db"
 }
 
 model Tournament {
-  id                      String        @id @default(uuid())
+  id                      String    @id @default(uuid())
   name                    String
   password                String
   questionsPerParticipant Int
   points                  String // e.g., "10,20,30"
   regulation              String?
-  status                  String        @default("pending") // pending, in_progress, finished
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  status                  String    @default("pending") // pending, in_progress, finished
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
   participants            Participant[]
   quizzes                 Quiz[]
 }
@@ -31,14 +31,14 @@ model Participant {
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId String
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime  @updatedAt
   quizzes      Quiz[]
 
   @@unique([tournamentId, name])
 }
 
 model Quiz {
-  id            String      @id @default(uuid())
+  id            String    @id @default(uuid())
   point         Int
   questionText  String?
   questionImage String?
@@ -46,10 +46,10 @@ model Quiz {
   answerText    String?
   answerImage   String?
   answerLink    String?
-  tournament    Tournament  @relation(fields: [tournamentId], references: [id])
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId  String
   participant   Participant @relation(fields: [participantId], references: [id])
   participantId String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }

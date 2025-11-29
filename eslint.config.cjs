@@ -42,8 +42,8 @@ module.exports = [
     files: ["backend/**/*.{ts,js,mjs,cjs}"],
     languageOptions: {
       parserOptions: {
-        project: true,
-        tsconfigRootDir: "/workspaces/gather-quiz/backend",
+        project: "./tsconfig.eslint.json",
+        tsconfigRootDir: __dirname + "/backend",
       },
       globals: {
         ...globals.node,
