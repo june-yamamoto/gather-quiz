@@ -17,10 +17,10 @@ export const errorHandler = (
 ) => {
   // エラーの詳細をログに出力
   console.error('[ErrorHandler] Error occurred:', {
+    // Prismaのエラーオブジェクトのプロパティを含める (messageなどが上書きされるのを防ぐため先に展開)
+    ...err,
     message: err.message,
     stack: err.stack,
-    // Prismaのエラーオブジェクトのプロパティを含める
-    ...err,
   });
 
   // HttpErrorのインスタンスかチェック
