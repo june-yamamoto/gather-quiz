@@ -4,6 +4,7 @@
  * @module index
  */
 
+import 'dotenv/config';
 import express, { Express, Request, Response } from 'express';
 import tournamentsRouter from './routes/tournaments';
 import quizzesRouter from './routes/quizzes';
@@ -26,6 +27,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 app.use('/api/tournaments', tournamentsRouter);
 app.use('/api/quizzes', quizzesRouter);
+app.use('/api/tournaments/:tournamentId/participants', participantsRouter);
 app.use('/api/upload', uploadRouter);
 
 // Error handling middleware must be last

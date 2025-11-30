@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 // PrismaClientインスタンスを保持する変数
 // 初期化は initPrisma() またはトップレベル（ローカル/テスト環境の場合）で行われる
@@ -25,19 +25,17 @@ export async function initPrisma() {
     console.log(`Attempting to retrieve secret from Secrets Manager with ID: ${process.env.SECRET_ID}`);
     try {
       const client = new SecretsManagerClient();
-      const response = await client.send(
-        new GetSecretValueCommand({ SecretId: process.env.SECRET_ID })
-      );
-      
+      const response = await client.send(new GetSecretValueCommand({ SecretId: process.env.SECRET_ID }));
+
       if (response.SecretString) {
         const secret = JSON.parse(response.SecretString);
         // デバッグログ: パスワードは出力しない
-        console.log("Secret retrieved (partial):", { 
-          host: secret.host, 
-          port: secret.port, 
-          dbname: secret.dbname, 
-          user: secret.username, 
-          sslmode: secret.sslmode 
+        console.log('Secret retrieved (partial):', {
+          host: secret.host,
+          port: secret.port,
+          dbname: secret.dbname,
+          user: secret.username,
+          sslmode: secret.sslmode,
         });
 
         const user = encodeURIComponent(secret.username);
@@ -46,11 +44,14 @@ export async function initPrisma() {
         const port = secret.port;
         const dbname = secret.dbname;
         // sslmodeはPoolの設定(rejectUnauthorized: false)に任せるため、URLには含めない
-        
+
         databaseUrl = `postgresql://${user}:${password}@${host}:${port}/${dbname}?schema=public`;
         // デバッグログ: パスワード以降はマスク
-        console.log("Constructed DATABASE_URL (partial):", databaseUrl.substring(0, databaseUrl.indexOf('@') + 1) + '...');
-        
+        console.log(
+          'Constructed DATABASE_URL (partial):',
+          databaseUrl.substring(0, databaseUrl.indexOf('@') + 1) + '...'
+        );
+
         process.env.DATABASE_URL = databaseUrl; // 環境変数にもセット
       } else {
         console.error('SecretString is empty.');
@@ -66,9 +67,9 @@ export async function initPrisma() {
   }
 
   console.log('Initializing PrismaClient with connection pool...');
-  const pool = new Pool({ 
+  const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
   });
   const adapter = new PrismaPg(pool);
   prisma = new PrismaClient({ adapter });

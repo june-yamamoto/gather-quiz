@@ -32,7 +32,8 @@ router.post(uploadRouterPath(pathToUploadImage()), async (req: Request, res: Res
     const s3Client = getS3Client();
     // ファイル名の衝突を避けるためにUUIDを使用し、ディレクトリ構造を整理する
     const fileUuid = uuidv4();
-    const key = `uploads/${tournamentId}/${participantId}/${fileUuid}-${fileName}`;
+    const fileExtension = fileName.split('.').pop();
+    const key = `uploads/${tournamentId}/${participantId}/${fileUuid}.${fileExtension}`;
 
     const putObjectCommand = new PutObjectCommand({
       Bucket: imageUploadBucket,
