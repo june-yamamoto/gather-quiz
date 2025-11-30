@@ -11,7 +11,7 @@
     "test:watch": "./node_modules/.bin/vitest",
     "lint": "./node_modules/.bin/eslint .",
     "lint-fix": "./node_modules/.bin/eslint . --fix",
-    "format": "prettier --write .",
+    "format": "./node_modules/.bin/prettier --write .",
     "dev": "tsx src/index.ts",
     "db:push": "prisma db push",
     "test:generate": "prisma generate --schema=./prisma/schema.test.prisma"
