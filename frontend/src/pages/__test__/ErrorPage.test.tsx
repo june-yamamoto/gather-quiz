@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import ErrorPage from '../pages/ErrorPage';
+import ErrorPage from '../ErrorPage';
 
 describe('ErrorPage', () => {
   it('エラーメッセージとトップページへのリンクが正しく表示されること', () => {

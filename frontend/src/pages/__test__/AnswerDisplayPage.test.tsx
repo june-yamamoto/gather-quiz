@@ -6,7 +6,7 @@ import AnswerDisplayPage from '../AnswerDisplayPage';
 import { quizApiClient } from '../../api/QuizApiClient';
 import { Quiz } from '../../models/Quiz';
 
-vi.mock('../api/QuizApiClient');
+vi.mock('../../api/QuizApiClient');
 
 const queryClient = new QueryClient();
 

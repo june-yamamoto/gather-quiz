@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '../test-utils';
+import { render, screen, fireEvent, waitFor } from '../../test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import TournamentPortalPage from './TournamentPortalPage';
-import { tournamentApiClient } from '../api/TournamentApiClient';
-import { Tournament } from '../models/Tournament';
+import TournamentPortalPage from '../TournamentPortalPage';
+import { tournamentApiClient } from '../../api/TournamentApiClient';
+import { Tournament } from '../../models/Tournament';
 
 describe('大会ポータルページ', () => {
   it('ログインモーダルを開き、ログインを試み、成功時に画面遷移すること', async () => {

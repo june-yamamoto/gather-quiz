@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import ServiceTopPage from '../pages/ServiceTopPage';
+import ServiceTopPage from '../ServiceTopPage';
 
 describe('ServiceTopPage', () => {
   it('ページが正しくレンダリングされること', () => {

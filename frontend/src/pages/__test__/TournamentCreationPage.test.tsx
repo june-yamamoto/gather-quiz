@@ -2,12 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import TournamentCreationPage from '../pages/TournamentCreationPage';
-import { tournamentApiClient } from '../api/TournamentApiClient';
-import { Tournament } from '../models/Tournament';
+import TournamentCreationPage from '../TournamentCreationPage';
+import { tournamentApiClient } from '../../api/TournamentApiClient';
+import { Tournament } from '../../models/Tournament';
 
 // APIクライアントをモック
-vi.mock('../api/TournamentApiClient');
+vi.mock('../../api/TournamentApiClient');
 
 const queryClient = new QueryClient();
 
