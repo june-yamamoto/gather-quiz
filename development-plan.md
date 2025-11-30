@@ -146,6 +146,56 @@
   - [ ] 問題ボード画面にて、一度以上開かれた問題は既読マークが表示される
   - [ ] 問題ボード画面にて、紐づく問題が一問も既読状態になっていない参加者は参加者名が表示されない
 
+### 5.3. 詳細な改修計画 (2025/11/30更新)
+
+#### 1. データモデルの変更
+- **ファイル**: `backend/prisma/schema.prisma`
+  - **`Quiz` モデルへのカラム追加**:
+    - `order` (Int, default: 0): 「第何問目の問題か」を識別するため。同じ配点の問題が複数ある場合に区別する。
+    - `isOpened` (Boolean, default: false): 問題ボードで既読状態を管理するため。
+
+#### 2. バックエンド改修
+- **ファイル**: `backend/src/routes/quizzes.ts`
+  - **API: `POST /` (問題作成)**:
+    - リクエストボディで `order` (順序) を受け取り、DBに保存するように修正。
+    - **バリデーション追加**:
+      - `questionText` または `questionImage` のどちらかが必須。
+      - `answerText` または `answerImage` のどちらかが必須。
+      - 不足している場合は `400 Bad Request` を返す。
+  - **API: `GET /:id` (問題詳細)**:
+    - 問題データ取得時に、`isOpened` フラグを `true` に更新する処理を追加。
+- **ファイル**: `backend/src/routes/tournaments.ts`
+  - **API: `GET /:id/board` (ボード取得)**:
+    - レスポンスの `Quiz` オブジェクトに `order`, `isOpened` を含める（Prismaのデフォルト動作で含まれるはずだが確認）。
+
+#### 3. フロントエンド改修
+- **参加者登録 (`frontend/src/pages/ParticipantRegistrationPage.tsx`)**
+  - 名前重複エラー（バックエンドからの409/500エラー）をキャッチし、「その名前は既に使用されています」といった具体的なエラーメッセージを表示する。
+
+- **大会作成フォーム (`frontend/src/components/TournamentForm.tsx`)**
+  - **UI変更**: 現在のカンマ区切りテキスト入力 (`points`) を廃止。
+  - **ロジック変更**:
+    - `questionsPerParticipant` (問題数) の入力値に応じて、数値入力欄（「1問目の配点」「2問目の配点」...）を動的に生成・表示する。
+    - フォーム送信時に、各入力欄の値を結合してカンマ区切り文字列 (`10,20,30`) に変換し、APIに送信する。
+
+- **参加者ダッシュボード (`frontend/src/pages/ParticipantDashboardPage.tsx`)**
+  - **表示追加**: 画面上部に参加者名を表示する。
+  - **問題リストの刷新**:
+    - 大会の設定配点 (`points`) を配列に展開し、順序ごとにリスト表示する。
+    - **未作成の場合**: 「作成する」ボタンを表示。クリックで `QuizCreatorPage` へ遷移（`order` と `point` を渡す）。
+    - **作成済みの場合**: 「編集する」ボタンを表示。クリックで `QuizCreatorPage` へ遷移（編集モード）。
+
+- **問題作成・編集 (`frontend/src/pages/QuizCreatorPage.tsx`)**
+  - **初期表示**: URLパラメータやStateから `order` と `point` を受け取る。配点欄は編集不可（Read-only）に変更する。
+  - **バリデーション**: `handleSubmit` 内で、問題（テキストor画像）と解答（テキストor画像）の必須入力をチェックし、不足があれば送信を中断してエラー表示する。
+
+- **問題ボード (`frontend/src/pages/QuizBoardPage.tsx`)**
+  - **既読表示**: `QuizCard` コンポーネントを改修し、`isOpened` が `true` の場合に既読スタイル（グレーアウトや「済」マーク）を適用する。
+  - **参加者名の非表示**: 各参加者の持つクイズリストをチェックし、全てのクイズが未読 (`isOpened === false`) の場合、参加者名を「???」等の表示にするか、非表示にする。
+
+- **主催者ダッシュボード (`frontend/src/pages/OrganizerDashboardPage.tsx`)**
+  - 大会ステータス (`tournament.status`) を確認し、`in_progress` または `finished` の場合に「開始済み」バッジを表示する。
+
 
 ---
 
