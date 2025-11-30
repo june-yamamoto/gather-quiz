@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GatherQuiz RDSデータベース用CloudFormationテンプレート
+
+Parameters:
+  VpcStackName:
+    Type: String
+    Description: 出力をインポートするVPC CloudFormationスタックの名前
+  DbUser:
+    Type: String
+    Description: RDSデータベースのマスターユーザー名
+    NoEcho: true
+  DbPassword:
+    Type: String
+    Description: RDSデータベースのマスターパスワード
+    NoEcho: true
+
+Resources:
+  # RDS Database Subnet Group
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for GatherQuiz RDS
+      SubnetIds:
+        'Fn::Split':
+          - ','
+          - !ImportValue
+              'Fn::Sub': '${VpcStackName}-PublicSubnetIds'
+
+  # RDS Parameter Group (SSL強制用)
+  DbParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: Parameter group for GatherQuiz RDS to force SSL
+      Family: postgres15
+      Parameters:
+        rds.force_ssl: "1"
+
+  # RDS Database Instance
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub ${AWS::StackName}-db
+      Engine: postgres
+      EngineVersion: '15'
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: '20'
+      MasterUsername: !Ref DbUser
+      MasterUserPassword: !Ref DbPassword
+      DBName: gatherquiz
+      PubliclyAccessible: true # インターネットからのアクセスを許可
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      DBParameterGroupName: !Ref DbParameterGroup # SSL強制パラメータグループを適用
+      VPCSecurityGroups:
+        - !ImportValue
+            'Fn::Sub': '${VpcStackName}-DatabaseSecurityGroupId'
+
+  # Secrets Manager Secret for DB Credentials
+  DbSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${AWS::StackName}-DbSecret
+      Description: Database credentials for GatherQuiz
+      SecretString: !Sub |
+        {
+          "username": "${DbUser}",
+          "password": "${DbPassword}",
+          "host": "${DatabaseInstance.Endpoint.Address}",
+          "port": "${DatabaseInstance.Endpoint.Port}",
+          "dbname": "gatherquiz",
+          "sslmode": "require"
+        }
+
+Outputs:
+  DbEndpoint:
+    Description: RDSデータベースのエンドポイント
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-DbEndpoint
+  DbPort:
+    Description: RDSデータベースのポート番号
+    Value: !GetAtt DatabaseInstance.Endpoint.Port
+    Export:
+      Name: !Sub ${AWS::StackName}-DbPort
+  DbSecretArn:
+    Description: DB接続情報シークレットのARN
+    Value: !Ref DbSecret
+    Export:
+      Name: !Sub ${AWS::StackName}-DbSecretArn
