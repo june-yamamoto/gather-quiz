@@ -20,7 +20,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'cp backend/prisma/schema.prisma backend/prisma/schema.original.prisma && cp backend/prisma/schema.e2e.prisma backend/prisma/schema.prisma && npm run db:push --prefix backend && NODE_ENV=test DATABASE_URL="file:./test.db" npm run dev --prefix backend',
+      command: 'cp backend/prisma/schema.prisma backend/prisma/schema.original.prisma && cp backend/prisma/schema.e2e.prisma backend/prisma/schema.prisma && DATABASE_URL="file:./test.db" npm run db:push --prefix backend && NODE_ENV=test DATABASE_URL="file:./test.db" npm run dev --prefix backend',
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
       stdout: 'pipe',
