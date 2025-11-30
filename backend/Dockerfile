@@ -28,20 +28,23 @@ ENV PGSSLROOTCERT=/etc/pki/tls/certs/rds-ca-bundle.pem
 RUN rm -rf node_modules/.prisma && npm exec prisma generate --schema prisma/schema.prisma --preview-feature=driverAdapters
 
 RUN npm run build
+RUN ls -la /var/task/dist
 
 # --- ステージ2: 最終イメージ ---
 FROM public.ecr.aws/lambda/nodejs:20
 
-WORKDIR ${LAMBDA_TASK_ROOT} # /var/task
+ENV LAMBDA_TASK_ROOT=/var/task
+WORKDIR ${LAMBDA_TASK_ROOT}
 
 ENV NODE_ENV=production
 
 # ビルドステージからビルド成果物を全てルートにコピー
-COPY --from=build /var/task/dist/. . 
+COPY --from=build /var/task/dist ${LAMBDA_TASK_ROOT}/
 # distの中身をルートにコピー
-COPY --from=build /var/task/node_modules ./node_modules
-COPY --from=build /var/task/prisma ./prisma 
-# prismaディレクトリ自体はPrisma Clientが読み込むので残す
+COPY --from=build /var/task/node_modules ${LAMBDA_TASK_ROOT}/node_modules
+COPY --from=build /var/task/prisma ${LAMBDA_TASK_ROOT}/prisma
+
+RUN ls -la ${LAMBDA_TASK_ROOT}
 
 # Lambdaハンドラを指定 (ルートにあると仮定)
 CMD [ "lambda.handler" ]

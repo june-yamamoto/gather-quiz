@@ -34,7 +34,9 @@ const TournamentCreationPage = () => {
         alert('大会情報が更新されました。');
         navigate(pathToOrganizerDashboard(tournament.id));
       } else {
-        const tournament = await tournamentApiClient.create(formData);
+        const { name, questionsPerParticipant, points, regulation, password } = formData;
+        const dataToSend = { name, questionsPerParticipant, points, regulation, password };
+        const tournament = await tournamentApiClient.create(dataToSend);
         navigate(pathToTournamentCreationComplete(tournament.id), {
           state: { password: formData.password },
         });

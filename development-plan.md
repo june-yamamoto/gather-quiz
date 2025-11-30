@@ -90,42 +90,39 @@
 
 ---
 
-## 4. サーバーレスアーキテクチャへの移行 (中断中)
+## 4. サーバーレスアーキテクチャへの移行 (完了)
 
 **目的:** 開発環境の運用コスト削減と、本番環境を見据えたモダンなサーバーレス構成への移行。
 
 **現状:**
-- **dev環境リソースの全削除**: デバッグと構成見直しのため、`gather-quiz-frontend-dev`, `gather-quiz-backend-lambda-dev`, `gather-quiz-rds-dev`, `gather-quiz-vpc-dev` の全CloudFormationスタックを削除しました。
-- **フロントエンド設定変更**: APIリクエスト先を環境変数 `VITE_API_BASE_URL` で制御するように修正し、CloudFrontのカスタムドメイン設定を一時的に無効化しました。
-- **パッケージ管理**: モノレポ構成を解体し、npm ベースの個別パッケージ管理に移行完了。
+- **dev環境の完全復旧**: バックエンド（Lambda）、データベース（RDS）、フロントエンド（S3+CloudFront）の全てのスタックが正常にデプロイされ、稼働しています。
+- **Prisma 7への移行**: 最新のPrisma 7を導入し、設定ファイルベースの管理に移行しました。
 
 **主な作業内容:**
 - ✅ **パッケージ分離とnpm移行**: `packages/backend`, `packages/frontend` をルート直下に移動し、pnpm から npm へ移行。
-- ✅ **Backend Lambda対応**: `Dockerfile`, `lambda.ts`, `schema.prisma` などを修正し、Prisma Client の初期化エラー (P1010) の解決に向けた調整を実施。
-- ✅ **Frontend API設定**: `src/api/*ApiClient.ts` の `baseURL` を修正し、環境変数経由でエンドポイントを指定可能に。
-- ✅ **dev環境クリーンアップ**: 既存の CloudFormation スタックをすべて削除。
-- ✅ **CloudFormationテンプレートとパラメータの整理**:
-    - パラメータファイルをルート直下から `cloudformation/parameters/` ディレクトリへ移動。
-    - `apprunner-stack.yaml` を削除し、Lambda/API Gateway構成へ一本化。
-    - 各テンプレート(`vpc-stack.yaml`, `backend-lambda-stack.yaml`, `frontend-stack.yaml`等)のDescriptionを日本語化し、不要なコメントアウトを整理。
-    - **構成変更**: コスト削減のため、LambdaをVPC外に配置し、RDSをパブリックアクセス可能に変更（`vpc-stack.yaml`の簡素化）。
-- ✅ **バックエンドのSecrets Manager対応とルーティング修正**:
-    - Lambda環境でDB認証情報をSecrets Managerから取得するように `db.ts` と `lambda.ts` を修正。
-    - ローカル開発環境とLambda環境のパス整合性を取るため、バックエンドのルーターを `/api` プレフィックス配下にマウントするように修正。
-    - `frontend/.env` を作成し、Viteのプロキシ設定と整合性を確保。
-    - E2Eテストがパスすることを確認。
+- ✅ **Backend Lambda対応**: `Dockerfile`, `lambda.ts` を修正し、Lambda環境での動作を確立。
+- ✅ **SSL接続問題の解消**: パブリックアクセスのRDSに対するSSL接続エラー（自己署名証明書問題）を、`db.ts` の `pg` プール設定 (`rejectUnauthorized: false`) で解消。
+- ✅ **Prisma 7アップグレード**:
+    - `prisma.config.ts` を導入し、DB接続設定を集約。
+    - `schema.prisma` から `url` プロパティを削除し、環境変数ベースに移行。
+    - 不要なスキーマファイルを削除し整理。
+- ✅ **データベースマイグレーション**: RDSに対して `prisma db push` を実行し、テーブルを作成完了。
+- ✅ **フロントエンドデプロイ**:
+    - S3バケットとCloudFrontディストリビューション (`gather-quiz-dev-v4`) をデプロイ。
+    - 古いCloudFrontとのCNAME競合を解消し、Route 53のDNSレコードを更新。
+    - CloudFront -> API Gateway -> Lambda -> RDS の疎通確認完了（200 OK）。
 
 ---
 
 ## 5. 今後の開発計画
 
-### 5.1. 新バックエンドへの完全移行 (再デプロイ)
+### 5.1. 新バックエンドへの完全移行 (完了)
 
-1.  [ ] **インフラ再構築**:
-    - `gather-quiz-vpc-dev`, `gather-quiz-rds-dev`, `gather-quiz-backend-lambda-dev`, `gather-quiz-frontend-dev` スタックを順次再デプロイする。
-2.  [ ] **動作確認**:
-    - 再デプロイされた環境で、Lambda関数が正常に起動し、データベース接続 (P1010エラーの解消) が成功することを確認する。
-    - フロントエンドからAPIへの接続を確認する。
+1.  ✅ **インフラ再構築**:
+    - `gather-quiz-vpc-dev`, `gather-quiz-rds-dev`, `gather-quiz-backend-lambda-dev`, `gather-quiz-frontend-dev-v2` スタックの再デプロイ完了。
+2.  ✅ **動作確認**:
+    - Lambda関数が正常に起動し、RDSへの接続（SSLエラー解消、テーブル作成済み）を確認。
+    - フロントエンドからAPIへの接続（CORS、パスルーティング）を確認。
 3.  [ ] **E2Eテストの実施**:
     - 新しいアーキテクチャで、既存のE2Eテストがすべてパスすることを確認する。
 
@@ -137,16 +134,18 @@
 
 ---
 
-## 6. デプロイ状況 (2025/11/24時点)
+## 6. デプロイ状況 (2025/11/30時点)
 
 ### 6.1. フロントエンド (開発環境)
 
-- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
-- **インフラ**: S3 + CloudFront (`gather-quiz-frontend-dev`)
+- ✅ **ステータス**: **稼働中**
+- **URL**: `https://dev.gather-quiz.june-yamamoto.com`
+- **インフラ**: S3 (`gather-quiz-dev-v4-frontend-bucket`) + CloudFront (`gather-quiz-frontend-dev-v2`)
 
 ### 6.2. バックエンド (新構成: Lambda)
 
-- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
+- ✅ **ステータス**: **稼働中**
+- **API Endpoint**: `https://38e2eh40bg.execute-api.ap-northeast-1.amazonaws.com` (CloudFront経由で利用)
 - **インフラ**: API Gateway + Lambda (`gather-quiz-backend-lambda-dev`)
 
 ### 6.3. バックエンド (旧構成: App Runner)
@@ -155,7 +154,7 @@
 
 ### 6.4. 共通インフラ
 
-- ⚠️ **ステータス**: **未デプロイ** (スタック削除済み)
+- ✅ **ステータス**: **稼働中**
 - **ネットワーク**: VPC (`gather-quiz-vpc-dev`)
 - **データベース**: RDS PostgreSQL (`gather-quiz-rds-dev`)
 - **成果物格納場所**: S3 (`gather-quiz-lambda-artifacts-251108`)

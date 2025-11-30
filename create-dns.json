@@ -1,0 +1,18 @@
+{
+  "Comment": "Create CNAME record for new CloudFront distribution",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "dev.gather-quiz.june-yamamoto.com.",
+        "Type": "CNAME",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "d2o25qfn9w9cvt.cloudfront.net"
+          }
+        ]
+      }
+    }
+  ]
+}

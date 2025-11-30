@@ -1,105 +1,96 @@
 import { PrismaClient } from '@prisma/client';
-import { Pool, PoolConfig } from 'pg';
+import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
-import * as fs from 'fs';
 
+// PrismaClientインスタンスを保持する変数
+// 初期化は initPrisma() またはトップレベル（ローカル/テスト環境の場合）で行われる
 export let prisma: PrismaClient;
-
-const RDS_CA_BUNDLE_PATH = '/etc/pki/tls/certs/rds-ca-bundle.pem';
 
 /**
  * PrismaClientを初期化する関数。
- * Lambda環境ではSecrets Managerから接続情報を取得し、PostgreSQLアダプターで初期化する。
+ * Lambda環境ではSecrets Managerから接続情報を取得して初期化する。
  * すでに初期化済みの場合は何もしない。
- * ローカル開発環境やテスト環境ではDATABASE_URLが設定されていればそれを使用する。
  */
 export async function initPrisma() {
   if (prisma) {
-    console.log('PrismaClient already initialized.');
+    console.log('PrismaClient already initialized. Skipping.');
     return;
   }
 
-  let databaseUrl: string | undefined;
+  let databaseUrl = process.env.DATABASE_URL;
 
-  // Lambda環境でSECRET_IDが設定されている場合、Secrets ManagerからDB接続情報を取得
-  if (process.env.SECRET_ID && !process.env.DATABASE_URL) {
-    console.log('Retrieving DB credentials from Secrets Manager...');
+  // DATABASE_URLがなく、SECRET_IDがある場合はSecrets Managerから取得
+  if (!databaseUrl && process.env.SECRET_ID) {
+    console.log(`Attempting to retrieve secret from Secrets Manager with ID: ${process.env.SECRET_ID}`);
     try {
-      const client = new SecretsManagerClient({ region: process.env.AWS_REGION || 'ap-northeast-1' });
+      const client = new SecretsManagerClient();
       const response = await client.send(
         new GetSecretValueCommand({ SecretId: process.env.SECRET_ID })
       );
+      
+      if (response.SecretString) {
+        const secret = JSON.parse(response.SecretString);
+        // デバッグログ: パスワードは出力しない
+        console.log("Secret retrieved (partial):", { 
+          host: secret.host, 
+          port: secret.port, 
+          dbname: secret.dbname, 
+          user: secret.username, 
+          sslmode: secret.sslmode 
+        });
 
-      if (!response.SecretString) {
-        throw new Error('SecretString not found in Secrets Manager response.');
+        const user = encodeURIComponent(secret.username);
+        const password = encodeURIComponent(secret.password); // パスワードはエンコード
+        const host = secret.host;
+        const port = secret.port;
+        const dbname = secret.dbname;
+        // sslmodeはPoolの設定(rejectUnauthorized: false)に任せるため、URLには含めない
+        
+        databaseUrl = `postgresql://${user}:${password}@${host}:${port}/${dbname}?schema=public`;
+        // デバッグログ: パスワード以降はマスク
+        console.log("Constructed DATABASE_URL (partial):", databaseUrl.substring(0, databaseUrl.indexOf('@') + 1) + '...');
+        
+        process.env.DATABASE_URL = databaseUrl; // 環境変数にもセット
+      } else {
+        console.error('SecretString is empty.');
       }
-      
-      const secret = JSON.parse(response.SecretString);
-      const user = encodeURIComponent(secret.username);
-      const password = encodeURIComponent(secret.password);
-      const host = secret.host;
-      const port = secret.port;
-      const dbname = secret.dbname;
-      const sslmode = secret.sslmode || 'require'; // Secrets Managerで指定されていなければrequireをデフォルトとする
-      
-      databaseUrl = `postgresql://${user}:${password}@${host}:${port}/${dbname}?schema=public&sslmode=${sslmode}`;
-      
-      // 環境変数にもセットしておくことで、後続の処理やPrisma Clientの初期化で利用可能にする
-      process.env.DATABASE_URL = databaseUrl;
-      console.log('DB credentials successfully retrieved and DATABASE_URL set from Secrets Manager.');
-
     } catch (error) {
-      console.error('Failed to retrieve secret from Secrets Manager:', error);
-      throw new Error(`Failed to initialize Prisma: Secrets Manager error - ${error instanceof Error ? error.message : String(error)}`);
+      console.error('Failed to retrieve secret from Secrets Manager or parse:', error);
+      throw error;
     }
-  } else if (process.env.DATABASE_URL) {
-    // ローカル開発環境やテスト環境などでDATABASE_URLが直接設定されている場合
-    databaseUrl = process.env.DATABASE_URL;
-    console.log('Using DATABASE_URL from environment variables.');
   }
 
   if (!databaseUrl) {
-    // どちらの方法でもDATABASE_URLが設定されなかった場合
-    throw new Error('DATABASE_URL environment variable is not set and could not be retrieved.');
+    throw new Error('DATABASE_URL environment variable is not set and could not be retrieved from Secrets Manager.');
   }
 
-  console.log(`Initializing PrismaClient for provider: ${databaseUrl.startsWith('postgresql') ? 'PostgreSQL' : 'SQLite'}...`);
-
-  // 接続文字列がPostgreSQLの場合のみPrismaPgアダプタを使用
-  if (databaseUrl.startsWith('postgresql')) {
-    const poolConfig: PoolConfig = {
-      connectionString: databaseUrl,
-    };
-
-    if (typeof poolConfig.ssl === 'object' && poolConfig.ssl && !poolConfig.ssl.ca) {
-      console.warn(`RDS CA Bundle not found at ${RDS_CA_BUNDLE_PATH}. SSL connection might fail.`);
-    }
-    
-    const pool = new Pool(poolConfig);
-    const adapter = new PrismaPg(pool);
-    prisma = new PrismaClient({ adapter });
-  } else if (databaseUrl.startsWith('file:')) {
-    // SQLiteの場合（テスト環境などで）
-    prisma = new PrismaClient();
-  } else {
-    throw new Error(`Unsupported database URL protocol: ${databaseUrl}`);
-  }
-  
+  console.log('Initializing PrismaClient with connection pool...');
+  const pool = new Pool({ 
+    connectionString: databaseUrl,
+    ssl: { rejectUnauthorized: false }
+  });
+  const adapter = new PrismaPg(pool);
+  prisma = new PrismaClient({ adapter });
   console.log('PrismaClient initialized.');
 }
 
-// ローカル開発やテストでの互換性のため、トップレベルで即時初期化を試みる
-// ただし、非同期のためここでは initPrisma() を直接呼び出さない
-// その代わりに、lambda.ts やローカルの起動スクリプト (index.ts) で await initPrisma() を呼ぶ
-
-// テスト環境では、initPrismaが呼ばれる前にPrismaClientのインスタンスが必要な場合があるため、
-// DATABASE_URLが設定されている場合は即座に初期化を試みる (主にSQLite用)
-if (process.env.NODE_ENV === 'test' && process.env.DATABASE_URL?.startsWith('file:')) {
-  console.log('Initializing PrismaClient for test environment (SQLite).');
+// ローカル開発環境やテスト環境、ビルド時など、DATABASE_URLが既に存在する場合の即時初期化ロジック
+// これにより、既存のスクリプト（dev, testなど）が変更なしで動作する
+if (process.env.NODE_ENV === 'test') {
+  // テスト環境
+  console.log('PrismaClient initializing for test environment (SQLite).');
   prisma = new PrismaClient();
+  console.log('PrismaClient initialized for test environment.');
+} else if (process.env.DATABASE_URL) {
+  // ローカル開発環境（DATABASE_URLが設定されている場合）
+  console.log('PrismaClient initializing for local development (PostgreSQL).');
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
+  prisma = new PrismaClient({ adapter });
+  console.log('PrismaClient initialized for local development.');
 } else {
-  // Lambda環境や通常のローカル開発ではinitPrismaを明示的に呼び出す必要がある
-  // prisma変数はundefinedのままexportされる。
-  console.log('PrismaClient initialization deferred. Call initPrisma() explicitly.');
+  // Lambda環境など、DATABASE_URLがなく、非同期初期化が必要な場合
+  // prisma変数はundefinedのまま。利用側（lambda.ts）で必ず initPrisma() を呼ぶこと。
+  console.log('PrismaClient initialization deferred. Waiting for initPrisma() call.');
 }

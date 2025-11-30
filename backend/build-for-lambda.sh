@@ -6,7 +6,12 @@ set -e
 # 1. ディレクトリとファイル名の定義
 TIMESTAMP=$(date +%s)
 WORKSPACE_ROOT=$(pwd)
-BACKEND_DIR="$WORKSPACE_ROOT/packages/backend"
+# packages/backend は存在しないため、ルート直下の backend を指定
+BACKEND_DIR="$WORKSPACE_ROOT/backend"
+if [ ! -d "$BACKEND_DIR" ]; then
+  # backendディレクトリで実行されている場合のフォールバック
+  BACKEND_DIR="$WORKSPACE_ROOT"
+fi
 BUILD_DIR="$BACKEND_DIR/build"
 
 # レイヤー用の設定
@@ -56,8 +61,8 @@ rm -rf ./prisma
 
 # Prismaエンジンの不要なバイナリを削除してサイズを削減
 echo "不要なPrismaエンジンバイナリを削除します..."
-find . -name "libquery_engine-*" -not -name "*linux-arm64-openssl-3.0.x*" -delete
-find . -name "schema-engine-*" -not -name "*linux-arm64-openssl-3.0.x*" -delete
+find . -name "libquery_engine-*" -not -name "*linux-x86_64-openssl-3.0.x*" -delete
+find . -name "schema-engine-*" -not -name "*linux-x86_64-openssl-3.0.x*" -delete
 
 # 診断: サイズの大きいディレクトリをリストアップ
 echo "node_modules内のサイズが大きいトップ20ディレクトリ:"
