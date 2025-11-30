@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 // PrismaClientインスタンスを保持する変数
 // 初期化は initPrisma() またはトップレベル（ローカル/テスト環境の場合）で行われる
@@ -79,9 +80,12 @@ export async function initPrisma() {
 // ローカル開発環境やテスト環境、ビルド時など、DATABASE_URLが既に存在する場合の即時初期化ロジック
 // これにより、既存のスクリプト（dev, testなど）が変更なしで動作する
 if (process.env.NODE_ENV === 'test') {
-  // テスト環境
-  console.log('PrismaClient initializing for test environment (SQLite).');
-  prisma = new PrismaClient();
+  // テスト環境: SQLite (BetterSqlite3 Adapter)
+  console.log('PrismaClient initializing for test environment (SQLite/BetterSqlite3).');
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL || 'file:./test.db',
+  });
+  prisma = new PrismaClient({ adapter });
   console.log('PrismaClient initialized for test environment.');
 } else if (process.env.DATABASE_URL) {
   // ローカル開発環境（DATABASE_URLが設定されている場合）

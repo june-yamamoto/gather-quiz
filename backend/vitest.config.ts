@@ -4,8 +4,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    fileParallelism: false,
+    setupFiles: ['./test/setup.ts'],
     env: {
-      DATABASE_URL: 'file:./prisma/test.db',
+      DATABASE_URL: 'file:./test.db',
     },
   },
 });

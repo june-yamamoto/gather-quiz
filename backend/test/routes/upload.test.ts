@@ -32,11 +32,16 @@ describe('アップロードAPI', async () => {
       const mockSignedUrl = 'https://test-bucket.s3.ap-northeast-1.amazonaws.com/some-signed-url';
       (getSignedUrl as vi.Mock).mockResolvedValue(mockSignedUrl);
 
-      const res = await request(app).post('/upload/image').send({ fileName: 'test.jpg', fileType: 'image/jpeg' });
+      const res = await request(app).post('/upload/image').send({
+        fileName: 'test.jpg',
+        fileType: 'image/jpeg',
+        tournamentId: 'test-tournament-id',
+        participantId: 'test-participant-id',
+      });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.signedUrl).toBe(mockSignedUrl);
-      expect(res.body.objectUrl).toContain('test.jpg');
+      expect(res.body.objectUrl).toMatch(/\/uploads\/test-tournament-id\/test-participant-id\/.*\.jpg$/);
       expect(getSignedUrl).toHaveBeenCalledOnce();
     });
 
