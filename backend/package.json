@@ -12,7 +12,7 @@
     "lint": "./node_modules/.bin/eslint .",
     "lint-fix": "./node_modules/.bin/eslint . --fix",
     "format": "./node_modules/.bin/prettier --write .",
-    "dev": "tsx src/index.ts",
+    "dev": "prisma generate && tsx src/index.ts",
     "db:push": "prisma db push",
     "test:generate": "prisma generate --schema=./prisma/schema.test.prisma"
   },
