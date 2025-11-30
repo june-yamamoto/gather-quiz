@@ -91,7 +91,10 @@ const AnswerDisplayPage = () => {
         )}
         {quiz.answerLink && (
           <Typography variant="body1" align="center" gutterBottom>
-            参考リンク: <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer">{quiz.answerLink}</a>
+            参考リンク:{' '}
+            <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer">
+              {quiz.answerLink}
+            </a>
           </Typography>
         )}
       </Card>

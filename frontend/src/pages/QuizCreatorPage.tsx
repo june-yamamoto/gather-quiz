@@ -42,9 +42,7 @@ const QuizCreatorPage = () => {
         : null;
       if (questionImageFile && !questionImageUrl) return;
 
-      const answerImageUrl = answerImageFile
-        ? await uploadApiClient.uploadImage(answerImageFile, tId, pId)
-        : null;
+      const answerImageUrl = answerImageFile ? await uploadApiClient.uploadImage(answerImageFile, tId, pId) : null;
       if (answerImageFile && !answerImageUrl) return;
 
       const quiz = new Quiz({
