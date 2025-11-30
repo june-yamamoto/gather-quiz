@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "./node_modules/.bin/vitest --run",
-    "pretest": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.test.prisma prisma/schema.prisma && prisma generate && prisma db push",
+    "pretest": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.test.prisma prisma/schema.prisma && DATABASE_URL=\"file:./test.db\" prisma generate && DATABASE_URL=\"file:./test.db\" prisma db push",
     "posttest": "mv prisma/schema.original.prisma prisma/schema.prisma",
     "test:watch": "./node_modules/.bin/vitest",
     "lint": "./node_modules/.bin/eslint .",
