@@ -15,6 +15,14 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
+  // エラーの詳細をログに出力
+  console.error('[ErrorHandler] Error occurred:', {
+    message: err.message,
+    stack: err.stack,
+    // Prismaのエラーオブジェクトのプロパティを含める
+    ...err,
+  });
+
   // HttpErrorのインスタンスかチェック
   if (err instanceof HttpError) {
     return res.status(err.statusCode).json({ error: err.message });
@@ -26,7 +34,6 @@ export const errorHandler = (
   }
 
   // その他の不明なエラー
-  console.error(err);
   // TODO: 本番環境では、エラーの詳細をログに出力し、汎用的なメッセージを返すようにする
   return res.status(500).json({ error: 'Internal Server Error' });
 };
