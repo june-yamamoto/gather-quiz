@@ -2,11 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import TournamentCreationCompletePage from '../pages/TournamentCreationCompletePage';
-import { tournamentApiClient } from '../api/TournamentApiClient';
-import { Tournament } from '../models/Tournament';
+import TournamentCreationCompletePage from '../TournamentCreationCompletePage';
+import { tournamentApiClient } from '../../api/TournamentApiClient';
+import { Tournament } from '../../models/Tournament';
 
-vi.mock('../api/TournamentApiClient');
+vi.mock('../../api/TournamentApiClient');
 
 const queryClient = new QueryClient();
 

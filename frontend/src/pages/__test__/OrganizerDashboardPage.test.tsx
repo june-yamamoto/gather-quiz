@@ -1,8 +1,8 @@
-import { render, screen, waitFor } from '../test-utils';
+import { render, screen, waitFor } from '../../test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import OrganizerDashboardPage from './OrganizerDashboardPage';
-import { tournamentApiClient } from '../api/TournamentApiClient';
+import OrganizerDashboardPage from '../OrganizerDashboardPage';
+import { tournamentApiClient } from '../../api/TournamentApiClient';
 
 describe('主催者ダッシュボードページ', () => {
   const mockData = {

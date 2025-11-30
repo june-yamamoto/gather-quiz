@@ -2,11 +2,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import QuizCreatorPage from '../pages/QuizCreatorPage';
-import { quizApiClient } from '../api/QuizApiClient';
-import { Quiz } from '../models/Quiz';
+import QuizCreatorPage from '../QuizCreatorPage';
+import { quizApiClient } from '../../api/QuizApiClient';
+import { Quiz } from '../../models/Quiz';
 
-vi.mock('../api/QuizApiClient');
+vi.mock('../../api/QuizApiClient');
 
 const queryClient = new QueryClient();
 
