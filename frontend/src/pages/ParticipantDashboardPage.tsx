@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Container, Typography, Box, List, ListItem, ListItemText, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
-import { pathToQuizCreator } from '../helpers/route-helpers';
+import { pathToQuizCreator, pathToTournamentPortal } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
@@ -77,12 +77,6 @@ const ParticipantDashboardPage = () => {
         <List>
           {points.map((point, index) => {
             // この順序(index)に対応する作成済みクイズを探す
-            // クイズのorderプロパティは0から始まると仮定
-            // (まだbackendのQuizモデルでorderが未実装だったり、データ移行前だとundefinedの可能性もあるので注意)
-            // ただし、これからの作成フローではorderが入る。既存データについてはorder=0のままかもしれない。
-            // ここでは簡易的に「orderが一致するもの」を探す。
-            // もしorderがまだデータになければ、配列のindex等でマッチングするロジックが必要だが、
-            // 今回の改修でbackendはorderを保存するようになる。
             const quiz = status?.createdQuizzes.find((q) => q.order === index);
             
             return (
@@ -126,6 +120,17 @@ const ParticipantDashboardPage = () => {
           })}
         </List>
       </Card>
+
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button
+          component={Link}
+          to={pathToTournamentPortal(tournamentId || '')}
+          variant="outlined"
+          color="inherit"
+        >
+          大会ポータルへ戻る
+        </Button>
+      </Box>
     </StyledContainer>
   );
 };

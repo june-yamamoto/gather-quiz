@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Container, Typography, Box } from '@mui/material';
-import { pathToTournamentCreation } from '../helpers/route-helpers';
+import { Container, Typography, Box, List, ListItem, ListItemText, ListItemButton, Paper } from '@mui/material';
+import { pathToTournamentCreation, pathToTournamentPortal } from '../helpers/route-helpers';
 import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -9,7 +10,22 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(8),
 }));
 
+type ViewedTournament = {
+  id: string;
+  name: string;
+  lastViewed: number;
+};
+
 const ServiceTopPage = () => {
+  const [viewedTournaments, setViewedTournaments] = useState<ViewedTournament[]>([]);
+
+  useEffect(() => {
+    const history = localStorage.getItem('viewedTournaments');
+    if (history) {
+      setViewedTournaments(JSON.parse(history));
+    }
+  }, []);
+
   return (
     <StyledContainer maxWidth="md">
       <Typography
@@ -45,6 +61,23 @@ const ServiceTopPage = () => {
           クイズ大会を新しく作成する
         </Button>
       </Box>
+
+      {viewedTournaments.length > 0 && (
+        <Box sx={{ mt: 8, textAlign: 'left' }}>
+          <Typography variant="h6" gutterBottom>
+            最近アクセスした大会
+          </Typography>
+          <Paper variant="outlined">
+            <List>
+              {viewedTournaments.map((t) => (
+                <ListItemButton key={t.id} component={Link} to={pathToTournamentPortal(t.id)}>
+                  <ListItemText primary={t.name} secondary={`ID: ${t.id}`} />
+                </ListItemButton>
+              ))}
+            </List>
+          </Paper>
+        </Box>
+      )}
     </StyledContainer>
   );
 };

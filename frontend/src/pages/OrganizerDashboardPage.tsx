@@ -3,7 +3,7 @@ import { Container, Typography, Box, TableHead, TableRow, TableCell, TableBody, 
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { tournamentApiClient } from '../api/TournamentApiClient';
-import { pathToTournamentEdit, pathToQuizBoard } from '../helpers/route-helpers';
+import { pathToTournamentEdit, pathToQuizBoard, pathToTournamentPortal } from '../helpers/route-helpers';
 import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
 import { Table, TableContainer } from '../components/design-system/Table/Table';
@@ -135,6 +135,17 @@ const OrganizerDashboardPage = () => {
             一度開始すると、問題の編集や参加者の追加はできなくなります。
           </Typography>
         )}
+      </Box>
+
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button
+          component={Link}
+          to={pathToTournamentPortal(tournamentId || '')}
+          variant="outlined"
+          color="inherit"
+        >
+          大会ポータルへ戻る
+        </Button>
       </Box>
     </StyledContainer>
   );

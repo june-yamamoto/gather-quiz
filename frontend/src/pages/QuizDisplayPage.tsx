@@ -1,20 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Box, CircularProgress } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
 import { quizApiClient } from '../api/QuizApiClient';
 import { Button } from '../components/design-system/Button/Button';
-import { Card } from '../components/design-system/Card/Card';
-
-const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '80vh', // Adjust as needed
-}));
 
 const QuizDisplayPage = () => {
   const { quizId } = useParams();
@@ -43,65 +32,90 @@ const QuizDisplayPage = () => {
 
   if (isLoading) {
     return (
-      <StyledContainer sx={{ textAlign: 'center' }}>
+      <Container sx={{ textAlign: 'center', mt: 4 }}>
         <CircularProgress />
-      </StyledContainer>
+      </Container>
     );
   }
 
   if (error || !quiz) {
     return (
-      <StyledContainer>
+      <Container sx={{ mt: 4 }}>
         <Typography color="error">エラー: {error?.message || 'クイズの読み込みに失敗しました。'}</Typography>
-      </StyledContainer>
+      </Container>
     );
   }
 
   return (
-    <StyledContainer maxWidth="md">
-      <Card sx={{ width: '100%' }}>
-        <Typography variant="h5" color="text.secondary" align="right">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100%',
+        bgcolor: 'background.paper',
+        p: 2,
+        boxSizing: 'border-box',
+      }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" color="text.secondary">
+          {/* 左上は空けておくか、ロゴなどを入れる */}
+        </Typography>
+        <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
           {quiz.point}点問題
         </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
         <Typography
-          variant="h3"
+          variant="h2"
           align="center"
           gutterBottom
           sx={{
-            my: 8,
-            fontSize: {
-              xs: '2rem',
-              sm: '2.5rem',
-              md: '3rem',
-            },
+            fontWeight: 'bold',
+            fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
+            mb: 4,
           }}
         >
           Q. {quiz.questionText}
         </Typography>
+
         {quiz.questionImage && (
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
             <img
               src={quiz.questionImage}
               alt="問題画像"
-              style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
             />
           </Box>
         )}
+
         {quiz.questionLink && (
-          <Typography variant="body1" align="center" gutterBottom>
+          <Typography variant="h6" align="center" sx={{ mt: 2 }}>
             参考リンク:{' '}
             <a href={quiz.questionLink} target="_blank" rel="noopener noreferrer">
               {quiz.questionLink}
             </a>
           </Typography>
         )}
-      </Card>
-      <Box sx={{ mt: 4 }}>
-        <Button variant="contained" size="large" onClick={showAnswer}>
+      </Box>
+
+      <Box sx={{ mt: 2, textAlign: 'center', pb: 2 }}>
+        <Button variant="contained" size="large" onClick={showAnswer} sx={{ minWidth: '200px', fontSize: '1.5rem' }}>
           正解を見る
         </Button>
       </Box>
-    </StyledContainer>
+    </Box>
   );
 };
 
