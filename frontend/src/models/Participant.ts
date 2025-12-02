@@ -17,6 +17,12 @@ export class Participant {
   name: string;
 
   /**
+   * パスワード (新規登録時のみ取得可能)
+   * @type {string | undefined}
+   */
+  password?: string;
+
+  /**
    * 紐づく大会のID
    * @type {string}
    */
@@ -43,6 +49,7 @@ export class Participant {
   constructor(data: {
     id: string;
     name: string;
+    password?: string;
     tournamentId: string;
     created: number;
     required: number;
@@ -50,6 +57,7 @@ export class Participant {
   }) {
     this.id = data.id;
     this.name = data.name;
+    this.password = data.password;
     this.tournamentId = data.tournamentId;
     this.created = data.created;
     this.required = data.required;
@@ -72,6 +80,7 @@ export class Participant {
       typeof data.name === 'string' &&
       'tournamentId' in data &&
       typeof data.tournamentId === 'string' &&
+      ('password' in data ? typeof data.password === 'string' : true) &&
       ('created' in data ? typeof data.created === 'number' : true) && // created is optional
       ('required' in data ? typeof data.required === 'number' : true) && // required is optional
       ('quizzes' in data ? Array.isArray(data.quizzes) : true) // quizzes is optional
@@ -79,6 +88,7 @@ export class Participant {
       const participantData = {
         id: data.id,
         name: data.name,
+        password: 'password' in data ? (data.password as string) : undefined,
         tournamentId: data.tournamentId,
         created: 'created' in data ? (data.created as number) : 0,
         required: 'required' in data ? (data.required as number) : 0,

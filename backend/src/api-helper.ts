@@ -56,6 +56,13 @@ export const pathToTournamentBoard = (id: string) => `${pathToTournament(id)}/bo
 export const pathToParticipants = (tournamentId: string) => `${pathToTournament(tournamentId)}/participants`;
 
 /**
+ * 参加者ログインエンドポイントのパスを返します。
+ * @param {string} tournamentId - 大会ID
+ * @returns {string} '/api/tournaments/:tournamentId/participants/login'
+ */
+export const pathToParticipantLogin = (tournamentId: string) => `${pathToParticipants(tournamentId)}/login`;
+
+/**
  * 特定の参加者のクイズ一覧エンドポイントのパスを返します。
  * @param {string} tournamentId - 大会ID
  * @param {string} participantId - 参加者ID

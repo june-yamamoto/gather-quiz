@@ -172,6 +172,26 @@ class TournamentApiClient {
       throw new Error('An unexpected error occurred');
     }
   }
+
+  /**
+   * 参加者として大会にログインします。
+   * @param {string} tournamentId - 大会ID
+   * @param {string} name - 参加者名
+   * @param {string} password - パスワード
+   * @returns {Promise<Participant>} ログインした参加者情報
+   * @throws {ApiError} APIリクエストが失敗した場合
+   */
+  public async loginParticipant(tournamentId: string, name: string, password: string): Promise<Participant> {
+    try {
+      const response = await this.client.post(`/tournaments/${tournamentId}/participants/login`, { name, password });
+      return Participant.fromApi(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new ApiError(error.response.data.message, error.response.status);
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
 }
 
 export const tournamentApiClient = new TournamentApiClient();

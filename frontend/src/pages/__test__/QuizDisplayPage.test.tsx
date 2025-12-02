@@ -42,10 +42,10 @@ const renderWithProviders = () => {
 describe('QuizDisplayPage', () => {
   it('クイズ問題が正しく表示されること', async () => {
     renderWithProviders();
-    await screen.findByText('30点問題');
-    expect(await screen.findByText(/This is a test question/)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: '問題画像' })).toHaveAttribute('src', 'http://example.com/image.png');
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com');
+    await screen.findByText('10点問題');
+    expect(await screen.findByText(/Test Question/)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '問題画像' })).toHaveAttribute('src', 'https://example.com/question.jpg');
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/hint');
     expect(screen.getByRole('button', { name: '正解を見る' })).toBeInTheDocument();
   });
 });

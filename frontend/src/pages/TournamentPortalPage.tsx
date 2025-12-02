@@ -13,7 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard } from '../helpers/route-helpers';
+import { pathToTournamentRegisterParticipant, pathToOrganizerDashboard, pathToParticipantDashboard } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Input } from '../components/design-system/Input/Input';
@@ -27,8 +27,15 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 const TournamentPortalPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [password, setPassword] = useState('');
+  
+  // Organizer Login State
+  const [organizerLoginOpen, setOrganizerLoginOpen] = useState(false);
+  const [organizerPassword, setOrganizerPassword] = useState('');
+
+  // Participant Login State
+  const [participantLoginOpen, setParticipantLoginOpen] = useState(false);
+  const [participantName, setParticipantName] = useState('');
+  const [participantPassword, setParticipantPassword] = useState('');
 
   const { data: tournament } = useQuery({
     queryKey: ['tournament', id],
@@ -41,27 +48,53 @@ const TournamentPortalPage = () => {
     enabled: !!id,
   });
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  // Organizer Handlers
+  const handleOrganizerLoginOpen = () => {
+    setOrganizerLoginOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setPassword('');
+  const handleOrganizerLoginClose = () => {
+    setOrganizerLoginOpen(false);
+    setOrganizerPassword('');
   };
 
-  const handleLogin = async () => {
+  const handleOrganizerLogin = async () => {
     if (!id) return;
     try {
-      await tournamentApiClient.login(id, password);
-      handleClose();
+      await tournamentApiClient.login(id, organizerPassword);
+      handleOrganizerLoginClose();
       setTimeout(() => {
         navigate(pathToOrganizerDashboard(id));
       }, 0);
     } catch (error) {
       console.error(error);
       alert('パスワードが違います。');
-      setPassword('');
+      setOrganizerPassword('');
+    }
+  };
+
+  // Participant Handlers
+  const handleParticipantLoginOpen = () => {
+    setParticipantLoginOpen(true);
+  };
+
+  const handleParticipantLoginClose = () => {
+    setParticipantLoginOpen(false);
+    setParticipantName('');
+    setParticipantPassword('');
+  };
+
+  const handleParticipantLogin = async () => {
+    if (!id) return;
+    try {
+      const participant = await tournamentApiClient.loginParticipant(id, participantName, participantPassword);
+      handleParticipantLoginClose();
+      setTimeout(() => {
+        navigate(pathToParticipantDashboard(id, participant.id));
+      }, 0);
+    } catch (error) {
+      console.error(error);
+      alert('名前またはパスワードが違います。');
     }
   };
 
@@ -83,7 +116,7 @@ const TournamentPortalPage = () => {
               <Typography color="textSecondary">大会の管理や進行はこちらから</Typography>
             </Box>
             <Box sx={{ mt: 3 }}>
-              <Button variant="outlined" color="primary" size="large" onClick={handleClickOpen} fullWidth>
+              <Button variant="outlined" color="primary" size="large" onClick={handleOrganizerLoginOpen} fullWidth>
                 主催者としてログイン
               </Button>
             </Box>
@@ -97,7 +130,7 @@ const TournamentPortalPage = () => {
               </Typography>
               <Typography color="textSecondary">問題の作成や確認はこちらから</Typography>
             </Box>
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Button
                 component={Link}
                 to={pathToTournamentRegisterParticipant(id || '')}
@@ -108,32 +141,69 @@ const TournamentPortalPage = () => {
               >
                 参加者として新規登録
               </Button>
+              <Button variant="outlined" color="primary" size="large" onClick={handleParticipantLoginOpen} fullWidth>
+                参加者としてログイン
+              </Button>
             </Box>
           </Card>
         </Grid>
       </Grid>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+      {/* Organizer Login Dialog */}
+      <Dialog open={organizerLoginOpen} onClose={handleOrganizerLoginClose} maxWidth="xs" fullWidth>
         <DialogTitle>主催者ログイン</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>大会作成時に設定した管理用パスワードを入力してください。</DialogContentText>
           <Input
             autoFocus
             margin="dense"
-            id="password"
             label="管理用パスワード"
             type="password"
             fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+            value={organizerPassword}
+            onChange={(e) => setOrganizerPassword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleOrganizerLogin()}
           />
         </DialogContent>
         <DialogActions sx={{ p: '0 24px 24px' }}>
-          <Button onClick={handleClose} variant="outlined">
+          <Button onClick={handleOrganizerLoginClose} variant="outlined">
             キャンセル
           </Button>
-          <Button onClick={handleLogin} variant="contained">
+          <Button onClick={handleOrganizerLogin} variant="contained">
+            ログイン
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Participant Login Dialog */}
+      <Dialog open={participantLoginOpen} onClose={handleParticipantLoginClose} maxWidth="xs" fullWidth>
+        <DialogTitle>参加者ログイン</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>登録した名前とパスワードを入力してください。</DialogContentText>
+          <Input
+            autoFocus
+            margin="dense"
+            label="名前"
+            fullWidth
+            value={participantName}
+            onChange={(e) => setParticipantName(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Input
+            margin="dense"
+            label="パスワード"
+            type="password"
+            fullWidth
+            value={participantPassword}
+            onChange={(e) => setParticipantPassword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleParticipantLogin()}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: '0 24px 24px' }}>
+          <Button onClick={handleParticipantLoginClose} variant="outlined">
+            キャンセル
+          </Button>
+          <Button onClick={handleParticipantLogin} variant="contained">
             ログイン
           </Button>
         </DialogActions>

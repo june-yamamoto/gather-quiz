@@ -4,6 +4,7 @@ import {
   asyncHandler,
   pathToTournaments,
   pathToParticipants,
+  pathToParticipantLogin,
   pathToTournamentLogin,
   pathToTournamentStatus,
   pathToTournamentStart,
@@ -109,6 +110,45 @@ router.post(
       },
     });
     res.json(new Participant(participant));
+  })
+);
+
+/**
+ * 参加者が大会にログインするためのエンドポイント
+ * @route POST /:id/participants/login
+ * @param {Request} req - Expressリクエストオブジェクト
+ * @param {Response} res - Expressレスポンスオブジェクト
+ * @param {string} req.params.id - 対象の大会ID
+ * @body {string} name - 参加者名
+ * @body {string} password - パスワード
+ * @returns {Participant} ログイン成功した参加者オブジェクト
+ * @throws {NotFoundError} 指定された参加者が見つからない場合
+ * @throws {UnauthorizedError} パスワードが不正な場合
+ */
+router.post(
+  tournamentsRouterPath(pathToParticipantLogin(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, password } = req.body;
+
+    const participant = await prisma.participant.findUnique({
+      where: {
+        tournamentId_name: {
+          tournamentId: id,
+          name: name,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new NotFoundError('Participant not found');
+    }
+
+    if (participant.password === password) {
+      res.json(new Participant(participant));
+    } else {
+      throw new UnauthorizedError('Invalid password');
+    }
   })
 );
 

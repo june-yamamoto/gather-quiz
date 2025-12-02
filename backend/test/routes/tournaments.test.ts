@@ -113,6 +113,53 @@ describe('大会API', () => {
     });
   });
 
+  describe('POST /:id/participants/login (参加者ログイン)', () => {
+    it('正しい名前とパスワードでログインが成功すること', async () => {
+      // 事前に参加者を作成
+      await prisma.participant.create({
+        data: {
+          name: 'LoginUser',
+          password: 'loginpw',
+          tournamentId: tournament.id,
+        },
+      });
+
+      const res = await request(app)
+        .post(`/tournaments/${tournament.id}/participants/login`)
+        .send({ name: 'LoginUser', password: 'loginpw' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.name).toBe('LoginUser');
+      expect(res.body.id).toBeDefined();
+    });
+
+    it('間違ったパスワードでログインが失敗すること', async () => {
+      await prisma.participant.create({
+        data: {
+          name: 'LoginUser2',
+          password: 'loginpw2',
+          tournamentId: tournament.id,
+        },
+      });
+
+      const res = await request(app)
+        .post(`/tournaments/${tournament.id}/participants/login`)
+        .send({ name: 'LoginUser2', password: 'wrongpw' });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe('Invalid password');
+    });
+
+    it('存在しない参加者名の場合、404エラーを返すこと', async () => {
+      const res = await request(app)
+        .post(`/tournaments/${tournament.id}/participants/login`)
+        .send({ name: 'NonexistentUser', password: 'pw' });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('Participant not found');
+    });
+  });
+
   describe('POST /:id/login (主催者ログイン)', () => {
     it('正しいパスワードでログインが成功すること', async () => {
       const res = await request(app).post(`/tournaments/${tournament.id}/login`).send({ password: 'correct-password' });
