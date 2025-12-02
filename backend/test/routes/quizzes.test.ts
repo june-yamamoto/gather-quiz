@@ -55,6 +55,7 @@ describe('クイズAPI', () => {
     it('新しいクイズが正しく作成されること', async () => {
       const quizData = {
         point: 10,
+        order: 1,
         questionText: 'テスト問題文',
         answerText: 'テスト解答文',
         tournamentId: tournament.id,
@@ -65,16 +66,39 @@ describe('クイズAPI', () => {
 
       expect(res.statusCode).toBe(201);
       expect(res.body.questionText).toBe(quizData.questionText);
+      expect(res.body.order).toBe(1);
+      expect(res.body.isOpened).toBe(false);
+    });
+
+    it('必須フィールド(問題/解答)が不足している場合エラーになること', async () => {
+      const quizData = {
+        point: 10,
+        // questionText missing
+        answerText: 'テスト解答文',
+        tournamentId: tournament.id,
+        participantId: participant.id,
+      };
+      const res = await request(app).post('/quizzes').send(quizData);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Question text or image is required');
     });
   });
 
   describe('GET /:id (クイズ取得)', () => {
-    it('指定したIDのクイズが正しく取得されること', async () => {
+    it('指定したIDのクイズが取得され、isOpenedがtrueになること', async () => {
+      // 初期状態確認
+      const initialQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
+      expect(initialQuiz?.isOpened).toBe(false);
+
       const res = await request(app).get(`/quizzes/${quiz.id}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.id).toBe(quiz.id);
-      expect(res.body.questionText).toBe('Original Question');
+      expect(res.body.isOpened).toBe(true);
+
+      // DBも更新されているか確認
+      const updatedQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
+      expect(updatedQuiz?.isOpened).toBe(true);
     });
 
     it('存在しないIDの場合、404エラーを返すこと', async () => {
@@ -99,6 +123,17 @@ describe('クイズAPI', () => {
       expect(res.body.point).toBe(updatedData.point);
       expect(res.body.questionText).toBe(updatedData.questionText);
     });
+
+    it('更新時に必須要件を満たさない場合エラーになること', async () => {
+      // 既存の問題文を消そうとする
+      const updatedData = {
+        questionText: '',
+      };
+      const res = await request(app).put(`/quizzes/${quiz.id}`).send(updatedData);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Question text or image is required');
+    });
+
 
     it('存在しないIDの場合、404エラーを返すこと', async () => {
       const updatedData = {

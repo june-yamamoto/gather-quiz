@@ -19,6 +19,7 @@ const quizzesRouterPath = (path: string) => path.substring(pathToQuizzes().lengt
  * @param {Request} req - Expressリクエストオブジェクト
  * @param {Response} res - Expressレスポンスオブジェクト
  * @body {number} point - 配点
+ * @body {number} [order] - 問題順序
  * @body {string} tournamentId - 紐づく大会のID
  * @body {string} participantId - 紐づく参加者のID
  * @body {string} [questionText] - 問題文
@@ -35,6 +36,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const {
       point,
+      order,
       questionText,
       questionImage,
       questionLink,
@@ -49,9 +51,18 @@ router.post(
       throw new BadRequestError('Missing required fields');
     }
 
+    if (!questionText && !questionImage) {
+      throw new BadRequestError('Question text or image is required');
+    }
+
+    if (!answerText && !answerImage) {
+      throw new BadRequestError('Answer text or image is required');
+    }
+
     const quiz = await prisma.quiz.create({
       data: {
         point,
+        order: order || 0,
         questionText,
         questionImage,
         questionLink,
@@ -83,6 +94,15 @@ router.get(
       where: { id },
     });
     if (quiz) {
+      // 問題詳細を取得した時点で既読(isOpened)にする
+      if (!quiz.isOpened) {
+        await prisma.quiz.update({
+          where: { id },
+          data: { isOpened: true },
+        });
+        // 更新後の値を反映
+        quiz.isOpened = true;
+      }
       res.json(new Quiz(quiz));
     } else {
       throw new NotFoundError('Quiz not found');
@@ -117,6 +137,21 @@ router.put(
     });
     if (!quiz) {
       throw new NotFoundError('The requested resource was not found.');
+    }
+
+    // 更新後の値を予測してバリデーションを行う
+    // リクエストボディに値が含まれていればそれを、なければ既存の値を使用する
+    // 注意: 空文字列への更新を許可する場合は、undefined判定を行う必要がある
+    const nextQuestionText = questionText !== undefined ? questionText : quiz.questionText;
+    const nextQuestionImage = questionImage !== undefined ? questionImage : quiz.questionImage;
+    const nextAnswerText = answerText !== undefined ? answerText : quiz.answerText;
+    const nextAnswerImage = answerImage !== undefined ? answerImage : quiz.answerImage;
+
+    if (!nextQuestionText && !nextQuestionImage) {
+      throw new BadRequestError('Question text or image is required');
+    }
+    if (!nextAnswerText && !nextAnswerImage) {
+      throw new BadRequestError('Answer text or image is required');
     }
 
     const updatedQuiz = await prisma.quiz.update({

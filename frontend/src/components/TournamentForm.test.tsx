@@ -27,7 +27,11 @@ describe('TournamentForm', () => {
 
     expect(screen.getByRole('textbox', { name: '大会名' })).toHaveValue('Test Tournament');
     expect(screen.getByRole('spinbutton', { name: '参加者1人あたりの問題作成数' })).toHaveValue(5);
-    expect(screen.getByRole('textbox', { name: '各問題の配点 (カンマ区切り)' })).toHaveValue('10,20,30,40,50');
+    expect(screen.getByRole('spinbutton', { name: '1問目の配点' })).toHaveValue(10);
+    expect(screen.getByRole('spinbutton', { name: '2問目の配点' })).toHaveValue(20);
+    expect(screen.getByRole('spinbutton', { name: '3問目の配点' })).toHaveValue(30);
+    expect(screen.getByRole('spinbutton', { name: '4問目の配点' })).toHaveValue(40);
+    expect(screen.getByRole('spinbutton', { name: '5問目の配点' })).toHaveValue(50);
     expect(screen.getByRole('textbox', { name: 'レギュレーション' })).toHaveValue('Test Regulation');
     expect(screen.getByText('この内容で更新する')).toBeInTheDocument();
   });

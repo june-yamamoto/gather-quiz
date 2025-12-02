@@ -57,6 +57,25 @@ class QuizApiClient {
       throw new Error('An unexpected error occurred');
     }
   }
+
+  /**
+   * 指定されたIDのクイズ情報を更新します。
+   * @param {string} id - クイズID
+   * @param {object} quizData - 更新するクイズのデータ
+   * @returns {Promise<Quiz>} 更新されたクイズ情報
+   * @throws {ApiError} APIリクエストが失敗した場合
+   */
+  public async update(id: string, quizData: object): Promise<Quiz> {
+    try {
+      const response = await this.client.put(`/quizzes/${id}`, quizData);
+      return Quiz.fromApi(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new ApiError(error.response.data.message, error.response.status);
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
 }
 
 export const quizApiClient = new QuizApiClient();

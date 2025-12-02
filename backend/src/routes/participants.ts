@@ -50,6 +50,8 @@ router.get(
     const remainingQuestions = requiredQuestions - createdQuestionsCount;
 
     res.json({
+      participantName: participant.name,
+      tournamentPoints: participant.tournament.points,
       createdQuizzes,
       remainingQuestions,
       requiredQuestions,

@@ -38,6 +38,8 @@ model Participant {
 model Quiz {
   id            String    @id @default(uuid())
   point         Int
+  order         Int       @default(0)
+  isOpened      Boolean   @default(false)
   questionText  String?
   questionImage String?
   questionLink  String?

@@ -32,10 +32,17 @@ class ParticipantApiClient {
   public async getQuizzes(
     tournamentId: string,
     participantId: string
-  ): Promise<{ createdQuizzes: Quiz[]; remainingQuestions: number }> {
+  ): Promise<{
+    participantName: string;
+    tournamentPoints: string;
+    createdQuizzes: Quiz[];
+    remainingQuestions: number;
+  }> {
     try {
       const response = await this.client.get(`/tournaments/${tournamentId}/participants/${participantId}/quizzes`);
       return {
+        participantName: response.data.participantName,
+        tournamentPoints: response.data.tournamentPoints,
         createdQuizzes: response.data.createdQuizzes.map(Quiz.fromApi),
         remainingQuestions: response.data.remainingQuestions,
       };

@@ -12,7 +12,9 @@ const queryClient = new QueryClient();
 
 const mockQuiz = new Quiz({
   id: 'q-1',
-  point: 30,
+  point: 10,
+  order: 0,
+  isOpened: true,
   questionText: 'This is a test question.',
   questionImage: null,
   questionLink: null,
@@ -40,7 +42,7 @@ const renderWithProviders = () => {
 describe('AnswerDisplayPage', () => {
   it('クイズの解答が正しく表示されること', async () => {
     renderWithProviders();
-    await screen.findByText(/Q. This is a test question./);
+    await screen.findByText('Q. This is a test question.');
     expect(screen.getByText('A. This is the answer.')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '解答画像' })).toHaveAttribute('src', 'http://example.com/answer.png');
     expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com/answer');

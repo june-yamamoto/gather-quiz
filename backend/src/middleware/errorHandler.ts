@@ -29,8 +29,13 @@ export const errorHandler = (
   }
 
   // Prismaのエラーコードをチェック
-  if ('code' in err && err.code === 'P2025') {
-    return res.status(404).json({ error: 'The requested resource was not found.' });
+  if ('code' in err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'The requested resource was not found.' });
+    }
+    if (err.code === 'P2002') {
+      return res.status(409).json({ error: 'Unique constraint violation' });
+    }
   }
 
   // その他の不明なエラー

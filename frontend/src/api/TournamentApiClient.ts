@@ -47,11 +47,12 @@ class TournamentApiClient {
    * @returns {Promise<any>} 大会のステータス情報
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  public async getStatus(id: string): Promise<{ tournamentName: string; participants: Participant[] }> {
+  public async getStatus(id: string): Promise<{ tournamentName: string; status: string; participants: Participant[] }> {
     try {
       const response = await this.client.get(`/tournaments/${id}/status`);
       return {
         tournamentName: response.data.tournamentName,
+        status: response.data.status,
         participants: response.data.participants.map(Participant.fromApi),
       };
     } catch (error) {
@@ -163,6 +164,26 @@ class TournamentApiClient {
   public async createParticipant(tournamentId: string, participantData: { name: string }): Promise<Participant> {
     try {
       const response = await this.client.post(`/tournaments/${tournamentId}/participants`, participantData);
+      return Participant.fromApi(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new ApiError(error.response.data.message, error.response.status);
+      }
+      throw new Error('An unexpected error occurred');
+    }
+  }
+
+  /**
+   * 参加者として大会にログインします。
+   * @param {string} tournamentId - 大会ID
+   * @param {string} name - 参加者名
+   * @param {string} password - パスワード
+   * @returns {Promise<Participant>} ログインした参加者情報
+   * @throws {ApiError} APIリクエストが失敗した場合
+   */
+  public async loginParticipant(tournamentId: string, name: string, password: string): Promise<Participant> {
+    try {
+      const response = await this.client.post(`/tournaments/${tournamentId}/participants/login`, { name, password });
       return Participant.fromApi(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

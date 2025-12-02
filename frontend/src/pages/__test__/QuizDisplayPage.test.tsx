@@ -12,10 +12,12 @@ const queryClient = new QueryClient();
 
 const mockQuiz = new Quiz({
   id: 'q-1',
-  point: 30,
-  questionText: 'This is a test question.',
-  questionImage: 'http://example.com/image.png',
-  questionLink: 'http://example.com',
+  point: 10,
+  order: 0,
+  isOpened: false,
+  questionText: 'Test Question',
+  questionImage: 'https://example.com/question.jpg',
+  questionLink: 'https://example.com/hint',
   answerText: 'Answer',
   answerImage: null,
   answerLink: null,
@@ -40,10 +42,10 @@ const renderWithProviders = () => {
 describe('QuizDisplayPage', () => {
   it('クイズ問題が正しく表示されること', async () => {
     renderWithProviders();
-    await screen.findByText('30点問題');
-    expect(await screen.findByText(/This is a test question/)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: '問題画像' })).toHaveAttribute('src', 'http://example.com/image.png');
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com');
+    await screen.findByText('10点問題');
+    expect(await screen.findByText(/Test Question/)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '問題画像' })).toHaveAttribute('src', 'https://example.com/question.jpg');
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/hint');
     expect(screen.getByRole('button', { name: '正解を見る' })).toBeInTheDocument();
   });
 });

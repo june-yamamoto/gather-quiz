@@ -1,12 +1,11 @@
 generator client {
   provider        = "prisma-client-js"
-  engineType      = "library"
-  previewFeatures = ["driverAdapters"]
   output          = "../node_modules/.prisma/client"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model Tournament {
@@ -39,6 +38,8 @@ model Participant {
 model Quiz {
   id            String    @id @default(uuid())
   point         Int
+  order         Int       @default(0)
+  isOpened      Boolean   @default(false)
   questionText  String?
   questionImage String?
   questionLink  String?
