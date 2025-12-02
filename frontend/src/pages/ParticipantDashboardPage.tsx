@@ -46,11 +46,16 @@ const ParticipantDashboardPage = () => {
     );
   }
 
+  // 大会の配点設定をパース
+  const points = status?.tournamentPoints ? status.tournamentPoints.split(',').map(Number) : [];
+
   return (
     <StyledContainer maxWidth="md">
-      <Typography variant="h4" component="h1" gutterBottom>
-        参加者ダッシュボード
-      </Typography>
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h5" component="h1">
+          {status?.participantName} さんのダッシュボード
+        </Typography>
+      </Box>
 
       <Card sx={{ my: 4, textAlign: 'left' }}>
         <Typography variant="h6" gutterBottom>
@@ -63,35 +68,62 @@ const ParticipantDashboardPage = () => {
           </Typography>{' '}
           問、作成してください。
         </Typography>
-        <Box sx={{ mt: 3 }}>
-          <Button
-            component={Link}
-            to={pathToQuizCreator(tournamentId || '', participantId || '')}
-            variant="contained"
-            color="primary"
-          >
-            新しい問題を作成する
-          </Button>
-        </Box>
       </Card>
 
       <Typography variant="h5" component="h2" gutterBottom>
-        作成済みの問題
+        問題リスト
       </Typography>
       <Card sx={{ textAlign: 'left', p: 0 }}>
         <List>
-          {status?.createdQuizzes.map((quiz, index) => (
-            <div key={quiz.id}>
-              <ListItem sx={{ py: 2 }}>
-                <ListItemText
-                  primary={quiz.questionText || '（問題文がありません）'}
-                  secondary={`正解: ${quiz.answerText || '（解答文がありません）'}`}
-                />
-                {/* TODO: 作成した問題を編集・削除できるように、今後ボタンをここに追加する */}
-              </ListItem>
-              {index < status.createdQuizzes.length - 1 && <Divider component="li" />}
-            </div>
-          ))}
+          {points.map((point, index) => {
+            // この順序(index)に対応する作成済みクイズを探す
+            // クイズのorderプロパティは0から始まると仮定
+            // (まだbackendのQuizモデルでorderが未実装だったり、データ移行前だとundefinedの可能性もあるので注意)
+            // ただし、これからの作成フローではorderが入る。既存データについてはorder=0のままかもしれない。
+            // ここでは簡易的に「orderが一致するもの」を探す。
+            // もしorderがまだデータになければ、配列のindex等でマッチングするロジックが必要だが、
+            // 今回の改修でbackendはorderを保存するようになる。
+            const quiz = status?.createdQuizzes.find((q) => q.order === index);
+            
+            return (
+              <div key={index}>
+                <ListItem
+                  secondaryAction={
+                    <Button
+                      component={Link}
+                      to={
+                        quiz
+                          ? `${pathToQuizCreator(tournamentId || '', participantId || '')}?edit=${quiz.id}&order=${index}&point=${point}`
+                          : `${pathToQuizCreator(tournamentId || '', participantId || '')}?order=${index}&point=${point}`
+                      }
+                      variant={quiz ? 'outlined' : 'contained'}
+                      color="primary"
+                      size="small"
+                    >
+                      {quiz ? '編集する' : '作成する'}
+                    </Button>
+                  }
+                  sx={{ py: 2 }}
+                >
+                  <ListItemText
+                    primary={`第${index + 1}問 (${point}点)`}
+                    secondary={
+                      quiz ? (
+                        <>
+                          Q. {quiz.questionText || '（画像のみ）'} <br />
+                          A. {quiz.answerText || '（画像のみ）'}
+                        </>
+                      ) : (
+                        '未作成'
+                      )
+                    }
+                    secondaryTypographyProps={{ component: 'div' }}
+                  />
+                </ListItem>
+                {index < points.length - 1 && <Divider component="li" />}
+              </div>
+            );
+          })}
         </List>
       </Card>
     </StyledContainer>

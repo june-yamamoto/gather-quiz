@@ -108,8 +108,8 @@ describe('大会API', () => {
 
       const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '重複参加者' });
 
-      // Prismaのユニーク制約違反は500を返すため、それを検証する
-      expect(res.statusCode).toBe(500);
+      // Prismaのユニーク制約違反は409を返すため、それを検証する
+      expect(res.statusCode).toBe(409);
     });
   });
 

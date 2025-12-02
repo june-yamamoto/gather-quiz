@@ -79,37 +79,46 @@ const QuizBoardPage = () => {
         {tournament.name}
       </Typography>
       <Box sx={{ mt: 4 }}>
-        {/* Header Row */}
-        <Grid container spacing={2}>
-          <Grid item xs={2} />
-          {tournament.participants.map((p: Participant) => (
-            <Grid item xs={columnWidth} key={p.id} textAlign="center">
-              <ParticipantName variant="h6">{p.name}</ParticipantName>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Rows for each point value */}
-        {points.map((point: number) => (
-          <Grid container spacing={2} key={point} sx={{ mt: 1 }} alignItems="stretch">
-            <Grid item xs={2}>
-              <PointLabel variant="h5">{point}点</PointLabel>
-            </Grid>
-            {tournament.participants.map((p: Participant) => {
-              const quiz = p.quizzes.find((q: Quiz) => q.point === point);
-              return (
-                <Grid item xs={columnWidth} key={`${p.id}-${point}`}>
-                  {quiz ? (
-                    <QuizCard point={point} onClick={() => handleQuizSelect(quiz.id)} />
-                  ) : (
-                    <QuizCard point={point} />
-                  )}
+                {/* Header Row */}
+                <Grid container spacing={2}>
+                  <Grid item xs={2} />
+                  {tournament.participants.map((p: Participant) => {
+                    const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
+                    return (
+                      <Grid item xs={columnWidth} key={p.id} textAlign="center">
+                        <ParticipantName variant="h6">
+                          {isParticipantVisible ? p.name : '???'}
+                        </ParticipantName>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
-              );
-            })}
-          </Grid>
-        ))}
-      </Box>
+        
+                {/* Rows for each point value */}
+                {points.map((point: number, index: number) => (
+                  <Grid container spacing={2} key={`${point}-${index}`} sx={{ mt: 1 }} alignItems="stretch">
+                    <Grid item xs={2}>
+                      <PointLabel variant="h5">{point}点</PointLabel>
+                    </Grid>
+                    {tournament.participants.map((p: Participant) => {
+                      // orderでクイズを特定する (orderが一致するものを探す)
+                      const quiz = p.quizzes.find((q: Quiz) => q.order === index);
+                      return (
+                        <Grid item xs={columnWidth} key={`${p.id}-${index}`}>
+                          {quiz ? (
+                            <QuizCard
+                              point={point}
+                              isAnswered={quiz.isOpened}
+                              onClick={() => handleQuizSelect(quiz.id)}
+                            />
+                          ) : (
+                            <QuizCard point={point} />
+                          )}
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                ))}      </Box>
     </StyledContainer>
   );
 };

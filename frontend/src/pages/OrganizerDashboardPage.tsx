@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, TableHead, TableRow, TableCell, TableBody, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, TableHead, TableRow, TableCell, TableBody, CircularProgress, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { tournamentApiClient } from '../api/TournamentApiClient';
@@ -44,6 +44,8 @@ const OrganizerDashboardPage = () => {
     }
   };
 
+  const isStarted = status?.status === 'in_progress' || status?.status === 'finished';
+
   if (isLoading) {
     return (
       <StyledContainer maxWidth="lg" sx={{ textAlign: 'center' }}>
@@ -62,9 +64,12 @@ const OrganizerDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="lg">
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
-        管理ページ: {status?.tournamentName}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ mr: 2 }}>
+          管理ページ: {status?.tournamentName}
+        </Typography>
+        {isStarted && <Chip label="開始済み" color="success" />}
+      </Box>
 
       <Card sx={{ mb: 4, textAlign: 'left' }}>
         <Typography variant="h6" component="h2" gutterBottom>
@@ -110,12 +115,26 @@ const OrganizerDashboardPage = () => {
       </TableContainer>
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleStartTournament}>
-          この内容で大会を開始する
-        </Button>
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          一度開始すると、問題の編集や参加者の追加はできなくなります。
-        </Typography>
+        {isStarted ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            component={Link}
+            to={pathToQuizBoard(tournamentId || '')}
+          >
+             問題ボードへ移動する
+          </Button>
+        ) : (
+          <Button variant="contained" color="primary" size="large" onClick={handleStartTournament}>
+            この内容で大会を開始する
+          </Button>
+        )}
+        {!isStarted && (
+          <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+            一度開始すると、問題の編集や参加者の追加はできなくなります。
+          </Typography>
+        )}
       </Box>
     </StyledContainer>
   );

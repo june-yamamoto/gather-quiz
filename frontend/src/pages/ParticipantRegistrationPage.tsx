@@ -6,6 +6,7 @@ import { pathToQuizCreator } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Input } from '../components/design-system/Input/Input';
 import { Button } from '../components/design-system/Button/Button';
+import { ApiError } from '../errors/ApiError';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -31,7 +32,11 @@ const ParticipantRegistrationPage = () => {
       navigate(pathToQuizCreator(tournamentId, participant.id));
     } catch (error) {
       console.error(error);
-      alert('エラーが発生しました。');
+      if (error instanceof ApiError && error.status === 409) {
+        alert('その名前は既に使用されています。別の名前を入力してください。');
+      } else {
+        alert('エラーが発生しました。');
+      }
     }
   };
 

@@ -12,10 +12,12 @@ const queryClient = new QueryClient();
 
 const mockQuiz = new Quiz({
   id: 'q-1',
-  point: 30,
-  questionText: 'This is a test question.',
-  questionImage: 'http://example.com/image.png',
-  questionLink: 'http://example.com',
+  point: 10,
+  order: 0,
+  isOpened: false,
+  questionText: 'Test Question',
+  questionImage: 'https://example.com/question.jpg',
+  questionLink: 'https://example.com/hint',
   answerText: 'Answer',
   answerImage: null,
   answerLink: null,

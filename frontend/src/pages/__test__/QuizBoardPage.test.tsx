@@ -30,6 +30,8 @@ const mockTournament = new Tournament({
         new Quiz({
           id: 'q-1',
           point: 10,
+          order: 0,
+          isOpened: true,
           tournamentId: 'test-id',
           participantId: 'p-1',
         }),

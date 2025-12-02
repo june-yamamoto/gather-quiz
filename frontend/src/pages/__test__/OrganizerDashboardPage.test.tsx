@@ -7,6 +7,7 @@ import { tournamentApiClient } from '../../api/TournamentApiClient';
 describe('主催者ダッシュボードページ', () => {
   const mockData = {
     tournamentName: 'マイテスト大会',
+    status: 'pending',
     participants: [
       { id: '1', name: 'アリス', created: 2, required: 3, tournamentId: 'test-id', quizzes: [] },
       { id: '2', name: 'ボブ', created: 3, required: 3, tournamentId: 'test-id', quizzes: [] },

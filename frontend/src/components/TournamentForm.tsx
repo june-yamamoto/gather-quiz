@@ -29,27 +29,51 @@ type TournamentFormProps = {
 };
 
 export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentFormProps) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(tournament?.name || '');
   const [password, setPassword] = useState('');
-  const [questionsPerParticipant, setQuestionsPerParticipant] = useState(3);
-  const [points, setPoints] = useState('10,20,30');
-  const [regulation, setRegulation] = useState('');
+  const [questionsPerParticipant, setQuestionsPerParticipant] = useState(tournament?.questionsPerParticipant || 3);
+  const [pointValues, setPointValues] = useState<string[]>(
+    tournament?.points ? tournament.points.split(',') : ['10', '20', '30']
+  );
+  const [regulation, setRegulation] = useState(tournament?.regulation || '');
 
   useEffect(() => {
     if (tournament) {
       setName(tournament.name);
       setQuestionsPerParticipant(tournament.questionsPerParticipant);
-      setPoints(tournament.points);
+      // カンマ区切りの文字列を配列に変換、空の場合は空配列
+      setPointValues(tournament.points ? tournament.points.split(',') : []);
       setRegulation(tournament.regulation || '');
     }
   }, [tournament]);
+
+  // 問題数が変更されたら配点入力欄の数を調整する
+  useEffect(() => {
+    setPointValues((prev) => {
+      const currentLength = prev.length;
+      if (questionsPerParticipant > currentLength) {
+        // 増えた分は空文字(またはデフォルト値)で埋める
+        return [...prev, ...Array(questionsPerParticipant - currentLength).fill('')];
+      } else if (questionsPerParticipant < currentLength) {
+        // 減った分は切り捨てる
+        return prev.slice(0, questionsPerParticipant);
+      }
+      return prev;
+    });
+  }, [questionsPerParticipant]);
+
+  const handlePointChange = (index: number, value: string) => {
+    const newPoints = [...pointValues];
+    newPoints[index] = value;
+    setPointValues(newPoints);
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const formData: TournamentFormData = {
       name,
       questionsPerParticipant: Number(questionsPerParticipant),
-      points,
+      points: pointValues.join(','),
       regulation,
       ...(password && { password }),
     };
@@ -72,7 +96,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
             onChange={(e) => setPassword(e.target.value)}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <Input
             label="参加者1人あたりの問題作成数"
             type="number"
@@ -80,17 +104,28 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
             required
             value={questionsPerParticipant}
             onChange={(e) => setQuestionsPerParticipant(Number(e.target.value))}
+            inputProps={{ min: 1, max: 10 }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <Input
-            label="各問題の配点 (カンマ区切り)"
-            fullWidth
-            required
-            value={points}
-            onChange={(e) => setPoints(e.target.value)}
-          />
+        
+        {/* 動的な配点入力欄 */}
+        <Grid item xs={12}>
+            <Grid container spacing={2}>
+            {pointValues.map((point, index) => (
+                <Grid item xs={6} sm={4} md={3} key={index}>
+                <Input
+                    label={`${index + 1}問目の配点`}
+                    type="number"
+                    fullWidth
+                    required
+                    value={point}
+                    onChange={(e) => handlePointChange(index, e.target.value)}
+                />
+                </Grid>
+            ))}
+            </Grid>
         </Grid>
+
         <Grid item xs={12}>
           <Input
             label="レギュレーション"

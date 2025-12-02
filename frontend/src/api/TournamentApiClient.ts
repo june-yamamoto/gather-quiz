@@ -47,11 +47,12 @@ class TournamentApiClient {
    * @returns {Promise<any>} 大会のステータス情報
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  public async getStatus(id: string): Promise<{ tournamentName: string; participants: Participant[] }> {
+  public async getStatus(id: string): Promise<{ tournamentName: string; status: string; participants: Participant[] }> {
     try {
       const response = await this.client.get(`/tournaments/${id}/status`);
       return {
         tournamentName: response.data.tournamentName,
+        status: response.data.status,
         participants: response.data.participants.map(Participant.fromApi),
       };
     } catch (error) {

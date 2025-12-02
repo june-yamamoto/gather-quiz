@@ -188,6 +188,7 @@ router.get(
 
     res.json({
       tournamentName: tournament.name,
+      status: tournament.status,
       participants: participantStatus,
     });
   })

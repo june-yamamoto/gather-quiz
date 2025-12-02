@@ -80,6 +80,8 @@ describe('参加者API', () => {
       expect(res.body.remainingQuestions).toBe(0);
       expect(res.body.requiredQuestions).toBe(2);
       expect(res.body.createdQuestionsCount).toBe(2);
+      expect(res.body.participantName).toBe('Test Participant');
+      expect(res.body.tournamentPoints).toBe('10,20');
     });
 
     it('存在しない参加者IDの場合、404エラーを返すこと', async () => {

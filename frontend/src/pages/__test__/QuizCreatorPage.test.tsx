@@ -28,7 +28,7 @@ const renderWithProviders = () => {
 describe('QuizCreatorPage', () => {
   it('クイズ作成フォームが正しく表示されること', () => {
     renderWithProviders();
-    expect(screen.getByRole('heading', { name: '問題作成・編集' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '新しい問題の作成' })).toBeInTheDocument();
     expect(screen.getByLabelText('問題文')).toBeInTheDocument();
     expect(screen.getByLabelText('解答文')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'この内容で問題を保存する' })).toBeInTheDocument();
@@ -39,6 +39,8 @@ describe('QuizCreatorPage', () => {
       new Quiz({
         id: 'new-quiz',
         point: 0,
+        order: 0,
+        isOpened: false,
         tournamentId: 't-id',
         participantId: 'p-id',
       })
@@ -46,12 +48,14 @@ describe('QuizCreatorPage', () => {
     renderWithProviders();
 
     fireEvent.change(screen.getByLabelText('問題文'), { target: { value: 'Test Question' } });
+    fireEvent.change(screen.getByLabelText('解答文'), { target: { value: 'Test Answer' } });
     fireEvent.click(screen.getByRole('button', { name: 'この内容で問題を保存する' }));
 
     await vi.waitFor(() => {
       expect(createMock).toHaveBeenCalledWith(
         expect.objectContaining({
           questionText: 'Test Question',
+          answerText: 'Test Answer',
         })
       );
     });

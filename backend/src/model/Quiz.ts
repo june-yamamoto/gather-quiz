@@ -15,6 +15,18 @@ export class Quiz {
   point: number;
 
   /**
+   * 問題順序
+   * @type {number}
+   */
+  order: number;
+
+  /**
+   * 既読フラグ
+   * @type {boolean}
+   */
+  isOpened: boolean;
+
+  /**
    * 問題文
    * @type {string | null}
    */
@@ -81,6 +93,8 @@ export class Quiz {
   constructor(data: {
     id: string;
     point: number;
+    order: number;
+    isOpened: boolean;
     questionText: string | null;
     questionImage: string | null;
     questionLink: string | null;
@@ -94,6 +108,8 @@ export class Quiz {
   }) {
     this.id = data.id;
     this.point = data.point;
+    this.order = data.order;
+    this.isOpened = data.isOpened;
     this.questionText = data.questionText;
     this.questionImage = data.questionImage;
     this.questionLink = data.questionLink;
@@ -114,6 +130,8 @@ export class Quiz {
     return {
       id: this.id,
       point: this.point,
+      order: this.order,
+      isOpened: this.isOpened,
       questionText: this.questionText,
       questionImage: this.questionImage,
       questionLink: this.questionLink,
