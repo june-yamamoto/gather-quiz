@@ -13,7 +13,7 @@ export const Layout = () => {
   // ヘッダー・フッターを非表示にするパスの条件
   // 1. 問題ボード画面 (/tournaments/:id/board)
   // 2. 問題表示画面・解答表示画面 (/quizzes/...)
-  const isImmersiveMode = path.includes('/board') || path.startsWith('/quizzes/');
+  const isImmersiveMode = path.includes('/board') || path.includes('/quizzes/');
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
