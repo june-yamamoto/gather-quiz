@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Container, Typography, Box, List, ListItem, ListItemText, ListItemButton, Paper } from '@mui/material';
+import { Container, Typography, Box, List, ListItemText, ListItemButton, Paper } from '@mui/material';
 import { pathToTournamentCreation, pathToTournamentPortal } from '../helpers/route-helpers';
 import { Button } from '../components/design-system/Button/Button';
 

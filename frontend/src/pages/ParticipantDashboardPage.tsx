@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Typography, Box, List, ListItem, Divider, CircularProgress, Chip, Stack } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
-import { pathToQuizCreator, pathToTournamentPortal, pathToQuizDisplay } from '../helpers/route-helpers';
+import { pathToQuizCreator, pathToTournamentPortal } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
+import { QuizPreviewDialog } from '../components/QuizPreviewDialog';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -14,6 +16,9 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 
 const ParticipantDashboardPage = () => {
   const { tournamentId, participantId } = useParams();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewQuizId, setPreviewQuizId] = useState('');
+  const [previewMode, setPreviewMode] = useState<'question' | 'answer'>('question');
 
   const {
     data: status,
@@ -29,6 +34,17 @@ const ParticipantDashboardPage = () => {
     },
     enabled: !!tournamentId && !!participantId,
   });
+
+  const handleOpenPreview = (quizId: string, mode: 'question' | 'answer') => {
+    setPreviewQuizId(quizId);
+    setPreviewMode(mode);
+    setPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setPreviewQuizId('');
+  };
 
   if (isLoading) {
     return (
@@ -89,13 +105,20 @@ const ParticipantDashboardPage = () => {
                       {quiz ? (
                         <Stack direction="row" spacing={1}>
                           <Button
-                            component={Link}
-                            to={pathToQuizDisplay(quiz.id)}
                             variant="outlined"
                             size="small"
                             color="info"
+                            onClick={() => handleOpenPreview(quiz.id, 'question')}
                           >
-                            プレビュー
+                            問題確認
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="warning"
+                            onClick={() => handleOpenPreview(quiz.id, 'answer')}
+                          >
+                            解答確認
                           </Button>
                           <Button
                             component={Link}
@@ -104,7 +127,7 @@ const ParticipantDashboardPage = () => {
                             color="primary"
                             size="small"
                           >
-                            編集する
+                            編集
                           </Button>
                         </Stack>
                       ) : (
@@ -166,6 +189,14 @@ const ParticipantDashboardPage = () => {
           大会ポータルへ戻る
         </Button>
       </Box>
+
+      {/* Preview Dialog */}
+      <QuizPreviewDialog
+        open={previewOpen}
+        onClose={handleClosePreview}
+        quizId={previewQuizId}
+        mode={previewMode}
+      />
     </StyledContainer>
   );
 };
