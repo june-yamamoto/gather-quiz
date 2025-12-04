@@ -8,7 +8,7 @@ DISTRIBUTION_ID="E6WB2EX8DG6PE"
 echo "Building frontend..."
 # ルートディレクトリで実行されている前提
 cd frontend
-npm install --legacy-peer-deps
+npm install
 npm run build
 cd ..
 
