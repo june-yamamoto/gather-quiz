@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Typography, Box, List, ListItem, ListItemText, Divider, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, List, ListItem, Divider, CircularProgress, Chip, Stack } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
-import { pathToQuizCreator } from '../helpers/route-helpers';
+import { pathToQuizCreator, pathToTournamentPortal } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
+import { QuizPreviewDialog } from '../components/QuizPreviewDialog';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -14,6 +16,9 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 
 const ParticipantDashboardPage = () => {
   const { tournamentId, participantId } = useParams();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewQuizId, setPreviewQuizId] = useState('');
+  const [previewMode, setPreviewMode] = useState<'question' | 'answer'>('question');
 
   const {
     data: status,
@@ -29,6 +34,17 @@ const ParticipantDashboardPage = () => {
     },
     enabled: !!tournamentId && !!participantId,
   });
+
+  const handleOpenPreview = (quizId: string, mode: 'question' | 'answer') => {
+    setPreviewQuizId(quizId);
+    setPreviewMode(mode);
+    setPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setPreviewQuizId('');
+  };
 
   if (isLoading) {
     return (
@@ -76,49 +92,85 @@ const ParticipantDashboardPage = () => {
       <Card sx={{ textAlign: 'left', p: 0 }}>
         <List>
           {points.map((point, index) => {
-            // この順序(index)に対応する作成済みクイズを探す
-            // クイズのorderプロパティは0から始まると仮定
-            // (まだbackendのQuizモデルでorderが未実装だったり、データ移行前だとundefinedの可能性もあるので注意)
-            // ただし、これからの作成フローではorderが入る。既存データについてはorder=0のままかもしれない。
-            // ここでは簡易的に「orderが一致するもの」を探す。
-            // もしorderがまだデータになければ、配列のindex等でマッチングするロジックが必要だが、
-            // 今回の改修でbackendはorderを保存するようになる。
             const quiz = status?.createdQuizzes.find((q) => q.order === index);
             
             return (
               <div key={index}>
-                <ListItem
-                  secondaryAction={
-                    <Button
-                      component={Link}
-                      to={
-                        quiz
-                          ? `${pathToQuizCreator(tournamentId || '', participantId || '')}?edit=${quiz.id}&order=${index}&point=${point}`
-                          : `${pathToQuizCreator(tournamentId || '', participantId || '')}?order=${index}&point=${point}`
-                      }
-                      variant={quiz ? 'outlined' : 'contained'}
-                      color="primary"
-                      size="small"
-                    >
-                      {quiz ? '編集する' : '作成する'}
-                    </Button>
-                  }
-                  sx={{ py: 2 }}
-                >
-                  <ListItemText
-                    primary={`第${index + 1}問 (${point}点)`}
-                    secondary={
-                      quiz ? (
-                        <>
-                          Q. {quiz.questionText || '（画像のみ）'} <br />
-                          A. {quiz.answerText || '（画像のみ）'}
-                        </>
+                <ListItem sx={{ py: 2, display: 'block' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                      第{index + 1}問 ({point}点)
+                    </Typography>
+                    <Box>
+                      {quiz ? (
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="info"
+                            onClick={() => handleOpenPreview(quiz.id, 'question')}
+                          >
+                            問題確認
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="warning"
+                            onClick={() => handleOpenPreview(quiz.id, 'answer')}
+                          >
+                            解答確認
+                          </Button>
+                          <Button
+                            component={Link}
+                            to={`${pathToQuizCreator(tournamentId || '', participantId || '')}?edit=${quiz.id}&order=${index}&point=${point}`}
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                          >
+                            編集
+                          </Button>
+                        </Stack>
                       ) : (
-                        '未作成'
-                      )
-                    }
-                    secondaryTypographyProps={{ component: 'div' }}
-                  />
+                        <Button
+                          component={Link}
+                          to={`${pathToQuizCreator(tournamentId || '', participantId || '')}?order=${index}&point=${point}`}
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                        >
+                          作成する
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
+
+                  {quiz ? (
+                    <Box sx={{ mt: 1 }}>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          <strong>Q.</strong> {quiz.questionText || '（テキストなし）'}
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                          {quiz.questionImage && <Chip label="画像あり" size="small" color="default" variant="outlined" />}
+                          {quiz.questionLink && <Chip label="リンクあり" size="small" color="default" variant="outlined" />}
+                        </Stack>
+                      </Box>
+                      <Divider sx={{ my: 1, borderStyle: 'dashed' }} />
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          <strong>A.</strong> {quiz.answerText || '（テキストなし）'}
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                          {quiz.answerImage && <Chip label="画像あり" size="small" color="default" variant="outlined" />}
+                          {quiz.answerLink && <Chip label="リンクあり" size="small" color="default" variant="outlined" />}
+                        </Stack>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.disabled">
+                      未作成
+                    </Typography>
+                  )}
                 </ListItem>
                 {index < points.length - 1 && <Divider component="li" />}
               </div>
@@ -126,6 +178,25 @@ const ParticipantDashboardPage = () => {
           })}
         </List>
       </Card>
+
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button
+          component={Link}
+          to={pathToTournamentPortal(tournamentId || '')}
+          variant="outlined"
+          color="inherit"
+        >
+          大会ポータルへ戻る
+        </Button>
+      </Box>
+
+      {/* Preview Dialog */}
+      <QuizPreviewDialog
+        open={previewOpen}
+        onClose={handleClosePreview}
+        quizId={previewQuizId}
+        mode={previewMode}
+      />
     </StyledContainer>
   );
 };

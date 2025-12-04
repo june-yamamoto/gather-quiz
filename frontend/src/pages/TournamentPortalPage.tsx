@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -24,6 +24,12 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(8),
 }));
 
+type ViewedTournament = {
+  id: string;
+  name: string;
+  lastViewed: number;
+};
+
 const TournamentPortalPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -47,6 +53,21 @@ const TournamentPortalPage = () => {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (tournament && id) {
+      const viewedTournaments: ViewedTournament[] = JSON.parse(localStorage.getItem('viewedTournaments') || '[]');
+      const newEntry = { id, name: tournament.name, lastViewed: Date.now() };
+      
+      // Remove existing entry with same ID
+      const filtered = viewedTournaments.filter((t) => t.id !== id);
+      
+      // Add new entry to the beginning
+      const updated = [newEntry, ...filtered].slice(0, 5); // Keep max 5
+      
+      localStorage.setItem('viewedTournaments', JSON.stringify(updated));
+    }
+  }, [tournament, id]);
 
   // Organizer Handlers
   const handleOrganizerLoginOpen = () => {
