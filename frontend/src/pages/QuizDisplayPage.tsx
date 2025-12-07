@@ -53,16 +53,33 @@ const QuizDisplayPage = () => {
         flexDirection: 'column',
         height: '100vh',
         width: '100%',
-        bgcolor: 'background.paper',
-        p: 2,
+        bgcolor: 'background.paper', // Or a custom light color
+        p: 3,
         boxSizing: 'border-box',
+        // Decorative frame
+        border: '8px solid',
+        borderColor: 'primary.main',
+        borderRadius: '16px',
+        overflow: 'hidden', // Ensure content stays within border radius
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" color="text.secondary">
-          {/* 左上は空けておくか、ロゴなどを入れる */}
+          {/* Logo or icon could go here */}
         </Typography>
-        <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: 'white',
+            bgcolor: 'primary.main',
+            px: 3,
+            py: 1,
+            borderRadius: '0 0 0 16px', // Decorative shape
+            mt: -3, // Pull up to attach to top border
+            mr: -3, // Pull right to attach to right border
+          }}
+        >
           {quiz.point}点問題
         </Typography>
       </Box>
@@ -75,6 +92,7 @@ const QuizDisplayPage = () => {
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
+          width: '100%',
         }}
       >
         <Typography
@@ -85,17 +103,25 @@ const QuizDisplayPage = () => {
             fontWeight: 'bold',
             fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
             mb: 4,
+            px: 4,
+            textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
           }}
         >
           Q. {quiz.questionText}
         </Typography>
 
         {quiz.questionImage && (
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden' }}>
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: 2 }}>
             <img
               src={quiz.questionImage}
               alt="問題画像"
-              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              }}
             />
           </Box>
         )}
@@ -103,7 +129,7 @@ const QuizDisplayPage = () => {
         {quiz.questionLink && (
           <Typography variant="h6" align="center" sx={{ mt: 2 }}>
             参考リンク:{' '}
-            <a href={quiz.questionLink} target="_blank" rel="noopener noreferrer">
+            <a href={quiz.questionLink} target="_blank" rel="noopener noreferrer" style={{ color: '#00529B', textDecoration: 'underline' }}>
               {quiz.questionLink}
             </a>
           </Typography>
@@ -111,7 +137,17 @@ const QuizDisplayPage = () => {
       </Box>
 
       <Box sx={{ mt: 2, textAlign: 'center', pb: 2 }}>
-        <Button variant="contained" size="large" onClick={showAnswer} sx={{ minWidth: '200px', fontSize: '1.5rem' }}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={showAnswer}
+          sx={{
+            minWidth: '200px',
+            fontSize: '1.5rem',
+            borderRadius: '30px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+          }}
+        >
           正解を見る
         </Button>
       </Box>
