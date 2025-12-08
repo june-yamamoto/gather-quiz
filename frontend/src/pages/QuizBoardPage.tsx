@@ -1,5 +1,6 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Typography, Grid, CircularProgress, Box } from '@mui/material';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Typography, Grid, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { Participant } from '../models/Participant';
@@ -33,6 +34,8 @@ const PointLabel = styled(Typography)(({ theme }) => ({
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
+  const [regulationOpen, setRegulationOpen] = useState(false);
+  const [finishDialogOpen, setFinishDialogOpen] = useState(false);
 
   const {
     data: tournament,
@@ -51,6 +54,16 @@ const QuizBoardPage = () => {
 
   const handleQuizSelect = (quizId: string) => {
     navigate(pathToQuizDisplay(quizId));
+  };
+
+  const handleFinishTournament = () => {
+    setFinishDialogOpen(true);
+  };
+
+  const handleBackToPortal = () => {
+    if (tournamentId) {
+      navigate(pathToTournamentPortal(tournamentId));
+    }
   };
 
   if (isLoading) {
@@ -74,21 +87,29 @@ const QuizBoardPage = () => {
   // Calculate column width based on participant count, with a max of 12 columns in Grid
   const columnWidth = Math.floor(10 / participantCount);
 
-  // 全ての問題が既読かチェック
-  // 参加者全員のクイズ数が、大会の問題数(points.length)と一致し、かつ全てisOpenedである必要がある
-  // または、単純に登録されている全クイズがisOpenedであるかを確認する (未作成の問題はどうする？ -> 未作成はボードに出ないので無視で良いか、あるいは完了とみなせないか)
-  // ここでは「作成されたクイズが全て既読になっている」かつ「全員が規定数のクイズを作成している」を完了条件とするのが厳密だが、
-  // UI上表示されているクイズが全て開かれたかどうかを基準にするのが自然。
-  // 各参加者のquizzesを走査し、未読(isOpened === false)が一つでもあれば未完了。
-  const isAllOpened = tournament.participants.every((p) =>
-    p.quizzes.every((q) => q.isOpened) && p.quizzes.length === points.length
+  // 全ての問題(作成済みのもの)が既読かチェック
+  // 参加者が一人もいない、またはクイズが一つもない場合は完了とはみなさない（開始前なので）
+  const totalQuizzes = tournament.participants.reduce((acc, p) => acc + p.quizzes.length, 0);
+  const openedQuizzes = tournament.participants.reduce(
+    (acc, p) => acc + p.quizzes.filter((q) => q.isOpened).length,
+    0
   );
+  
+  const isAllOpened = totalQuizzes > 0 && totalQuizzes === openedQuizzes;
 
   return (
     <StyledContainer maxWidth="xl">
-      <Typography variant="h3" component="h1" align="center" gutterBottom>
-        {tournament.name}
-      </Typography>
+      <Box sx={{ position: 'relative', mb: 2, textAlign: 'center' }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          {tournament.name}
+        </Typography>
+        <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
+          <Button variant="outlined" size="small" onClick={() => setRegulationOpen(true)}>
+            ルール確認
+          </Button>
+        </Box>
+      </Box>
+
       <Box sx={{ mt: 4 }}>
         {/* Header Row */}
         <Grid container spacing={2}>
@@ -121,7 +142,7 @@ const QuizBoardPage = () => {
                       onClick={() => handleQuizSelect(quiz.id)}
                     />
                   ) : (
-                    <QuizCard point={point} />
+                    <QuizCard point={point} isUncreated />
                   )}
                 </Grid>
               );
@@ -132,20 +153,59 @@ const QuizBoardPage = () => {
 
       {isAllOpened && (
         <Box sx={{ mt: 8, textAlign: 'center' }}>
-          <Typography variant="h4" gutterBottom>
-            全ての問題が終了しました！
-          </Typography>
           <Button
-            component={Link}
-            to={pathToTournamentPortal(tournamentId || '')}
             variant="contained"
             color="primary"
             size="large"
+            onClick={handleFinishTournament}
+            sx={{
+                fontSize: '1.5rem',
+                py: 2,
+                px: 6,
+                borderRadius: '50px',
+                background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+                boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+            }}
           >
-            大会ポータルへ戻る
+            大会を終了する！
           </Button>
         </Box>
       )}
+
+      {/* Regulation Dialog */}
+      <Dialog open={regulationOpen} onClose={() => setRegulationOpen(false)}>
+        <DialogTitle>大会レギュレーション</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ whiteSpace: 'pre-wrap' }}>
+            {tournament.regulation || 'レギュレーションは設定されていません。'}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRegulationOpen(false)}>閉じる</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Finish Dialog */}
+      <Dialog open={finishDialogOpen} onClose={() => setFinishDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            お疲れ様でした！
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              全ての問題が終了しました。
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              クイズ大会にご参加いただきありがとうございました。
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 4 }}>
+          <Button onClick={handleBackToPortal} variant="contained" color="primary" size="large">
+            大会ポータルへ戻る
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StyledContainer>
   );
 };

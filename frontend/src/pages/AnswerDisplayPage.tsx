@@ -64,7 +64,7 @@ const AnswerDisplayPage = () => {
       }}
     >
       <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '2px solid #ccc', pb: 1, width: '100%' }}>
+        <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '2px solid #ccc', pb: 1, width: '100%', whiteSpace: 'pre-wrap' }}>
           Q. {quiz.questionText}
         </Typography>
       </Box>
@@ -91,6 +91,7 @@ const AnswerDisplayPage = () => {
             px: 4,
             color: 'error.main',
             textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+            whiteSpace: 'pre-wrap',
           }}
         >
           A. {quiz.answerText}

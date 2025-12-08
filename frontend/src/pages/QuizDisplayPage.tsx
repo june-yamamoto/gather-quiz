@@ -105,6 +105,7 @@ const QuizDisplayPage = () => {
             mb: 4,
             px: 4,
             textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+            whiteSpace: 'pre-wrap',
           }}
         >
           Q. {quiz.questionText}
