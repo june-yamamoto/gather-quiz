@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Container, Typography, Box, Grid, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem } from '@mui/material';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { uploadApiClient } from '../api/UploadApiClient';
 import { quizApiClient } from '../api/QuizApiClient';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Input } from '../components/design-system/Input/Input';
 import { Button } from '../components/design-system/Button/Button';
+import { Tournament } from '../models/Tournament';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -27,7 +29,10 @@ const QuizCreatorPage = () => {
   const order = Number(searchParams.get('order')) || 0;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [tournament, setTournament] = useState<Tournament | null>(null);
   const [point, setPoint] = useState(initialPoint);
+  const [genre, setGenre] = useState('');
+  
   const [questionText, setQuestionText] = useState('');
   const [questionLink, setQuestionLink] = useState('');
   const [questionImageFile, setQuestionImageFile] = useState<File | null>(null);
@@ -38,6 +43,21 @@ const QuizCreatorPage = () => {
   const [answerImageFile, setAnswerImageFile] = useState<File | null>(null);
   const [existingAnswerImageUrl, setExistingAnswerImageUrl] = useState<string | null>(null);
 
+  const [isRegulationOpen, setIsRegulationOpen] = useState(false);
+
+  // Fetch Tournament Info
+  useEffect(() => {
+    if (tournamentId) {
+      tournamentApiClient.get(tournamentId)
+        .then(setTournament)
+        .catch((error) => {
+          console.error('Failed to fetch tournament:', error);
+          alert('大会情報の取得に失敗しました。');
+        });
+    }
+  }, [tournamentId]);
+
+  // Fetch Quiz Info if editing
   useEffect(() => {
     if (editQuizId) {
       const fetchQuiz = async () => {
@@ -45,6 +65,7 @@ const QuizCreatorPage = () => {
         try {
           const quiz = await quizApiClient.get(editQuizId);
           setPoint(quiz.point);
+          setGenre(quiz.genre || '');
           setQuestionText(quiz.questionText || '');
           setQuestionLink(quiz.questionLink || '');
           setExistingQuestionImageUrl(quiz.questionImage || null);
@@ -92,6 +113,7 @@ const QuizCreatorPage = () => {
       const quizData = {
         point,
         order,
+        genre: genre || null,
         questionText,
         questionImage: questionImageUrl,
         questionLink,
@@ -119,6 +141,13 @@ const QuizCreatorPage = () => {
     }
   };
 
+  const genres = tournament?.genres
+    ? tournament.genres
+        .split(',')
+        .map((g) => g.trim())
+        .filter((g) => g !== '')
+    : [];
+
   if (isLoading && editQuizId && !questionText) {
      return (
        <StyledContainer maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -129,19 +158,53 @@ const QuizCreatorPage = () => {
 
   return (
     <StyledContainer maxWidth="md">
-      <Typography variant="h4" component="h1" gutterBottom>
-        {editQuizId ? '問題の編集' : '新しい問題の作成'}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4" component="h1">
+          {editQuizId ? '問題の編集' : '新しい問題の作成'}
+        </Typography>
+        {tournament?.regulation && (
+          <Button variant="outlined" size="small" onClick={() => setIsRegulationOpen(true)}>
+            大会ルールを確認
+          </Button>
+        )}
+      </Box>
+
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
-        <Input
-          label="配点"
-          type="number"
-          required
-          value={point}
-          // 配点はURLパラメータから指定されるため変更不可とする
-          inputProps={{ readOnly: true }}
-          sx={{ mb: 3, width: '150px' }}
-        />
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item>
+                <Input
+                label="配点"
+                type="number"
+                required
+                value={point}
+                // 配点はURLパラメータから指定されるため変更不可とする
+                inputProps={{ readOnly: true }}
+                sx={{ width: '100px' }}
+                />
+            </Grid>
+            {genres.length > 0 && (
+                <Grid item xs>
+                     <Input
+                        select
+                        label="ジャンル"
+                        value={genre}
+                        onChange={(e) => setGenre(e.target.value)}
+                        fullWidth
+                        helperText="この問題のジャンルを選択してください（任意）"
+                    >
+                        <MenuItem value="">
+                            <em>選択しない</em>
+                        </MenuItem>
+                        {genres.map((g) => (
+                            <MenuItem key={g} value={g}>
+                                {g}
+                            </MenuItem>
+                        ))}
+                    </Input>
+                </Grid>
+            )}
+        </Grid>
+
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <StyledSection>
@@ -225,6 +288,25 @@ const QuizCreatorPage = () => {
           </Button>
         </Box>
       </Box>
+
+      {/* レギュレーション表示ダイアログ */}
+      <Dialog
+        open={isRegulationOpen}
+        onClose={() => setIsRegulationOpen(false)}
+        aria-labelledby="regulation-dialog-title"
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle id="regulation-dialog-title">大会ルール (レギュレーション)</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ whiteSpace: 'pre-wrap' }}>
+            {tournament?.regulation || 'レギュレーションは設定されていません。'}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsRegulationOpen(false)}>閉じる</Button>
+        </DialogActions>
+      </Dialog>
     </StyledContainer>
   );
 };

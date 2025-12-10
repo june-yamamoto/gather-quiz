@@ -1,11 +1,13 @@
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, Box, Chip } from '@mui/material';
 import type { PaperProps } from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+import { getGenreColor } from '../../../helpers/color-helpers';
 
 type QuizCardProps = PaperProps & {
   point: number;
   isAnswered?: boolean;
   isUncreated?: boolean;
+  genre?: string | null;
   onClick?: () => void;
 };
 
@@ -14,7 +16,7 @@ type StyledQuizCardProps = Omit<QuizCardProps, 'point'>;
 const StyledQuizCard = styled(Paper, {
   shouldForwardProp: (prop) => prop !== 'isAnswered' && prop !== 'isUncreated',
 })<StyledQuizCardProps>(({ theme, isAnswered, isUncreated, onClick }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(1),
   textAlign: 'center',
   width: '100%',
   minHeight: '120px',
@@ -49,17 +51,33 @@ const StyledQuizCard = styled(Paper, {
       }),
 }));
 
-export const QuizCard = ({ point, isAnswered, isUncreated, onClick, ...props }: QuizCardProps) => {
+export const QuizCard = ({ point, isAnswered, isUncreated, genre, onClick, ...props }: QuizCardProps) => {
   return (
     <StyledQuizCard isAnswered={isAnswered} isUncreated={isUncreated} onClick={onClick} role={onClick ? 'button' : undefined} {...props}>
-      <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-        {point}
-      </Typography>
-      {isUncreated && (
-        <Typography variant="caption" display="block">
-          未作成
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        {genre && !isUncreated && (
+          <Chip
+            label={genre}
+            size="small"
+            sx={{
+              backgroundColor: isAnswered ? undefined : getGenreColor(genre),
+              color: isAnswered ? undefined : '#fff',
+              fontWeight: 'bold',
+              mb: 1,
+              maxWidth: '90%',
+              opacity: isAnswered ? 0.6 : 1,
+            }}
+          />
+        )}
+        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+          {point}
         </Typography>
-      )}
+        {isUncreated && (
+          <Typography variant="caption" display="block">
+            未作成
+          </Typography>
+        )}
+      </Box>
     </StyledQuizCard>
   );
 };

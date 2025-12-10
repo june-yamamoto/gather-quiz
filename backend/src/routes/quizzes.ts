@@ -22,6 +22,7 @@ const quizzesRouterPath = (path: string) => path.substring(pathToQuizzes().lengt
  * @body {number} [order] - 問題順序
  * @body {string} tournamentId - 紐づく大会のID
  * @body {string} participantId - 紐づく参加者のID
+ * @body {string} [genre] - ジャンル
  * @body {string} [questionText] - 問題文
  * @body {string} [questionImage] - 問題画像URL
  * @body {string} [questionLink] - 問題参考リンク
@@ -45,6 +46,7 @@ router.post(
       answerLink,
       tournamentId,
       participantId,
+      genre,
     } = req.body;
 
     if (!point || !tournamentId || !participantId) {
@@ -69,6 +71,7 @@ router.post(
         answerText,
         answerImage,
         answerLink,
+        genre,
         tournament: { connect: { id: tournamentId } },
         participant: { connect: { id: participantId } },
       },
@@ -120,6 +123,7 @@ router.get(
  * @param {Response} res - Expressレスポンスオブジェクト
  * @param {string} req.params.id - 更新対象のクイズID
  * @body {number} [point] - 新しい配点
+ * @body {string} [genre] - 新しいジャンル
  * @body {string} [questionText] - 新しい問題文
  * @body {string} [questionImage] - 新しい問題画像URL
  * @body {string} [questionLink] - 新しい問題参考リンク
@@ -133,7 +137,7 @@ router.put(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink } = req.body;
+    const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink, genre } = req.body;
 
     const quiz = await prisma.quiz.findUnique({
       where: { id },
@@ -167,6 +171,7 @@ router.put(
         answerText,
         answerImage,
         answerLink,
+        genre,
       },
     });
     res.status(200).json(new Quiz(updatedQuiz));

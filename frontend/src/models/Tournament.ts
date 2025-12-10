@@ -29,10 +29,16 @@ export class Tournament {
   points: string;
 
   /**
-   * 大会のレギュレーション
+   * レギュレーション
    * @type {(string | null)}
    */
   regulation?: string | null;
+
+  /**
+   * ジャンル (カンマ区切り)
+   * @type {(string | null)}
+   */
+  genres?: string | null;
 
   /**
    * 大会の状態
@@ -46,22 +52,32 @@ export class Tournament {
    */
   participants: Participant[];
 
+  /**
+   * 作成日時
+   * @type {Date}
+   */
+  createdAt: Date;
+
   constructor(data: {
     id: string;
     name: string;
     questionsPerParticipant: number;
     points: string;
     regulation?: string | null;
+    genres?: string | null;
     status: string;
-    participants: Participant[];
+    createdAt: Date;
+    participants?: Participant[];
   }) {
     this.id = data.id;
     this.name = data.name;
     this.questionsPerParticipant = data.questionsPerParticipant;
     this.points = data.points;
     this.regulation = data.regulation;
+    this.genres = data.genres;
     this.status = data.status;
-    this.participants = data.participants;
+    this.createdAt = data.createdAt;
+    this.participants = data.participants || [];
   }
 
   /**
@@ -82,6 +98,8 @@ export class Tournament {
       typeof data.questionsPerParticipant === 'number' &&
       'points' in data &&
       typeof data.points === 'string' &&
+      ('regulation' in data ? typeof data.regulation === 'string' || data.regulation === null : true) && // regulation is optional
+      ('genres' in data ? typeof data.genres === 'string' || data.genres === null : true) && // genres is optional
       'status' in data &&
       typeof data.status === 'string' &&
       ('participants' in data ? Array.isArray(data.participants) : true) // participants is optional
@@ -89,10 +107,12 @@ export class Tournament {
       const tournamentData = {
         id: data.id,
         name: data.name,
-        questionsPerParticipant: data.questionsPerParticipant,
-        points: data.points,
-        regulation: 'regulation' in data ? (data.regulation as string) : null,
-        status: data.status,
+        questionsPerParticipant: data.questionsPerParticipant as number,
+        points: data.points as string,
+        regulation: 'regulation' in data ? (data.regulation as string | null) : null,
+        genres: 'genres' in data ? (data.genres as string | null) : null,
+        status: data.status as string,
+        createdAt: new Date(data.createdAt as string),
         participants: 'participants' in data ? (data.participants as unknown[]).map(Participant.fromApi) : [],
       };
       return new Tournament(tournamentData);

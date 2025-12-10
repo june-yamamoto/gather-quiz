@@ -6,13 +6,16 @@
   "scripts": {
     "build": "tsc",
     "test": "./node_modules/.bin/vitest --run",
-    "pretest": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.test.prisma prisma/schema.prisma && DATABASE_URL=\"file:./test.db\" prisma generate && DATABASE_URL=\"file:./test.db\" prisma db push",
+    "pretest": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.test.prisma prisma/schema.prisma && DATABASE_URL=\"file:./test.db\" prisma generate --schema=./prisma/schema.test.prisma && DATABASE_URL=\"file:./test.db\" prisma db push --schema=./prisma/schema.test.prisma",
     "posttest": "mv prisma/schema.original.prisma prisma/schema.prisma",
     "test:watch": "./node_modules/.bin/vitest",
     "lint": "./node_modules/.bin/eslint .",
     "lint-fix": "./node_modules/.bin/eslint . --fix",
     "format": "./node_modules/.bin/prettier --write .",
-    "dev": "prisma generate && tsx src/index.ts",
+    "dev:sqlite": "prisma generate --schema=./prisma/schema.prisma && tsx src/index.ts",
+    "dev:postgres": "cp prisma/schema.prisma prisma/schema.original.prisma && cp prisma/schema.postgres.prisma prisma/schema.prisma && prisma generate && tsx src/index.ts & sleep 5 && mv prisma/schema.original.prisma prisma/schema.prisma || { mv prisma/schema.original.prisma prisma/schema.prisma; exit 1; }",
+    "dev:postgres:generate": "prisma generate --schema=./prisma/schema.postgres.prisma",
+    "dev:postgres:push": "prisma db push --schema=./prisma/schema.postgres.prisma",
     "db:push": "prisma db push",
     "test:generate": "prisma generate --schema=./prisma/schema.test.prisma"
   },

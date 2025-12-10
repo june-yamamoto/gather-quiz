@@ -139,6 +139,7 @@ const QuizBoardPage = () => {
                     <QuizCard
                       point={point}
                       isAnswered={quiz.isOpened}
+                      genre={quiz.genre}
                       onClick={() => handleQuizSelect(quiz.id)}
                     />
                   ) : (

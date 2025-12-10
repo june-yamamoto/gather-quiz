@@ -15,6 +15,7 @@ model Tournament {
   questionsPerParticipant Int
   points                  String // e.g., "10,20,30"
   regulation              String?
+  genres                  String?   // Comma separated genres
   status                  String    @default("pending") // pending, in_progress, finished
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
@@ -40,6 +41,7 @@ model Quiz {
   point         Int
   order         Int       @default(0)
   isOpened      Boolean   @default(false)
+  genre         String?
   questionText  String?
   questionImage String?
   questionLink  String?

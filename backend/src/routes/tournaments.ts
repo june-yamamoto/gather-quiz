@@ -37,12 +37,13 @@ router.use(tournamentsRouterPath(pathToParticipants(':tournamentId')), participa
  * @body {number} questionsPerParticipant - 参加者1人あたりの問題作成数
  * @body {string} points - 各問題の配点 (カンマ区切り)
  * @body {string | null} regulation - レギュレーション
+ * @body {string | null} genres - ジャンル (カンマ区切り)
  * @returns {Tournament} 作成された大会オブジェクト
  */
 router.post(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
-    const { name, password, questionsPerParticipant, points, regulation } = req.body;
+    const { name, password, questionsPerParticipant, points, regulation, genres } = req.body;
     const tournament = await prisma.tournament.create({
       data: {
         name,
@@ -50,6 +51,7 @@ router.post(
         questionsPerParticipant,
         points,
         regulation,
+        genres,
       },
     });
     res.json(new Tournament(tournament));
@@ -245,6 +247,7 @@ router.get(
  * @body {number} [questionsPerParticipant] - 新しい問題作成数
  * @body {string} [points] - 新しい配点
  * @body {string | null} [regulation] - 新しいレギュレーション
+ * @body {string | null} [genres] - 新しいジャンル
  * @returns {Tournament} 更新された大会オブジェクト
  * @throws {NotFoundError} 指定されたIDの大会が見つからない場合
  */
@@ -252,7 +255,7 @@ router.put(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, password, questionsPerParticipant, points, regulation } = req.body;
+    const { name, password, questionsPerParticipant, points, regulation, genres } = req.body;
 
     const tournament = await prisma.tournament.findUnique({
       where: { id },
@@ -269,6 +272,7 @@ router.put(
         questionsPerParticipant,
         points,
         regulation,
+        genres,
       },
     });
 

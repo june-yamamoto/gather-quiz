@@ -27,6 +27,12 @@ export class Quiz {
   isOpened: boolean;
 
   /**
+   * ジャンル
+   * @type {(string | null)}
+   */
+  genre?: string | null;
+
+  /**
    * 問題文
    * @type {(string | null)}
    */
@@ -79,6 +85,7 @@ export class Quiz {
     point: number;
     order: number;
     isOpened: boolean;
+    genre?: string | null;
     questionText?: string | null;
     questionImage?: string | null;
     questionLink?: string | null;
@@ -92,6 +99,7 @@ export class Quiz {
     this.point = data.point;
     this.order = data.order;
     this.isOpened = data.isOpened;
+    this.genre = data.genre;
     this.questionText = data.questionText;
     this.questionImage = data.questionImage;
     this.questionLink = data.questionLink;
@@ -120,6 +128,7 @@ export class Quiz {
       typeof data.order === 'number' &&
       'isOpened' in data &&
       typeof data.isOpened === 'boolean' &&
+      ('genre' in data ? typeof data.genre === 'string' || data.genre === null : true) && // genre is optional
       'tournamentId' in data &&
       typeof data.tournamentId === 'string' &&
       'participantId' in data &&

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
 import { quizApiClient } from '../api/QuizApiClient';
 import { Button } from '../components/design-system/Button/Button';
+import { getGenreColor } from '../helpers/color-helpers';
 
 const QuizDisplayPage = () => {
   const { quizId } = useParams();
@@ -64,9 +65,26 @@ const QuizDisplayPage = () => {
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" color="text.secondary">
-          {/* Logo or icon could go here */}
-        </Typography>
+        <Box>
+            {quiz.genre && (
+            <Typography
+                variant="h4"
+                sx={{
+                fontWeight: 'bold',
+                color: 'white',
+                bgcolor: getGenreColor(quiz.genre),
+                px: 3,
+                py: 1,
+                borderRadius: '0 0 16px 0',
+                mt: -3,
+                ml: -3,
+                boxShadow: '2px 2px 5px rgba(0,0,0,0.2)',
+                }}
+            >
+                {quiz.genre}
+            </Typography>
+            )}
+        </Box>
         <Typography
           variant="h4"
           sx={{
