@@ -2,8 +2,8 @@
 set -e
 
 # Configuration
-BUCKET_NAME="gather-quiz-dev-v4-frontend-bucket"
-DISTRIBUTION_ID="E6WB2EX8DG6PE"
+BUCKET_NAME="gather-quiz-dev-v3-frontend-bucket"
+DISTRIBUTION_ID="E3LGU49WE56Y8B"
 
 echo "Building frontend..."
 # ルートディレクトリで実行されている前提

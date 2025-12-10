@@ -112,6 +112,8 @@ export class Tournament {
         regulation: 'regulation' in data ? (data.regulation as string | null) : null,
         genres: 'genres' in data ? (data.genres as string | null) : null,
         status: data.status as string,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         createdAt: new Date(data.createdAt as string),
         participants: 'participants' in data ? (data.participants as unknown[]).map(Participant.fromApi) : [],
       };

@@ -13,6 +13,7 @@ describe('大会ポータルページ', () => {
       questionsPerParticipant: 5,
       points: '10,20,30,40,50',
       status: 'pending',
+      createdAt: new Date(),
       participants: [],
     });
 
