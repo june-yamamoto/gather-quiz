@@ -80,6 +80,12 @@ export class Quiz {
    */
   participantId: string;
 
+  /**
+   * 作成者の名前
+   * @type {(string | undefined)}
+   */
+  participantName?: string;
+
   constructor(data: {
     id: string;
     point: number;
@@ -94,6 +100,7 @@ export class Quiz {
     answerLink?: string | null;
     tournamentId: string;
     participantId: string;
+    participantName?: string;
   }) {
     this.id = data.id;
     this.point = data.point;
@@ -108,6 +115,7 @@ export class Quiz {
     this.answerLink = data.answerLink;
     this.tournamentId = data.tournamentId;
     this.participantId = data.participantId;
+    this.participantName = data.participantName;
   }
 
   /**
@@ -132,7 +140,8 @@ export class Quiz {
       'tournamentId' in data &&
       typeof data.tournamentId === 'string' &&
       'participantId' in data &&
-      typeof data.participantId === 'string'
+      typeof data.participantId === 'string' &&
+      ('participantName' in data ? typeof data.participantName === 'string' : true) // participantName is optional
     ) {
       return new Quiz(data as any); // eslint-disable-line @typescript-eslint/no-explicit-any
     }

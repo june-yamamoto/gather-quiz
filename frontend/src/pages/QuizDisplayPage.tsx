@@ -113,6 +113,19 @@ const QuizDisplayPage = () => {
           width: '100%',
         }}
       >
+        {quiz.participantName && (
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+              fontWeight: 'bold',
+            }}
+          >
+            作成者: {quiz.participantName}
+          </Typography>
+        )}
         <Typography
           variant="h2"
           align="center"

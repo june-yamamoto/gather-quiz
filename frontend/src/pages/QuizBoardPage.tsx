@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Grid, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Container, Typography, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { Participant } from '../models/Participant';
@@ -13,6 +13,8 @@ import { Button } from '../components/design-system/Button/Button';
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(4),
+  paddingLeft: theme.spacing(4),
+  paddingRight: theme.spacing(4),
 }));
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
@@ -20,6 +22,10 @@ const ParticipantName = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(2),
   backgroundColor: theme.palette.grey[100],
   borderRadius: '8px',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  textAlign: 'center',
 }));
 
 const PointLabel = styled(Typography)(({ theme }) => ({
@@ -29,7 +35,17 @@ const PointLabel = styled(Typography)(({ theme }) => ({
   justifyContent: 'flex-end',
   height: '100%',
   paddingRight: theme.spacing(2),
+  minWidth: '80px',
 }));
+
+// Helper to chunk array
+const chunkArray = <T,>(array: T[], size: number): T[][] => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+};
 
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
@@ -68,7 +84,7 @@ const QuizBoardPage = () => {
 
   if (isLoading) {
     return (
-      <StyledContainer maxWidth="xl" sx={{ textAlign: 'center' }}>
+      <StyledContainer maxWidth={false} sx={{ textAlign: 'center' }}>
         <CircularProgress />
       </StyledContainer>
     );
@@ -76,19 +92,19 @@ const QuizBoardPage = () => {
 
   if (error || !tournament) {
     return (
-      <StyledContainer maxWidth="xl">
+      <StyledContainer maxWidth={false}>
         <Typography color="error">エラー: {error?.message || 'ボードの読み込みに失敗しました。'}</Typography>
       </StyledContainer>
     );
   }
 
   const points = tournament.points.split(',').map(Number);
-  const participantCount = tournament.participants.length;
-  // Calculate column width based on participant count, with a max of 12 columns in Grid
-  const columnWidth = Math.floor(10 / participantCount);
+  
+  // 1行あたりの最大参加者数
+  const PARTICIPANTS_PER_ROW = 8;
+  const chunkedParticipants = chunkArray(tournament.participants, PARTICIPANTS_PER_ROW);
 
   // 全ての問題(作成済みのもの)が既読かチェック
-  // 参加者が一人もいない、またはクイズが一つもない場合は完了とはみなさない（開始前なので）
   const totalQuizzes = tournament.participants.reduce((acc, p) => acc + p.quizzes.length, 0);
   const openedQuizzes = tournament.participants.reduce(
     (acc, p) => acc + p.quizzes.filter((q) => q.isOpened).length,
@@ -98,8 +114,8 @@ const QuizBoardPage = () => {
   const isAllOpened = totalQuizzes > 0 && totalQuizzes === openedQuizzes;
 
   return (
-    <StyledContainer maxWidth="xl">
-      <Box sx={{ position: 'relative', mb: 2, textAlign: 'center' }}>
+    <StyledContainer maxWidth={false}>
+      <Box sx={{ position: 'relative', mb: 4, textAlign: 'center' }}>
         <Typography variant="h3" component="h1" gutterBottom>
           {tournament.name}
         </Typography>
@@ -110,47 +126,58 @@ const QuizBoardPage = () => {
         </Box>
       </Box>
 
-      <Box sx={{ mt: 4 }}>
-        {/* Header Row */}
-        <Grid container spacing={2}>
-          <Grid item xs={2} />
-          {tournament.participants.map((p: Participant) => {
-            const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
-            return (
-              <Grid item xs={columnWidth} key={p.id} textAlign="center">
-                <ParticipantName variant="h6">{isParticipantVisible ? p.name : '???'}</ParticipantName>
-              </Grid>
-            );
-          })}
-        </Grid>
-
-        {/* Rows for each point value */}
-        {points.map((point: number, index: number) => (
-          <Grid container spacing={2} key={`${point}-${index}`} sx={{ mt: 1 }} alignItems="stretch">
-            <Grid item xs={2}>
-              <PointLabel variant="h5">{point}点</PointLabel>
-            </Grid>
-            {tournament.participants.map((p: Participant) => {
-              // orderでクイズを特定する (orderが一致するものを探す)
-              const quiz = p.quizzes.find((q: Quiz) => q.order === index);
+      {chunkedParticipants.map((participantsChunk, chunkIndex) => (
+        <Box key={chunkIndex} sx={{ mb: 8 }}>
+          {/* Header Row */}
+          <Box sx={{ display: 'flex', mb: 2 }}>
+            <Box sx={{ minWidth: '100px', flexShrink: 0 }} /> {/* Spacer for PointLabel */}
+            {participantsChunk.map((p: Participant) => {
+              const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
               return (
-                <Grid item xs={columnWidth} key={`${p.id}-${index}`}>
-                  {quiz ? (
-                    <QuizCard
-                      point={point}
-                      isAnswered={quiz.isOpened}
-                      genre={quiz.genre}
-                      onClick={() => handleQuizSelect(quiz.id)}
-                    />
-                  ) : (
-                    <QuizCard point={point} isUncreated />
-                  )}
-                </Grid>
+                <Box key={p.id} sx={{ flex: 1, minWidth: 0, px: 1 }}>
+                  <ParticipantName variant="h6" title={isParticipantVisible ? p.name : '???'}>
+                    {isParticipantVisible ? p.name : '???'}
+                  </ParticipantName>
+                </Box>
               );
             })}
-          </Grid>
-        ))}
-      </Box>
+            {/* Fill empty columns if last chunk is not full */}
+            {Array.from({ length: PARTICIPANTS_PER_ROW - participantsChunk.length }).map((_, i) => (
+                <Box key={`empty-${i}`} sx={{ flex: 1, minWidth: 0, px: 1 }} />
+            ))}
+          </Box>
+
+          {/* Rows for each point value */}
+          {points.map((point: number, index: number) => (
+            <Box key={`${point}-${index}`} sx={{ display: 'flex', mb: 2, alignItems: 'stretch' }}>
+              <Box sx={{ minWidth: '100px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <PointLabel variant="h5">{point}点</PointLabel>
+              </Box>
+              {participantsChunk.map((p: Participant) => {
+                const quiz = p.quizzes.find((q: Quiz) => q.order === index);
+                return (
+                  <Box key={`${p.id}-${index}`} sx={{ flex: 1, minWidth: 0, px: 1 }}>
+                    {quiz ? (
+                      <QuizCard
+                        point={point}
+                        isAnswered={quiz.isOpened}
+                        genre={quiz.genre}
+                        onClick={() => handleQuizSelect(quiz.id)}
+                      />
+                    ) : (
+                      <QuizCard point={point} isUncreated />
+                    )}
+                  </Box>
+                );
+              })}
+              {/* Fill empty columns if last chunk is not full */}
+              {Array.from({ length: PARTICIPANTS_PER_ROW - participantsChunk.length }).map((_, i) => (
+                  <Box key={`empty-card-${i}`} sx={{ flex: 1, minWidth: 0, px: 1 }} />
+              ))}
+            </Box>
+          ))}
+        </Box>
+      ))}
 
       {isAllOpened && (
         <Box sx={{ mt: 8, textAlign: 'center' }}>

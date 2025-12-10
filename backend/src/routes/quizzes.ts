@@ -93,10 +93,9 @@ router.get(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { preview } = req.query;
-
     const quiz = await prisma.quiz.findUnique({
       where: { id },
+      include: { participant: true },
     });
     if (quiz) {
       // 問題詳細を取得した時点で既読(isOpened)にする
