@@ -93,6 +93,7 @@ router.get(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
+    const { preview } = req.query;
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: { participant: true },
