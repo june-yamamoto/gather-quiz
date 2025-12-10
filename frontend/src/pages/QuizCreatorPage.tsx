@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { uploadApiClient } from '../api/UploadApiClient';
 import { quizApiClient } from '../api/QuizApiClient';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Input } from '../components/design-system/Input/Input';
 import { Button } from '../components/design-system/Button/Button';
-import { Tournament } from '../models/Tournament';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -29,7 +29,6 @@ const QuizCreatorPage = () => {
   const order = Number(searchParams.get('order')) || 0;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [tournament, setTournament] = useState<Tournament | null>(null);
   const [point, setPoint] = useState(initialPoint);
   const [genre, setGenre] = useState('');
   
@@ -46,16 +45,16 @@ const QuizCreatorPage = () => {
   const [isRegulationOpen, setIsRegulationOpen] = useState(false);
 
   // Fetch Tournament Info
-  useEffect(() => {
-    if (tournamentId) {
-      tournamentApiClient.get(tournamentId)
-        .then(setTournament)
-        .catch((error) => {
-          console.error('Failed to fetch tournament:', error);
-          alert('大会情報の取得に失敗しました。');
-        });
-    }
-  }, [tournamentId]);
+  const { data: tournament } = useQuery({
+    queryKey: ['tournament', tournamentId],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.get(tournamentId);
+    },
+    enabled: !!tournamentId,
+  });
 
   // Fetch Quiz Info if editing
   useEffect(() => {
@@ -162,7 +161,7 @@ const QuizCreatorPage = () => {
         <Typography variant="h4" component="h1">
           {editQuizId ? '問題の編集' : '新しい問題の作成'}
         </Typography>
-        {tournament?.regulation && (
+        {tournament && (
           <Button variant="outlined" size="small" onClick={() => setIsRegulationOpen(true)}>
             大会ルールを確認
           </Button>
