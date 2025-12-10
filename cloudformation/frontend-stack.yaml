@@ -48,7 +48,7 @@ Resources:
             Resource: !Sub arn:aws:s3:::${FrontendBucket}/*
             Condition:
               StringEquals:
-                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendCloudFrontDistribution}"
+                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendCloudFrontDistributionV2}"
 
   # CloudFront Origin Access Control (OAC)
   CloudFrontOriginAccessControl:
@@ -61,7 +61,7 @@ Resources:
         SigningProtocol: sigv4
 
   # CloudFront Distribution for Frontend
-  FrontendCloudFrontDistribution:
+  FrontendCloudFrontDistributionV2:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -97,9 +97,6 @@ Resources:
           MinTTL: 0
           DefaultTTL: 86400 # 24 hours
           MaxTTL: 31536000 # 1 year
-          FunctionAssociations:
-            - EventType: viewer-request
-              FunctionARN: !GetAtt BasicAuthFunction.FunctionARN
         Origins:
           - Id: s3-origin
             DomainName: !Sub ${FrontendBucket}.s3.${AWS::Region}.amazonaws.com
@@ -194,11 +191,11 @@ Outputs:
       Name: !Sub ${AWS::StackName}-FrontendBucketName
   CloudFrontDistributionId:
     Description: CloudFrontディストリビューションのID
-    Value: !Ref FrontendCloudFrontDistribution
+    Value: !Ref FrontendCloudFrontDistributionV2
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDistributionId
   CloudFrontDomainName:
     Description: CloudFrontディストリビューションのドメイン名
-    Value: !GetAtt FrontendCloudFrontDistribution.DomainName
+    Value: !GetAtt FrontendCloudFrontDistributionV2.DomainName
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDomainName
