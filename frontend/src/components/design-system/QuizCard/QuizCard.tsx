@@ -19,7 +19,7 @@ const StyledQuizCard = styled(Paper, {
   padding: theme.spacing(1),
   textAlign: 'center',
   width: '100%',
-  minHeight: '120px',
+  minHeight: '85px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
