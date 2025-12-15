@@ -54,17 +54,17 @@ const AnswerDisplayPage = () => {
         height: '100vh',
         width: '100%',
         bgcolor: '#FFF5F5', // Light reddish background for answer
-        p: 3,
+        p: '2vmin',
         boxSizing: 'border-box',
         // Decorative frame
-        border: '8px solid',
+        border: '1vmin solid',
         borderColor: 'error.main', // Red border for answer
-        borderRadius: '16px',
+        borderRadius: '2vmin',
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '2px solid #ccc', pb: 1, width: '100%', whiteSpace: 'pre-wrap' }}>
+      <Box sx={{ mb: '2vmin', display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '0.2vmin solid #ccc', pb: '1vmin', width: '100%', whiteSpace: 'pre-wrap', fontSize: '3vmin' }}>
           Q. {quiz.questionText}
         </Typography>
       </Box>
@@ -86,19 +86,20 @@ const AnswerDisplayPage = () => {
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-            mb: 4,
-            px: 4,
+            fontSize: '6vmin',
+            mb: '4vmin',
+            px: '4vmin',
             color: 'error.main',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+            textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
             whiteSpace: 'pre-wrap',
+            lineHeight: 1.2,
           }}
         >
           A. {quiz.answerText}
         </Typography>
 
         {quiz.answerImage && (
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: 2 }}>
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: '2vmin' }}>
             <img
               src={quiz.answerImage}
               alt="解答画像"
@@ -106,15 +107,15 @@ const AnswerDisplayPage = () => {
                 maxWidth: '100%',
                 maxHeight: '100%',
                 objectFit: 'contain',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                borderRadius: '1vmin',
+                boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
               }}
             />
           </Box>
         )}
 
         {quiz.answerLink && (
-          <Typography variant="h6" align="center" sx={{ mt: 2 }}>
+          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
             参考リンク:{' '}
             <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer" style={{ color: '#d32f2f', textDecoration: 'underline' }}>
               {quiz.answerLink}
@@ -123,20 +124,22 @@ const AnswerDisplayPage = () => {
         )}
       </Box>
 
-      <Box sx={{ mt: 2, textAlign: 'center', pb: 2 }}>
+      <Box sx={{ mt: '2vmin', textAlign: 'center', pb: '2vmin' }}>
         <Button
           variant="contained"
           size="large"
           onClick={backToBoard}
           sx={{
-            minWidth: '200px',
-            fontSize: '1.5rem',
-            borderRadius: '30px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+            minWidth: '20vmin',
+            fontSize: '2.5vmin',
+            borderRadius: '4vmin',
+            boxShadow: '0 0.5vmin 0.8vmin rgba(0,0,0,0.2)',
             bgcolor: 'secondary.main', // Green button to go back
             '&:hover': {
               bgcolor: 'secondary.dark',
             },
+            py: '1vmin',
+            px: '4vmin',
           }}
         >
           ボードに戻る

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
-import { Participant } from '../models/Participant';
 import { Quiz } from '../models/Quiz';
 import { pathToQuizDisplay, pathToTournamentPortal } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
@@ -19,7 +18,8 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
   fontWeight: 'bold',
-  padding: theme.spacing(2),
+  padding: theme.spacing(1),
+  marginBottom: theme.spacing(1),
   backgroundColor: theme.palette.grey[100],
   borderRadius: '8px',
   whiteSpace: 'nowrap',
@@ -27,25 +27,6 @@ const ParticipantName = styled(Typography)(({ theme }) => ({
   textOverflow: 'ellipsis',
   textAlign: 'center',
 }));
-
-const PointLabel = styled(Typography)(({ theme }) => ({
-  fontWeight: 'bold',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  height: '100%',
-  paddingRight: theme.spacing(2),
-  minWidth: '80px',
-}));
-
-// Helper to chunk array
-const chunkArray = <T,>(array: T[], size: number): T[][] => {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-};
 
 const QuizBoardPage = () => {
   const { tournamentId } = useParams();
@@ -100,10 +81,6 @@ const QuizBoardPage = () => {
 
   const points = tournament.points.split(',').map(Number);
   
-  // 1行あたりの最大参加者数
-  const PARTICIPANTS_PER_ROW = 8;
-  const chunkedParticipants = chunkArray(tournament.participants, PARTICIPANTS_PER_ROW);
-
   // 全ての問題(作成済みのもの)が既読かチェック
   const totalQuizzes = tournament.participants.reduce((acc, p) => acc + p.quizzes.length, 0);
   const openedQuizzes = tournament.participants.reduce(
@@ -126,58 +103,35 @@ const QuizBoardPage = () => {
         </Box>
       </Box>
 
-      {chunkedParticipants.map((participantsChunk, chunkIndex) => (
-        <Box key={chunkIndex} sx={{ mb: 8 }}>
-          {/* Header Row */}
-          <Box sx={{ display: 'flex', mb: 2 }}>
-            <Box sx={{ minWidth: '100px', flexShrink: 0 }} /> {/* Spacer for PointLabel */}
-            {participantsChunk.map((p: Participant) => {
-              const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
-              return (
-                <Box key={p.id} sx={{ flex: 1, minWidth: 0, px: 1 }}>
-                  <ParticipantName variant="h6" title={isParticipantVisible ? p.name : '???'}>
-                    {isParticipantVisible ? p.name : '???'}
-                  </ParticipantName>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
+        {tournament.participants.map((p) => {
+            const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
+            return (
+                <Box key={p.id} sx={{ flex: '1 1 150px', minWidth: '150px', maxWidth: '250px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <ParticipantName variant="h6" title={isParticipantVisible ? p.name : '???'}>
+                        {isParticipantVisible ? p.name : '???'}
+                    </ParticipantName>
+                    {points.map((point, index) => {
+                        const quiz = p.quizzes.find((q: Quiz) => q.order === index);
+                        return (
+                            <Box key={`${p.id}-${index}`} sx={{ width: '100%' }}>
+                                {quiz ? (
+                                    <QuizCard
+                                        point={point}
+                                        isAnswered={quiz.isOpened}
+                                        genre={quiz.genre}
+                                        onClick={() => handleQuizSelect(quiz.id)}
+                                    />
+                                ) : (
+                                    <QuizCard point={point} isUncreated />
+                                )}
+                            </Box>
+                        );
+                    })}
                 </Box>
-              );
-            })}
-            {/* Fill empty columns if last chunk is not full */}
-            {Array.from({ length: PARTICIPANTS_PER_ROW - participantsChunk.length }).map((_, i) => (
-                <Box key={`empty-${i}`} sx={{ flex: 1, minWidth: 0, px: 1 }} />
-            ))}
-          </Box>
-
-          {/* Rows for each point value */}
-          {points.map((point: number, index: number) => (
-            <Box key={`${point}-${index}`} sx={{ display: 'flex', mb: 2, alignItems: 'stretch' }}>
-              <Box sx={{ minWidth: '100px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                <PointLabel variant="h5">{point}点</PointLabel>
-              </Box>
-              {participantsChunk.map((p: Participant) => {
-                const quiz = p.quizzes.find((q: Quiz) => q.order === index);
-                return (
-                  <Box key={`${p.id}-${index}`} sx={{ flex: 1, minWidth: 0, px: 1 }}>
-                    {quiz ? (
-                      <QuizCard
-                        point={point}
-                        isAnswered={quiz.isOpened}
-                        genre={quiz.genre}
-                        onClick={() => handleQuizSelect(quiz.id)}
-                      />
-                    ) : (
-                      <QuizCard point={point} isUncreated />
-                    )}
-                  </Box>
-                );
-              })}
-              {/* Fill empty columns if last chunk is not full */}
-              {Array.from({ length: PARTICIPANTS_PER_ROW - participantsChunk.length }).map((_, i) => (
-                  <Box key={`empty-card-${i}`} sx={{ flex: 1, minWidth: 0, px: 1 }} />
-              ))}
-            </Box>
-          ))}
-        </Box>
-      ))}
+            );
+        })}
+      </Box>
 
       {isAllOpened && (
         <Box sx={{ mt: 8, textAlign: 'center' }}>

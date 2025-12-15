@@ -64,15 +64,15 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                   height: '100%',
                   width: '100%',
                   bgcolor: 'background.paper',
-                  p: 3,
+                  p: '2vmin',
                   boxSizing: 'border-box',
-                  border: '8px solid',
+                  border: '1vmin solid',
                   borderColor: 'primary.main',
-                  borderRadius: '0', // Dialog is full screen, maybe no radius or small radius? Let's keep consistent inner style
+                  borderRadius: '0', // Dialog is full screen
                   overflow: 'hidden',
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '2vmin' }}>
                   <Typography variant="h5" color="text.secondary">
                     {/* 左上スペース */}
                   </Typography>
@@ -82,11 +82,12 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                       fontWeight: 'bold',
                       color: 'white',
                       bgcolor: 'primary.main',
-                      px: 3,
-                      py: 1,
-                      borderRadius: '0 0 0 16px',
-                      mt: -3,
-                      mr: -3,
+                      px: '3vmin',
+                      py: '1vmin',
+                      borderRadius: '0 0 0 2vmin',
+                      mt: '-2vmin',
+                      mr: '-2vmin',
+                      fontSize: '4vmin',
                     }}
                   >
                     {quiz.point}点問題
@@ -110,18 +111,19 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                     gutterBottom
                     sx={{
                       fontWeight: 'bold',
-                      fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-                      mb: 4,
-                      px: 4,
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                      fontSize: '6vmin',
+                      mb: '4vmin',
+                      px: '4vmin',
+                      textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
                       whiteSpace: 'pre-wrap',
+                      lineHeight: 1.2,
                     }}
                   >
                     Q. {quiz.questionText}
                   </Typography>
 
                   {quiz.questionImage && (
-                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: 2 }}>
+                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: '2vmin' }}>
                       <img
                         src={quiz.questionImage}
                         alt="問題画像"
@@ -129,15 +131,15 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                           maxWidth: '100%',
                           maxHeight: '100%',
                           objectFit: 'contain',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          borderRadius: '1vmin',
+                          boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
                         }}
                       />
                     </Box>
                   )}
 
                   {quiz.questionLink && (
-                    <Typography variant="h6" align="center" sx={{ mt: 2 }}>
+                    <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
                       参考リンク:{' '}
                       <a href={quiz.questionLink} target="_blank" rel="noopener noreferrer" style={{ color: '#00529B', textDecoration: 'underline' }}>
                         {quiz.questionLink}
@@ -155,16 +157,16 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                   height: '100%',
                   width: '100%',
                   bgcolor: '#FFF5F5',
-                  p: 3,
+                  p: '2vmin',
                   boxSizing: 'border-box',
-                  border: '8px solid',
+                  border: '1vmin solid',
                   borderColor: 'error.main',
                   borderRadius: '0',
                   overflow: 'hidden',
                 }}
               >
-                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                  <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '2px solid #ccc', pb: 1, width: '100%', whiteSpace: 'pre-wrap' }}>
+                <Box sx={{ mb: '2vmin', display: 'flex', alignItems: 'center' }}>
+                  <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '0.2vmin solid #ccc', pb: '1vmin', width: '100%', whiteSpace: 'pre-wrap', fontSize: '3vmin' }}>
                     Q. {quiz.questionText}
                   </Typography>
                 </Box>
@@ -186,19 +188,20 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                     gutterBottom
                     sx={{
                       fontWeight: 'bold',
-                      fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-                      mb: 4,
-                      px: 4,
+                      fontSize: '6vmin',
+                      mb: '4vmin',
+                      px: '4vmin',
                       color: 'error.main',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                      textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
                       whiteSpace: 'pre-wrap',
+                      lineHeight: 1.2,
                     }}
                   >
                     A. {quiz.answerText}
                   </Typography>
 
                   {quiz.answerImage && (
-                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: 2 }}>
+                    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: '2vmin' }}>
                       <img
                         src={quiz.answerImage}
                         alt="解答画像"
@@ -206,15 +209,15 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
                           maxWidth: '100%',
                           maxHeight: '100%',
                           objectFit: 'contain',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          borderRadius: '1vmin',
+                          boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
                         }}
                       />
                     </Box>
                   )}
 
                   {quiz.answerLink && (
-                    <Typography variant="h6" align="center" sx={{ mt: 2 }}>
+                    <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
                       参考リンク:{' '}
                       <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer" style={{ color: '#d32f2f', textDecoration: 'underline' }}>
                         {quiz.answerLink}
