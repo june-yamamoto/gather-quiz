@@ -18,7 +18,7 @@ export const Layout = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {!isImmersiveMode && <Header />}
-      <Container component="main" sx={{ mt: 4, mb: 4, flex: 1, ...(isImmersiveMode && { maxWidth: 'none !important', padding: 0, margin: 0 }) }}>
+      <Container component="main" sx={{ flex: 1, ...(isImmersiveMode && { maxWidth: 'none !important', padding: '0 !important', margin: 0 }) }}>
         <Outlet />
       </Container>
       {!isImmersiveMode && <Footer />}

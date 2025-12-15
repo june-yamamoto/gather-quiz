@@ -59,12 +59,24 @@ const AnswerDisplayPage = () => {
         // Decorative frame
         border: '1vmin solid',
         borderColor: 'error.main', // Red border for answer
-        borderRadius: '2vmin',
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ mb: '2vmin', display: 'flex', alignItems: 'center' }}>
-        <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', borderBottom: '0.2vmin solid #ccc', pb: '1vmin', width: '100%', whiteSpace: 'pre-wrap', fontSize: '3vmin' }}>
+      <Box
+        sx={{
+          mb: '2vmin',
+          display: 'flex',
+          alignItems: 'center',
+          maxHeight: '20%',
+          overflow: 'auto',
+          borderBottom: '0.2vmin solid #ccc',
+        }}
+      >
+        <Typography
+          variant="h5"
+          color="text.secondary"
+          sx={{ fontWeight: 'bold', pb: '1vmin', width: '100%', whiteSpace: 'pre-wrap', fontSize: '2vmin', height: '100%', paddingBottom: '8px', paddingTop: '8px' }}
+        >
           Q. {quiz.questionText}
         </Typography>
       </Box>
@@ -76,7 +88,7 @@ const AnswerDisplayPage = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'hidden',
+          overflow: 'auto',
           width: '100%',
         }}
       >
@@ -86,26 +98,38 @@ const AnswerDisplayPage = () => {
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            fontSize: '6vmin',
+            fontSize: '4vmin',
             mb: '4vmin',
             px: '4vmin',
             color: 'error.main',
             textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
             whiteSpace: 'pre-wrap',
             lineHeight: 1.2,
+            maxHeight: quiz.answerImage ? '45%' : '65%'
           }}
         >
           A. {quiz.answerText}
         </Typography>
 
         {quiz.answerImage && (
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', overflow: 'hidden', p: '2vmin' }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              overflow: 'hidden',
+              p: '2vmin',
+            }}
+          >
             <img
               src={quiz.answerImage}
               alt="解答画像"
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
+                minHeight: '20%',
                 objectFit: 'contain',
                 borderRadius: '1vmin',
                 boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
@@ -117,7 +141,12 @@ const AnswerDisplayPage = () => {
         {quiz.answerLink && (
           <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
             参考リンク:{' '}
-            <a href={quiz.answerLink} target="_blank" rel="noopener noreferrer" style={{ color: '#d32f2f', textDecoration: 'underline' }}>
+            <a
+              href={quiz.answerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#d32f2f', textDecoration: 'underline' }}
+            >
               {quiz.answerLink}
             </a>
           </Typography>

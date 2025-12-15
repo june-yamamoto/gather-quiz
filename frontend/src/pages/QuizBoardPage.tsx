@@ -107,7 +107,7 @@ const QuizBoardPage = () => {
         {tournament.participants.map((p) => {
             const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
             return (
-                <Box key={p.id} sx={{ flex: '1 1 150px', minWidth: '150px', maxWidth: '250px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box key={p.id} sx={{ minWidth: '180px', display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <ParticipantName variant="h6" title={isParticipantVisible ? p.name : '???'}>
                         {isParticipantVisible ? p.name : '???'}
                     </ParticipantName>

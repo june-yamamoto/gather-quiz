@@ -50,6 +50,7 @@ const QuizDisplayPage = () => {
   return (
     <Box
       sx={{
+        pt: '24px',
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
@@ -60,7 +61,6 @@ const QuizDisplayPage = () => {
         // Decorative frame
         border: '1vmin solid',
         borderColor: 'primary.main',
-        borderRadius: '2vmin',
         overflow: 'hidden', // Ensure content stays within border radius
       }}
     >
@@ -111,7 +111,7 @@ const QuizDisplayPage = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'hidden',
+          overflow: 'auto',
           width: '100%',
         }}
       >
@@ -130,17 +130,18 @@ const QuizDisplayPage = () => {
           </Typography>
         )}
         <Typography
-          variant="h2"
+          variant="h4"
           align="center"
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            fontSize: '6vmin',
+            fontSize: '4vmin',
             mb: '4vmin',
             px: '4vmin',
             textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
             whiteSpace: 'pre-wrap',
             lineHeight: 1.2,
+            maxHeight: quiz.questionImage ? '65%' : '85%',
           }}
         >
           Q. {quiz.questionText}
@@ -154,6 +155,7 @@ const QuizDisplayPage = () => {
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
+                minHeight: '20%',
                 objectFit: 'contain',
                 borderRadius: '1vmin',
                 boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
@@ -172,7 +174,7 @@ const QuizDisplayPage = () => {
         )}
       </Box>
 
-      <Box sx={{ mt: '2vmin', textAlign: 'center', pb: '2vmin' }}>
+      <Box sx={{ mt: '2vmin', textAlign: 'center' }}>
         <Button
           variant="contained"
           size="large"
