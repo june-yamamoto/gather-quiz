@@ -19,6 +19,7 @@ export type TournamentFormData = {
   questionsPerParticipant: number;
   points: string;
   regulation: string;
+  genres: string;
   password?: string;
 };
 
@@ -36,6 +37,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
     tournament?.points ? tournament.points.split(',') : ['10', '20', '30']
   );
   const [regulation, setRegulation] = useState(tournament?.regulation || '');
+  const [genres, setGenres] = useState(tournament?.genres || '');
 
   useEffect(() => {
     if (tournament) {
@@ -44,6 +46,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
       // カンマ区切りの文字列を配列に変換、空の場合は空配列
       setPointValues(tournament.points ? tournament.points.split(',') : []);
       setRegulation(tournament.regulation || '');
+      setGenres(tournament.genres || '');
     }
   }, [tournament]);
 
@@ -75,6 +78,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
       questionsPerParticipant: Number(questionsPerParticipant),
       points: pointValues.join(','),
       regulation,
+      genres,
       ...(password && { password }),
     };
     onSubmit(formData);
@@ -134,6 +138,16 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
             fullWidth
             value={regulation}
             onChange={(e) => setRegulation(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Input
+            label="ジャンル設定 (カンマ区切り)"
+            placeholder="例: スポーツ, アニメ, 科学"
+            fullWidth
+            value={genres}
+            onChange={(e) => setGenres(e.target.value)}
+            helperText="設定したジャンルは、問題作成時に選択できるようになります。空欄の場合はジャンル設定なしとなります。"
           />
         </Grid>
       </Grid>

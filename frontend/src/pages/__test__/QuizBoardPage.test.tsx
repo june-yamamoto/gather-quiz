@@ -19,6 +19,7 @@ const mockTournament = new Tournament({
   points: '10',
   regulation: '',
   status: 'in_progress',
+  createdAt: new Date(),
   participants: [
     new Participant({
       id: 'p-1',

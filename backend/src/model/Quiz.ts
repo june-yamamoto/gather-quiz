@@ -27,6 +27,12 @@ export class Quiz {
   isOpened: boolean;
 
   /**
+   * ジャンル
+   * @type {string | null}
+   */
+  genre: string | null;
+
+  /**
    * 問題文
    * @type {string | null}
    */
@@ -75,6 +81,12 @@ export class Quiz {
   participantId: string;
 
   /**
+   * 紐づく参加者の名前
+   * @type {string | undefined}
+   */
+  participantName?: string;
+
+  /**
    * 作成日時
    * @type {Date}
    */
@@ -95,6 +107,7 @@ export class Quiz {
     point: number;
     order: number;
     isOpened: boolean;
+    genre: string | null;
     questionText: string | null;
     questionImage: string | null;
     questionLink: string | null;
@@ -103,6 +116,7 @@ export class Quiz {
     answerLink: string | null;
     tournamentId: string;
     participantId: string;
+    participant?: { name: string };
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -110,6 +124,7 @@ export class Quiz {
     this.point = data.point;
     this.order = data.order;
     this.isOpened = data.isOpened;
+    this.genre = data.genre;
     this.questionText = data.questionText;
     this.questionImage = data.questionImage;
     this.questionLink = data.questionLink;
@@ -118,6 +133,7 @@ export class Quiz {
     this.answerLink = data.answerLink;
     this.tournamentId = data.tournamentId;
     this.participantId = data.participantId;
+    this.participantName = data.participant?.name;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -132,6 +148,7 @@ export class Quiz {
       point: this.point,
       order: this.order,
       isOpened: this.isOpened,
+      genre: this.genre,
       questionText: this.questionText,
       questionImage: this.questionImage,
       questionLink: this.questionLink,
@@ -140,6 +157,7 @@ export class Quiz {
       answerLink: this.answerLink,
       tournamentId: this.tournamentId,
       participantId: this.participantId,
+      participantName: this.participantName,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

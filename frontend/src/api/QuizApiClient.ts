@@ -25,12 +25,14 @@ class QuizApiClient {
   /**
    * 指定されたIDのクイズ情報を取得します。
    * @param {string} id - クイズID
+   * @param {boolean} [isPreview] - プレビューモードかどうか (trueの場合、既読フラグを更新しない)
    * @returns {Promise<Quiz>} クイズ情報
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  public async get(id: string): Promise<Quiz> {
+  public async get(id: string, isPreview?: boolean): Promise<Quiz> {
     try {
-      const response = await this.client.get(`/quizzes/${id}`);
+      const config = isPreview ? { params: { preview: true } } : {};
+      const response = await this.client.get(`/quizzes/${id}`, config);
       return Quiz.fromApi(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

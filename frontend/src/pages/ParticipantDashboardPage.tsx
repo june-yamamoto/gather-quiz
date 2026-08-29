@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Typography, Box, List, ListItem, Divider, CircularProgress, Chip, Stack } from '@mui/material';
+import { Container, Typography, Box, List, ListItem, Divider, CircularProgress, Chip, Stack, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { pathToQuizCreator, pathToTournamentPortal } from '../helpers/route-helpers';
 import { participantApiClient } from '../api/ParticipantApiClient';
+import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
 import { QuizPreviewDialog } from '../components/QuizPreviewDialog';
+import { getGenreColor } from '../helpers/color-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
@@ -19,11 +21,12 @@ const ParticipantDashboardPage = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewQuizId, setPreviewQuizId] = useState('');
   const [previewMode, setPreviewMode] = useState<'question' | 'answer'>('question');
+  const [regulationOpen, setRegulationOpen] = useState(false);
 
   const {
     data: status,
-    error,
-    isLoading,
+    error: statusError,
+    isLoading: isStatusLoading,
   } = useQuery({
     queryKey: ['participant', participantId, 'quizzes'],
     queryFn: () => {
@@ -33,6 +36,19 @@ const ParticipantDashboardPage = () => {
       return participantApiClient.getQuizzes(tournamentId, participantId);
     },
     enabled: !!tournamentId && !!participantId,
+  });
+
+  const {
+    data: tournament,
+  } = useQuery({
+    queryKey: ['tournament', tournamentId],
+    queryFn: () => {
+      if (!tournamentId) {
+        throw new Error('Tournament ID is not defined');
+      }
+      return tournamentApiClient.get(tournamentId);
+    },
+    enabled: !!tournamentId,
   });
 
   const handleOpenPreview = (quizId: string, mode: 'question' | 'answer') => {
@@ -46,7 +62,7 @@ const ParticipantDashboardPage = () => {
     setPreviewQuizId('');
   };
 
-  if (isLoading) {
+  if (isStatusLoading) {
     return (
       <StyledContainer maxWidth="md" sx={{ textAlign: 'center' }}>
         <CircularProgress />
@@ -54,10 +70,10 @@ const ParticipantDashboardPage = () => {
     );
   }
 
-  if (error) {
+  if (statusError) {
     return (
       <StyledContainer maxWidth="md">
-        <Typography color="error">エラー: {error.message}</Typography>
+        <Typography color="error">エラー: {statusError.message}</Typography>
       </StyledContainer>
     );
   }
@@ -67,10 +83,17 @@ const ParticipantDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="md">
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
+      <Box sx={{ mb: 4, textAlign: 'center', position: 'relative' }}>
         <Typography variant="h5" component="h1">
           {status?.participantName} さんのダッシュボード
         </Typography>
+        {tournament?.regulation && (
+          <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
+            <Button variant="outlined" size="small" onClick={() => setRegulationOpen(true)}>
+              ルール確認
+            </Button>
+          </Box>
+        )}
       </Box>
 
       <Card sx={{ my: 4, textAlign: 'left' }}>
@@ -146,6 +169,19 @@ const ParticipantDashboardPage = () => {
 
                   {quiz ? (
                     <Box sx={{ mt: 1 }}>
+                      {quiz.genre && (
+                        <Box sx={{ mb: 1 }}>
+                          <Chip 
+                            label={quiz.genre} 
+                            size="small" 
+                            sx={{ 
+                              backgroundColor: getGenreColor(quiz.genre), 
+                              color: '#fff', 
+                              fontWeight: 'bold' 
+                            }} 
+                          />
+                        </Box>
+                      )}
                       <Box sx={{ mb: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                           <strong>Q.</strong> {quiz.questionText || '（テキストなし）'}
@@ -197,6 +233,19 @@ const ParticipantDashboardPage = () => {
         quizId={previewQuizId}
         mode={previewMode}
       />
+
+      {/* Regulation Dialog */}
+      <Dialog open={regulationOpen} onClose={() => setRegulationOpen(false)}>
+        <DialogTitle>大会レギュレーション</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ whiteSpace: 'pre-wrap' }}>
+            {tournament?.regulation || 'レギュレーションは設定されていません。'}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRegulationOpen(false)}>閉じる</Button>
+        </DialogActions>
+      </Dialog>
     </StyledContainer>
   );
 };

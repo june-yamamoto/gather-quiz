@@ -1,22 +1,25 @@
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, Box, Chip } from '@mui/material';
 import type { PaperProps } from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+import { getGenreColor } from '../../../helpers/color-helpers';
 
 type QuizCardProps = PaperProps & {
   point: number;
   isAnswered?: boolean;
+  isUncreated?: boolean;
+  genre?: string | null;
   onClick?: () => void;
 };
 
 type StyledQuizCardProps = Omit<QuizCardProps, 'point'>;
 
 const StyledQuizCard = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== 'isAnswered',
-})<StyledQuizCardProps>(({ theme, isAnswered, onClick }) => ({
-  padding: theme.spacing(2),
+  shouldForwardProp: (prop) => prop !== 'isAnswered' && prop !== 'isUncreated',
+})<StyledQuizCardProps>(({ theme, isAnswered, isUncreated, onClick }) => ({
+  padding: theme.spacing(1),
   textAlign: 'center',
   width: '100%',
-  minHeight: '120px',
+  minHeight: '85px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -37,17 +40,44 @@ const StyledQuizCard = styled(Paper, {
         backgroundColor: theme.palette.grey[200],
         color: theme.palette.text.disabled,
       }
+    : isUncreated
+    ? {
+        backgroundColor: theme.palette.background.default,
+        border: `2px dashed ${theme.palette.grey[400]}`,
+        color: theme.palette.text.secondary,
+      }
     : {
         backgroundColor: theme.palette.background.paper,
       }),
 }));
 
-export const QuizCard = ({ point, isAnswered, onClick, ...props }: QuizCardProps) => {
+export const QuizCard = ({ point, isAnswered, isUncreated, genre, onClick, ...props }: QuizCardProps) => {
   return (
-    <StyledQuizCard isAnswered={isAnswered} onClick={onClick} role={onClick ? 'button' : undefined} {...props}>
-      <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-        {point}
-      </Typography>
+    <StyledQuizCard isAnswered={isAnswered} isUncreated={isUncreated} onClick={onClick} role={onClick ? 'button' : undefined} {...props}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        {genre && !isUncreated && (
+          <Chip
+            label={genre}
+            size="small"
+            sx={{
+              backgroundColor: isAnswered ? undefined : getGenreColor(genre),
+              color: isAnswered ? undefined : '#fff',
+              fontWeight: 'bold',
+              mb: 1,
+              maxWidth: '90%',
+              opacity: isAnswered ? 0.6 : 1,
+            }}
+          />
+        )}
+        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+          {point}
+        </Typography>
+        {isUncreated && (
+          <Typography variant="caption" display="block">
+            未作成
+          </Typography>
+        )}
+      </Box>
     </StyledQuizCard>
   );
 };

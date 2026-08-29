@@ -101,6 +101,23 @@ describe('クイズAPI', () => {
       expect(updatedQuiz?.isOpened).toBe(true);
     });
 
+    it('preview=trueの場合、isOpenedが更新されないこと', async () => {
+      // 初期状態確認
+      const initialQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
+      expect(initialQuiz?.isOpened).toBe(false);
+
+      const res = await request(app).get(`/quizzes/${quiz.id}?preview=true`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.id).toBe(quiz.id);
+      // レスポンスのisOpenedもfalseのままのはず（ただしAPIの実装によっては現在のDB値を返すか更新後の値を返すかによるが、今回は更新しないのでfalse）
+      expect(res.body.isOpened).toBe(false);
+
+      // DBも更新されていないか確認
+      const updatedQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
+      expect(updatedQuiz?.isOpened).toBe(false);
+    });
+
     it('存在しないIDの場合、404エラーを返すこと', async () => {
       const res = await request(app).get('/quizzes/nonexistent_id');
 
@@ -133,7 +150,6 @@ describe('クイズAPI', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('Question text or image is required');
     });
-
 
     it('存在しないIDの場合、404エラーを返すこと', async () => {
       const updatedData = {

@@ -18,11 +18,12 @@ describe('TournamentCreationCompletePage', () => {
     vi.spyOn(tournamentApiClient, 'get').mockResolvedValue(
       new Tournament({
         id: tournamentId,
-        name: 'Test Tournament',
-        questionsPerParticipant: 5,
-        points: '10,20,30,40,50',
-        regulation: 'Test Regulation',
+        name: 'New Tournament',
+        questionsPerParticipant: 3,
+        points: '10,20,30',
+        regulation: '',
         status: 'pending',
+        createdAt: new Date(),
         participants: [],
       })
     );

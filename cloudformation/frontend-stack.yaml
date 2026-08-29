@@ -13,15 +13,7 @@ Parameters:
     Description: ACM証明書のARN (us-east-1にある必要があります)
   ApiGatewayEndpoint:
     Type: String
-    Description: API Gatewayのエンドポイント (https://なし)
-  BasicAuthUser:
-    Type: String
-    Description: Basic認証のユーザー名
-    NoEcho: true
-  BasicAuthPass:
-    Type: String
-    Description: Basic認証のパスワード
-    NoEcho: true
+    Description: API Gatewayのエンドポイント (ドメイン名のみ、例： example.execute-api.ap-northeast-1.amazonaws.com)
 
 Resources:
   # S3 Bucket for Frontend Static Files
@@ -48,7 +40,7 @@ Resources:
             Resource: !Sub arn:aws:s3:::${FrontendBucket}/*
             Condition:
               StringEquals:
-                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendCloudFrontDistribution}"
+                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendCloudFrontDistributionV2}"
 
   # CloudFront Origin Access Control (OAC)
   CloudFrontOriginAccessControl:
@@ -61,7 +53,7 @@ Resources:
         SigningProtocol: sigv4
 
   # CloudFront Distribution for Frontend
-  FrontendCloudFrontDistribution:
+  FrontendCloudFrontDistributionV2:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -97,9 +89,6 @@ Resources:
           MinTTL: 0
           DefaultTTL: 86400 # 24 hours
           MaxTTL: 31536000 # 1 year
-          FunctionAssociations:
-            - EventType: viewer-request
-              FunctionARN: !GetAtt BasicAuthFunction.FunctionARN
         Origins:
           - Id: s3-origin
             DomainName: !Sub ${FrontendBucket}.s3.${AWS::Region}.amazonaws.com
@@ -125,67 +114,6 @@ Resources:
             ResponseCode: 200
             ResponsePagePath: /index.html
 
-  # CloudFront Function for Basic Authentication
-  BasicAuthFunction:
-    Type: AWS::CloudFront::Function
-    Properties:
-      Name: !Sub "${AWS::StackName}-BasicAuth"
-      AutoPublish: true
-      FunctionConfig:
-        Comment: "Basic authentication for the website"
-        Runtime: cloudfront-js-1.0
-      FunctionCode: !Sub |
-        function handler(event) {
-          var request = event.request;
-          var headers = request.headers;
-          var authUser = "${BasicAuthUser}";
-          var authPass = "${BasicAuthPass}";
-
-          // A simple Base64 encode function for CloudFront Functions
-          var b64Encode = function(str) {
-            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-            var result = '';
-            var i = 0;
-            do {
-              var a = str.charCodeAt(i++);
-              var b = str.charCodeAt(i++);
-              var c = str.charCodeAt(i++);
-              a = a ? a : 0;
-              b = b ? b : 0;
-              c = c ? c : 0;
-
-              var b1 = (a >> 2) & 0x3F;
-              var b2 = ((a & 0x3) << 4) | ((b >> 4) & 0xF);
-              var b3 = ((b & 0xF) << 2) | ((c >> 6) & 0x3);
-              var b4 = c & 0x3F;
-
-              if (!b) {
-                b3 = b4 = 64;
-              } else if (!c) {
-                b4 = 64;
-              }
-              result += chars.charAt(b1) + chars.charAt(b2) + chars.charAt(b3) + chars.charAt(b4);
-            } while (i < str.length);
-            return result;
-          };
-
-          var authString = "Basic " + b64Encode(authUser + ":" + authPass);
-
-          if (
-            typeof headers.authorization === "undefined" ||
-            headers.authorization.value !== authString
-          ) {
-            return {
-              statusCode: 401,
-              statusDescription: "Unauthorized",
-              headers: {
-                "www-authenticate": { value: 'Basic realm="Enter credentials"' },
-              },
-            };
-          }
-          return request;
-        }
-
 Outputs:
   FrontendBucketName:
     Description: フロントエンド用S3バケットの名前
@@ -194,11 +122,11 @@ Outputs:
       Name: !Sub ${AWS::StackName}-FrontendBucketName
   CloudFrontDistributionId:
     Description: CloudFrontディストリビューションのID
-    Value: !Ref FrontendCloudFrontDistribution
+    Value: !Ref FrontendCloudFrontDistributionV2
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDistributionId
   CloudFrontDomainName:
     Description: CloudFrontディストリビューションのドメイン名
-    Value: !GetAtt FrontendCloudFrontDistribution.DomainName
+    Value: !GetAtt FrontendCloudFrontDistributionV2.DomainName
     Export:
       Name: !Sub ${AWS::StackName}-CloudFrontDomainName

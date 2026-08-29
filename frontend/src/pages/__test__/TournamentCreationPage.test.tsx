@@ -34,10 +34,11 @@ describe('TournamentCreationPage', () => {
     const createMock = vi.spyOn(tournamentApiClient, 'create').mockResolvedValue(
       new Tournament({
         id: 'new-id',
-        name: 'Test Tournament',
-        questionsPerParticipant: 0,
-        points: '',
+        name: 'New Tournament',
+        questionsPerParticipant: 3,
+        points: '10,20,30',
         status: 'pending',
+        createdAt: new Date(),
         participants: [],
       })
     );

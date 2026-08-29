@@ -42,6 +42,12 @@ export class Tournament {
   regulation: string | null;
 
   /**
+   * ジャンル (カンマ区切り)
+   * @type {string | null}
+   */
+  genres: string | null;
+
+  /**
    * 大会の状態
    * @type {string}
    */
@@ -82,6 +88,7 @@ export class Tournament {
     questionsPerParticipant: number;
     points: string;
     regulation: string | null;
+    genres: string | null;
     status: string;
     createdAt: Date;
     updatedAt: Date;
@@ -94,6 +101,7 @@ export class Tournament {
     this.questionsPerParticipant = data.questionsPerParticipant;
     this.points = data.points;
     this.regulation = data.regulation;
+    this.genres = data.genres;
     this.status = data.status;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
@@ -113,6 +121,7 @@ export class Tournament {
       questionsPerParticipant: this.questionsPerParticipant,
       points: this.points,
       regulation: this.regulation,
+      genres: this.genres,
       status: this.status,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

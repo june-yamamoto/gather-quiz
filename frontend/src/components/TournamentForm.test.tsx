@@ -11,6 +11,7 @@ describe('TournamentForm', () => {
     points: '10,20,30,40,50',
     regulation: 'Test Regulation',
     status: 'pending',
+    createdAt: new Date(),
     participants: [],
   });
 
