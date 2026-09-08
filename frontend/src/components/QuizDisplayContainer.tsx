@@ -1,4 +1,5 @@
 import { QuizMedia } from './QuizMedia';
+import { QuizChoices } from './QuizChoices';
 import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
@@ -125,9 +126,7 @@ export const QuizDisplayContainer = ({
         >
           {quiz.questionText}
         </Typography>
-        {quiz.choiceCount > 0 && <Box component="ol" aria-label="選択肢" sx={{ alignSelf: 'stretch', mx: '4vmin', my: 1, pl: '6vmin' }}>
-          {quiz.choices.map((choice, index) => <Typography component="li" key={index} sx={{ fontSize: 'clamp(20px, 3vmin, 44px)', whiteSpace: 'pre-wrap', mb: 1, pl: 1 }}>{choice}</Typography>)}
-        </Box>}
+        {quiz.choiceCount > 0 && <QuizChoices choices={quiz.choices} />}
 
 
 
