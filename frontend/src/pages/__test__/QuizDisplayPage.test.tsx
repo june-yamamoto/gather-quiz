@@ -40,6 +40,16 @@ const renderWithProviders = (quiz = mockQuiz) => {
 };
 
 describe('QuizDisplayPage', () => {
+  it('動画はロードだけで既読にせず、失敗後の再生開始で初めて既読にする', async () => {
+    renderWithProviders(new Quiz({ ...mockQuiz, questionImage: null, questionLink: 'https://example.com/movie.mp4' }));
+    const player = await screen.findByLabelText('問題メディア');
+    fireEvent.loadedMetadata(player);
+    fireEvent.error(player);
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 80)); });
+    expect(quizApiClient.markOpened).not.toHaveBeenCalled();
+    fireEvent.playing(player);
+    await waitFor(() => expect(quizApiClient.markOpened).toHaveBeenCalledWith('q-1'));
+  });
   beforeEach(() => {
     queryClient.clear();
     vi.clearAllMocks();

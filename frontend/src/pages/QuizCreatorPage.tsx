@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { MediaAttachmentField } from '../components/MediaAttachmentField';
+import { safeMediaUrl } from '../helpers/media';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem } from '@mui/material';
+import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { uploadApiClient } from '../api/UploadApiClient';
@@ -34,6 +36,13 @@ const QuizCreatorPage = () => {
   const order = Number(searchParams.get('order')) || 0;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingEdit, setIsFetchingEdit] = useState(!!editQuizId);
+  const [editError, setEditError] = useState(false);
+  const [editAttempt, setEditAttempt] = useState(0);
+  const [saveError, setSaveError] = useState('');
+  const submitting = useRef(false);
+  const [questionMediaFile, setQuestionMediaFile] = useState<File | null>(null);
+  const [answerMediaFile, setAnswerMediaFile] = useState<File | null>(null);
   const [point, setPoint] = useState(initialPoint);
   const [genre, setGenre] = useState('');
   
@@ -63,11 +72,15 @@ const QuizCreatorPage = () => {
 
   // Fetch Quiz Info if editing
   useEffect(() => {
+    let cancelled = false;
     if (editQuizId) {
+      /** 古い取得結果が別の問題の編集内容を上書きしないようにする。 */
       const fetchQuiz = async () => {
-        setIsLoading(true);
+        setIsFetchingEdit(true);
+        setEditError(false);
         try {
           const quiz = await quizApiClient.get(editQuizId);
+          if (cancelled) return;
           setPoint(quiz.point);
           setGenre(quiz.genre || '');
           setQuestionText(quiz.questionText || '');
@@ -76,32 +89,40 @@ const QuizCreatorPage = () => {
           setAnswerText(quiz.answerText || '');
           setAnswerLink(quiz.answerLink || '');
           setExistingAnswerImageUrl(quiz.answerImage || null);
-        } catch (error) {
-          console.error(error);
-          alert('クイズ情報の取得に失敗しました。');
+        } catch {
+          if (!cancelled) setEditError(true);
         } finally {
-          setIsLoading(false);
+          if (!cancelled) setIsFetchingEdit(false);
         }
       };
       fetchQuiz();
     } else {
+      setIsFetchingEdit(false);
       setPoint(initialPoint);
     }
-  }, [editQuizId, initialPoint]);
+    return () => { cancelled = true; };
+  }, [editQuizId, initialPoint, editAttempt]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    if (!questionText && !questionImageFile && !existingQuestionImageUrl) {
-      alert('問題文または問題画像のどちらかは必須です。');
+    if (submitting.current || isFetchingEdit || editError) return;
+    setSaveError('');
+    if ((!questionMediaFile && questionLink.trim() && !safeMediaUrl(questionLink)) || (!answerMediaFile && answerLink.trim() && !safeMediaUrl(answerLink))) {
+      setSaveError('HTTPまたはHTTPSの有効なURLを入力してください。');
       return;
     }
-    if (!answerText && !answerImageFile && !existingAnswerImageUrl) {
-      alert('解答文または解答画像のどちらかは必須です。');
+
+    if (!questionText.trim() && !questionImageFile && !existingQuestionImageUrl && !questionMediaFile && !questionLink.trim()) {
+      setSaveError('問題には文章・画像・動画・音声・URLのいずれかが必要です。');
+      return;
+    }
+    if (!answerText.trim() && !answerImageFile && !existingAnswerImageUrl && !answerMediaFile && !answerLink.trim()) {
+      setSaveError('解答には文章・画像・動画・音声・URLのいずれかが必要です。');
       return;
     }
 
     try {
+      submitting.current = true;
       setIsLoading(true);
       const tId = tournamentId || '';
       const pId = participantId || '';
@@ -109,21 +130,32 @@ const QuizCreatorPage = () => {
       const questionImageUrl = questionImageFile
         ? await uploadApiClient.uploadImage(questionImageFile, tId, pId)
         : existingQuestionImageUrl;
+      setExistingQuestionImageUrl(questionImageUrl);
+      setQuestionImageFile(null);
 
       const answerImageUrl = answerImageFile 
         ? await uploadApiClient.uploadImage(answerImageFile, tId, pId) 
         : existingAnswerImageUrl;
+      setExistingAnswerImageUrl(answerImageUrl);
+      setAnswerImageFile(null);
 
+      // 一部の転送後に保存が失敗しても、転送済みファイルは再利用する。
+      const savedQuestionLink = questionMediaFile ? await uploadApiClient.uploadMedia(questionMediaFile, tId, pId) : questionLink.trim();
+      setQuestionLink(savedQuestionLink);
+      setQuestionMediaFile(null);
+      const savedAnswerLink = answerMediaFile ? await uploadApiClient.uploadMedia(answerMediaFile, tId, pId) : answerLink.trim();
+      setAnswerLink(savedAnswerLink);
+      setAnswerMediaFile(null);
       const quizData = {
         point,
         order,
         genre: genre || null,
         questionText,
         questionImage: questionImageUrl,
-        questionLink,
+        questionLink: savedQuestionLink,
         answerText,
         answerImage: answerImageUrl,
-        answerLink,
+        answerLink: savedAnswerLink,
         tournamentId: tId,
         participantId: pId,
       };
@@ -139,8 +171,9 @@ const QuizCreatorPage = () => {
       navigate(pathToParticipantDashboard(tId, pId));
     } catch (error) {
       console.error(error);
-      alert('エラーが発生しました。');
+      setSaveError(error instanceof Error ? error.message : '保存に失敗しました。再試行してください。');
     } finally {
+      submitting.current = false;
       setIsLoading(false);
     }
   };
@@ -152,13 +185,18 @@ const QuizCreatorPage = () => {
         .filter((g) => g !== '')
     : [];
 
-  if (isLoading && editQuizId && !questionText) {
+  if (isFetchingEdit) {
      return (
        <StyledContainer maxWidth="md" sx={{ textAlign: 'center' }}>
          <CircularProgress />
        </StyledContainer>
      );
   }
+  if (editQuizId && editError) return <StyledContainer maxWidth="md">
+    <Alert severity="error" action={<Button onClick={() => setEditAttempt((value) => value + 1)}>再試行</Button>}>
+      クイズ情報を取得できませんでした。既存の添付を保護するため、取得できるまで編集できません。
+    </Alert>
+  </StyledContainer>;
 
   return (
     <StyledContainer maxWidth="md">
@@ -174,6 +212,8 @@ const QuizCreatorPage = () => {
       </Box>
 
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        {saveError && <Alert severity="error" sx={{ mb: 2 }}>{saveError}</Alert>}
+        <Box component="fieldset" disabled={isLoading} sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid item>
                 <Input
@@ -229,7 +269,7 @@ const QuizCreatorPage = () => {
                 <input
                   type="file"
                   hidden
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
                   onChange={(e) => setQuestionImageFile(e.target.files ? e.target.files[0] : null)}
                 />
               </Button>
@@ -242,13 +282,8 @@ const QuizCreatorPage = () => {
                   （設定済みの画像あり）
                 </Typography>
               ) : null}
-              <Input
-                label="参考リンク"
-                inputProps={{ inputMode: 'url', autoCapitalize: 'none', spellCheck: false }}
-                fullWidth
-                value={questionLink}
-                onChange={(e) => setQuestionLink(e.target.value)}
-              />
+              {(questionImageFile || existingQuestionImageUrl) && <Button onClick={() => { setQuestionImageFile(null); setExistingQuestionImageUrl(null); }}>問題画像を削除</Button>}
+              <MediaAttachmentField label="問題" url={questionLink} file={questionMediaFile} onUrlChange={setQuestionLink} onFileChange={setQuestionMediaFile} />
             </StyledSection>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -270,7 +305,7 @@ const QuizCreatorPage = () => {
                 <input
                   type="file"
                   hidden
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
                   onChange={(e) => setAnswerImageFile(e.target.files ? e.target.files[0] : null)}
                 />
               </Button>
@@ -283,7 +318,8 @@ const QuizCreatorPage = () => {
                   （設定済みの画像あり）
                 </Typography>
               ) : null}
-              <Input label="参考リンク" inputProps={{ inputMode: 'url', autoCapitalize: 'none', spellCheck: false }} fullWidth value={answerLink} onChange={(e) => setAnswerLink(e.target.value)} />
+              {(answerImageFile || existingAnswerImageUrl) && <Button onClick={() => { setAnswerImageFile(null); setExistingAnswerImageUrl(null); }}>解答画像を削除</Button>}
+              <MediaAttachmentField label="解答" url={answerLink} file={answerMediaFile} onUrlChange={setAnswerLink} onFileChange={setAnswerMediaFile} />
             </StyledSection>
           </Grid>
         </Grid>
@@ -291,6 +327,7 @@ const QuizCreatorPage = () => {
           <Button type="submit" variant="contained" color="primary" size="large" disabled={isLoading} sx={{ width: { xs: '100%', sm: 'auto' } }}>
             {editQuizId ? 'この内容で更新する' : 'この内容で問題を保存する'}
           </Button>
+        </Box>
         </Box>
       </Box>
 

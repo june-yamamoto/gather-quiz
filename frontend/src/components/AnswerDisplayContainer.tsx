@@ -1,3 +1,4 @@
+import { QuizMedia } from './QuizMedia';
 import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
@@ -95,19 +96,7 @@ export const AnswerDisplayContainer = ({
 
 
 
-        {quiz.answerLink && (
-          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: 'clamp(16px, 2.5vmin, 32px)' }}>
-            参考リンク:{' '}
-            <a
-              href={quiz.answerLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'inherit', textDecoration: 'underline' }}
-            >
-              {quiz.answerLink}
-            </a>
-          </Typography>
-        )}
+        {quiz.answerLink && <QuizMedia url={quiz.answerLink} label="解答メディア" />}
       </Box>
 
         {quiz.answerImage && (

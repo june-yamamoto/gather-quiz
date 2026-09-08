@@ -92,6 +92,12 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
       return HttpResponse.json({ success: true });
     }),
     http.post('*/api/upload/image', () => HttpResponse.json({ signedUrl: '/api/story-upload', objectUrl: imageFixture })),
+    http.post('*/api/upload/media', async ({ request }) => {
+      const data = await body(request);
+      return HttpResponse.json({ signedUrl: '/api/story-upload', objectUrl: data.fileType === 'video/mp4' || data.fileType === 'video/webm'
+        ? 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
+        : 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg' });
+    }),
     http.put('*/api/story-upload', () => new HttpResponse(null, { status: 200 })),
   ];
   return { handlers };

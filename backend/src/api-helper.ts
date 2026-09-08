@@ -101,6 +101,9 @@ export const pathToQuiz = (id: string) => `${pathToQuizzes()}/${id}`;
  */
 export const pathToUploadImage = () => `${API_ROOT}/upload/image`;
 
+/** 動画・音声アップロードの署名発行パスを返す。 */
+export const pathToUploadMedia = () => `${API_ROOT}/upload/media`;
+
 type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<unknown>;
 
 /**

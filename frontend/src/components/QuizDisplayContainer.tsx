@@ -1,3 +1,4 @@
+import { QuizMedia } from './QuizMedia';
 import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
@@ -10,6 +11,7 @@ type QuizDisplayContainerProps = {
   buttonText?: string;
   showButton?: boolean;
   onQuestionImageLoad?: () => void;
+  onQuestionMediaPlayed?: () => void;
 };
 
 export const QuizDisplayContainer = ({
@@ -18,6 +20,7 @@ export const QuizDisplayContainer = ({
   buttonText = '正解を見る',
   showButton = true,
   onQuestionImageLoad,
+  onQuestionMediaPlayed,
 }: QuizDisplayContainerProps) => {
   return (
     <Box
@@ -124,19 +127,7 @@ export const QuizDisplayContainer = ({
 
 
 
-        {quiz.questionLink && (
-          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: 'clamp(16px, 2.5vmin, 32px)' }}>
-            参考リンク:{' '}
-            <a
-              href={quiz.questionLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'inherit', textDecoration: 'underline' }}
-            >
-              {quiz.questionLink}
-            </a>
-          </Typography>
-        )}
+        {quiz.questionLink && <QuizMedia url={quiz.questionLink} label="問題メディア" onPlayed={onQuestionMediaPlayed} />}
       </Box>
 
         {quiz.questionImage && (

@@ -45,7 +45,7 @@ export class Quiz {
   questionImage?: string | null;
 
   /**
-   * 問題の参考リンク
+   * 問題の動画・音声または参考リンクURL
    * @type {(string | null)}
    */
   questionLink?: string | null;
@@ -63,7 +63,7 @@ export class Quiz {
   answerImage?: string | null;
 
   /**
-   * 解答の参考リンク
+   * 解答の動画・音声または参考リンクURL
    * @type {(string | null)}
    */
   answerLink?: string | null;
