@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
-  marginTop: theme.spacing(8),
+  marginTop: theme.spacing(5),
 }));
 
 const ErrorPage = () => {
@@ -16,7 +16,7 @@ const ErrorPage = () => {
       <Typography variant="h5" color="textSecondary" paragraph>
         お探しのページが見つからないか、一時的にアクセスできない状態です。
       </Typography>
-      <Box sx={{ mt: 4 }}>
+      <Box sx={{ mt: 3 }}>
         <Button component={Link} to="/" variant="contained" color="primary" size="large">
           トップページに戻る
         </Button>

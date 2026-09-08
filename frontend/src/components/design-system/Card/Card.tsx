@@ -3,9 +3,11 @@ import type { CardProps } from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 
 const StyledCard = styled(MuiCard)<CardProps>(({ theme }) => ({
-  borderRadius: '8px',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-  padding: theme.spacing(4),
+  borderRadius: theme.spacing(2),
+  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: '0 8px 28px rgba(35,59,52,0.035)',
+  padding: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: { padding: theme.spacing(2) },
   textAlign: 'center',
   height: '100%',
   display: 'flex',

@@ -32,7 +32,7 @@ const AnswerDisplayPage = () => {
 
   if (isLoading) {
     return (
-      <Container sx={{ textAlign: 'center', mt: 4 }}>
+      <Container sx={{ textAlign: 'center', mt: 3 }}>
         <CircularProgress />
       </Container>
     );
@@ -40,14 +40,14 @@ const AnswerDisplayPage = () => {
 
   if (error || !quiz) {
     return (
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 3 }}>
         <Typography color="error">エラー: {error?.message || 'クイズの読み込みに失敗しました。'}</Typography>
       </Container>
     );
   }
 
   return (
-    <Box sx={{ height: '100vh', width: '100vw' }}>
+    <Box sx={{ height: '100dvh', width: '100%' }}>
       <AnswerDisplayContainer quiz={quiz} onButtonClick={backToBoard} buttonText="ボードに戻る" />
     </Box>
   );

@@ -85,7 +85,7 @@ describe('クイズAPI', () => {
   });
 
   describe('GET /:id (クイズ取得)', () => {
-    it('指定したIDのクイズが取得され、isOpenedがtrueになること', async () => {
+    it('通常取得や編集用の取得では既読にならないこと', async () => {
       // 初期状態確認
       const initialQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
       expect(initialQuiz?.isOpened).toBe(false);
@@ -94,11 +94,11 @@ describe('クイズAPI', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.id).toBe(quiz.id);
-      expect(res.body.isOpened).toBe(true);
+      expect(res.body.isOpened).toBe(false);
 
       // DBも更新されているか確認
       const updatedQuiz = await prisma.quiz.findUnique({ where: { id: quiz.id } });
-      expect(updatedQuiz?.isOpened).toBe(true);
+      expect(updatedQuiz?.isOpened).toBe(false);
     });
 
     it('preview=trueの場合、isOpenedが更新されないこと', async () => {
@@ -123,6 +123,31 @@ describe('クイズAPI', () => {
 
       expect(res.statusCode).toBe(404);
       expect(res.body.error).toBe('Quiz not found');
+    });
+  });
+
+  describe('PUT /:id/opened (表示済み記録)', () => {
+    it('指定した問題だけを既読にし、再送しても結果が変わらないこと', async () => {
+      const other = await prisma.quiz.create({ data: {
+        point: 20, order: 1, questionText: '未表示の問題', answerText: '解答',
+        tournamentId: tournament.id, participantId: participant.id,
+      } });
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const res = await request(app).put(`/quizzes/${quiz.id}/opened`);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.isOpened).toBe(true);
+      }
+      expect((await prisma.quiz.findUnique({ where: { id: other.id } }))?.isOpened).toBe(false);
+    });
+
+    it('存在しない問題は404を返すこと', async () => {
+      expect((await request(app).put('/quizzes/nonexistent_id/opened')).statusCode).toBe(404);
+    });
+
+    it('GETやHEADで既読更新URLを取得しても既読にならないこと', async () => {
+      await request(app).get(`/quizzes/${quiz.id}/opened`);
+      await request(app).head(`/quizzes/${quiz.id}`);
+      expect((await prisma.quiz.findUnique({ where: { id: quiz.id } }))?.isOpened).toBe(false);
     });
   });
 

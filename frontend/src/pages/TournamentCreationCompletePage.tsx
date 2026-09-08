@@ -8,8 +8,8 @@ import { Button } from '../components/design-system/Button/Button';
 import { Card } from '../components/design-system/Card/Card';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
 }));
 
 const StyledInfoBox = styled(Box)(({ theme }) => ({
@@ -59,7 +59,7 @@ const TournamentCreationCompletePage = () => {
       </Typography>
 
       {tournament && (
-        <Card sx={{ mt: 4, textAlign: 'left' }}>
+        <Card sx={{ mt: 3, textAlign: 'left' }}>
           <Typography variant="h6">大会名: {tournament.name}</Typography>
           <StyledInfoBox>
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>

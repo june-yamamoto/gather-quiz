@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Alert, Button } from '@mui/material';
+import { useState } from 'react';
+import { useQuizOpened } from '../helpers/use-quiz-opened';
 import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
 import { quizApiClient } from '../api/QuizApiClient';
@@ -8,6 +10,7 @@ import { QuizDisplayContainer } from '../components/QuizDisplayContainer';
 const QuizDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const [loadedImage, setLoadedImage] = useState('');
 
   const {
     data: quiz,
@@ -24,6 +27,9 @@ const QuizDisplayPage = () => {
     enabled: !!quizId,
   });
 
+  const record = useQuizOpened(quiz?.id === quizId && !error ? quiz : undefined,
+    !!quiz && (!quiz.questionImage || loadedImage === `${quiz.id}:${quiz.questionImage}`));
+
   const showAnswer = () => {
     if (quizId) {
       navigate(pathToAnswerDisplay(quizId));
@@ -32,7 +38,7 @@ const QuizDisplayPage = () => {
 
   if (isLoading) {
     return (
-      <Container sx={{ textAlign: 'center', mt: 4 }}>
+      <Container sx={{ textAlign: 'center', mt: 3 }}>
         <CircularProgress />
       </Container>
     );
@@ -40,15 +46,19 @@ const QuizDisplayPage = () => {
 
   if (error || !quiz) {
     return (
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 3 }}>
         <Typography color="error">エラー: {error?.message || 'クイズの読み込みに失敗しました。'}</Typography>
       </Container>
     );
   }
 
   return (
-    <Box sx={{ height: '100vh', width: '100vw' }}>
-      <QuizDisplayContainer quiz={quiz} onButtonClick={showAnswer} buttonText="正解を見る" />
+    <Box sx={{ height: '100dvh', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      {record.error && <Alert severity="warning" action={<Button onClick={record.retry}>既読保存を再試行</Button>}>
+        既読を保存できませんでした。
+      </Alert>}
+      <QuizDisplayContainer quiz={quiz} onButtonClick={showAnswer} buttonText="正解を見る"
+        onQuestionImageLoad={() => setLoadedImage(`${quiz.id}:${quiz.questionImage}`)} />
     </Box>
   );
 };

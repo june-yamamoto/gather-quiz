@@ -7,7 +7,7 @@ import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
-  marginTop: theme.spacing(8),
+  marginTop: theme.spacing(5),
 }));
 
 type ViewedTournament = {
@@ -27,7 +27,8 @@ const ServiceTopPage = () => {
   }, []);
 
   return (
-    <StyledContainer maxWidth="md">
+    <StyledContainer maxWidth="md" sx={{ mb: 5, py: { xs: 2, sm: 3 } }}>
+      <Typography variant="overline" color="secondary" sx={{ letterSpacing: '0.18em', fontWeight: 700 }}>QUIZ, TOGETHER.</Typography>
       <Typography
         variant="h2"
         component="h1"
@@ -56,14 +57,26 @@ const ServiceTopPage = () => {
       >
         みんなで問題を持ち寄る、クイズ大会開催ツール
       </Typography>
-      <Box sx={{ mt: 4 }}>
+      <Box sx={{ mt: 3 }}>
         <Button component={Link} to={pathToTournamentCreation()} variant="contained" color="primary" size="large">
           クイズ大会を新しく作成する
         </Button>
       </Box>
 
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 3, mt: 5, textAlign: 'left', borderTop: 1, borderColor: 'divider', pt: 3 }}>
+        {[
+          ['01', '大会をつくる', '配点とルールを決めて、参加者を招待。'],
+          ['02', '問いを持ち寄る', 'スマートフォンから、自分だけの問題を。'],
+          ['03', 'みんなで楽しむ', '問題ボードを囲んで、答えを見つけよう。'],
+        ].map(([number, title, description]) => <Box key={number}>
+          <Typography color="secondary" variant="caption" sx={{ fontWeight: 800 }}>{number}</Typography>
+          <Typography variant="h6" sx={{ my: 1 }}>{title}</Typography>
+          <Typography variant="body2" color="text.secondary">{description}</Typography>
+        </Box>)}
+      </Box>
+
       {viewedTournaments.length > 0 && (
-        <Box sx={{ mt: 8, textAlign: 'left' }}>
+        <Box sx={{ mt: 5, textAlign: 'left' }}>
           <Typography variant="h6" gutterBottom>
             最近アクセスした大会
           </Typography>

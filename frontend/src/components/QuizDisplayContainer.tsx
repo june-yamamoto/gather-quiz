@@ -1,3 +1,4 @@
+import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
 import { Button } from './design-system/Button/Button';
@@ -8,6 +9,7 @@ type QuizDisplayContainerProps = {
   onButtonClick?: () => void;
   buttonText?: string;
   showButton?: boolean;
+  onQuestionImageLoad?: () => void;
 };
 
 export const QuizDisplayContainer = ({
@@ -15,6 +17,7 @@ export const QuizDisplayContainer = ({
   onButtonClick,
   buttonText = '正解を見る',
   showButton = true,
+  onQuestionImageLoad,
 }: QuizDisplayContainerProps) => {
   return (
     <Box
@@ -28,7 +31,7 @@ export const QuizDisplayContainer = ({
         p: '2vmin',
         boxSizing: 'border-box',
         // Decorative frame
-        border: '1vmin solid',
+        border: '0.5vmin solid',
         borderColor: 'primary.main',
         overflow: 'hidden',
       }}
@@ -47,8 +50,8 @@ export const QuizDisplayContainer = ({
                 borderRadius: '0 0 2vmin 0',
                 mt: '-2vmin',
                 ml: '-2vmin',
-                boxShadow: '0.2vmin 0.2vmin 0.5vmin rgba(0,0,0,0.2)',
-                fontSize: '4vmin',
+
+                fontSize: 'clamp(22px, 4vmin, 64px)',
               }}
             >
               {quiz.genre}
@@ -66,20 +69,23 @@ export const QuizDisplayContainer = ({
             borderRadius: '0 0 0 2vmin', // Decorative shape
             mt: '-2vmin', // Pull up to attach to top border
             mr: '-2vmin', // Pull right to attach to right border
-            fontSize: '4vmin',
+            fontSize: 'clamp(22px, 4vmin, 64px)',
           }}
         >
           {quiz.point}点問題
         </Typography>
       </Box>
 
-      <Box
+      <Box role="region" aria-label="本文" tabIndex={0}
         sx={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'safe center',
+          minHeight: 0,
+          '& > *': { flexShrink: 0 },
+          overflowWrap: 'anywhere',
           overflow: 'auto',
           width: '100%',
         }}
@@ -92,7 +98,7 @@ export const QuizDisplayContainer = ({
               color: 'text.secondary',
               mb: '2vmin',
               fontWeight: 'bold',
-              fontSize: '2.5vmin',
+              fontSize: 'clamp(16px, 2.5vmin, 32px)',
             }}
           >
             作成者: {quiz.participantName}
@@ -104,53 +110,28 @@ export const QuizDisplayContainer = ({
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            fontSize: '4vmin',
+            fontSize: 'clamp(22px, 4vmin, 64px)',
             mb: '4vmin',
             px: '4vmin',
-            textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
+
             whiteSpace: 'pre-wrap',
-            lineHeight: 1.2,
-            maxHeight: quiz.questionImage ? '70%' : '90%',
+            lineHeight: 1.6,
+            maxWidth: '100%',
           }}
         >
-          Q. {quiz.questionText}
+          {quiz.questionText}
         </Typography>
 
-        {quiz.questionImage && (
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              overflow: 'hidden',
-              p: '2vmin',
-            }}
-          >
-            <img
-              src={quiz.questionImage}
-              alt="問題画像"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                minHeight: '20%',
-                objectFit: 'contain',
-                borderRadius: '1vmin',
-                boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
-              }}
-            />
-          </Box>
-        )}
+
 
         {quiz.questionLink && (
-          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
+          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: 'clamp(16px, 2.5vmin, 32px)' }}>
             参考リンク:{' '}
             <a
               href={quiz.questionLink}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#00529B', textDecoration: 'underline' }}
+              style={{ color: 'inherit', textDecoration: 'underline' }}
             >
               {quiz.questionLink}
             </a>
@@ -158,17 +139,23 @@ export const QuizDisplayContainer = ({
         )}
       </Box>
 
+        {quiz.questionImage && (
+          <Box sx={{ height: '35%', minHeight: 0, flexShrink: 0, display: 'flex', justifyContent: 'center', pt: 1 }}>
+          <ExpandableQuizImage contained key={quiz.questionImage} src={quiz.questionImage} alt="問題画像" onLoad={onQuestionImageLoad} />
+          </Box>
+        )}
+
       {showButton && (
-        <Box sx={{ mt: '2vmin', textAlign: 'center' }}>
+        <Box sx={{ mt: '2vmin', flexShrink: 0, textAlign: 'center' }}>
           <Button
             variant="contained"
             size="large"
             onClick={onButtonClick}
             sx={{
               minWidth: '20vmin',
-              fontSize: '2.5vmin',
+              fontSize: 'clamp(16px, 2.5vmin, 32px)',
               borderRadius: '4vmin',
-              boxShadow: '0 0.5vmin 0.8vmin rgba(0,0,0,0.2)',
+
               py: '1vmin',
               px: '4vmin',
             }}

@@ -1,32 +1,20 @@
+import { quizArgs, quizArgTypes, tournamentArgs, tournamentArgTypes, type QuizControls, type TournamentControls } from '../controls';
 import type { Meta, StoryObj } from '@storybook/react';
 import OrganizerDashboardPage from '../../pages/OrganizerDashboardPage';
+import { pathToOrganizerDashboard } from '../../helpers/route-helpers';
+import { mobile } from '../fixtures';
 
-const meta: Meta<typeof OrganizerDashboardPage> = {
-  title: '画面/主催者/主催者ダッシュボード',
-  component: OrganizerDashboardPage,
-  parameters: {
-    reactRouter: {
-      route: '/tournaments/:tournamentId/admin',
-      path: '/tournaments/test-organizer-id/admin',
-    },
-    mockData: [
-      {
-        url: '/api/tournaments/test-organizer-id/status',
-        method: 'GET',
-        status: 200,
-        response: {
-          tournamentName: '主催者ダッシュボードテスト大会',
-          participants: [
-            { id: 'p1', name: '田中', created: 3, required: 3 },
-            { id: 'p2', name: '佐藤', created: 1, required: 3 },
-          ],
-        },
-      },
-    ],
-  },
-};
-
+const meta = {
+  args: { ...quizArgs, ...tournamentArgs },
+  argTypes: { ...quizArgTypes, ...tournamentArgTypes },
+  render: () => <OrganizerDashboardPage />,
+  title: '画面/主催者/管理',
+  parameters: { page: true, route: { path: pathToOrganizerDashboard(':tournamentId'), entry: pathToOrganizerDashboard('t-1') } },
+} satisfies Meta<QuizControls & TournamentControls>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { name: '通常' };
+export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
+export const Loading: Story = { name: '読み込み中', parameters: { mockScenario: 'loading' } };
+export const Failure: Story = { name: '取得失敗', parameters: { mockScenario: 'error' } };

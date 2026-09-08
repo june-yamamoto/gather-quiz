@@ -22,8 +22,8 @@ describe('AnswerDisplayContainer', () => {
   it('解答情報が正しくレンダリングされること', () => {
     render(<AnswerDisplayContainer quiz={mockQuiz} />);
     
-    expect(screen.getByText('Q. Question')).toBeInTheDocument();
-    expect(screen.getByText('A. Test Answer')).toBeInTheDocument();
+    expect(screen.getByText('Question')).toBeInTheDocument();
+    expect(screen.getByText('Test Answer')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '解答画像' })).toHaveAttribute('src', 'https://example.com/answer.jpg');
     expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/ref');
     expect(screen.getByRole('button', { name: 'ボードに戻る' })).toBeInTheDocument();
@@ -37,8 +37,8 @@ describe('AnswerDisplayContainer', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
   
-  it('showButtonがfalseの場合、ボタンが表示されないこと', () => {
+  it('showButtonがfalseの場合、画面遷移ボタンが表示されないこと', () => {
     render(<AnswerDisplayContainer quiz={mockQuiz} showButton={false} />);
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'ボードに戻る' })).not.toBeInTheDocument();
   });
 });

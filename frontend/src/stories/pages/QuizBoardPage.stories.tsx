@@ -1,44 +1,29 @@
+import { quizArgs, quizArgTypes, tournamentArgs, tournamentArgTypes, type QuizControls, type TournamentControls } from '../controls';
 import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect } from '@storybook/test';
 import QuizBoardPage from '../../pages/QuizBoardPage';
+import { pathToQuizBoard } from '../../helpers/route-helpers';
+import { mobile } from '../fixtures';
 
-const meta: Meta<typeof QuizBoardPage> = {
-  title: '画面/大会実施/問題選択ボードページ',
-  component: QuizBoardPage,
-  parameters: {
-    reactRouter: {
-      route: '/tournaments/:tournamentId/board',
-      path: '/tournaments/test-board-id/board',
-    },
-    mockData: [
-      {
-        url: '/api/tournaments/test-board-id/board',
-        method: 'GET',
-        status: 200,
-        response: {
-          name: 'クイズボードテスト大会',
-          points: '10,20,30',
-          participants: [
-            {
-              id: 'p1',
-              name: '田中',
-              quizzes: [
-                { id: 'q1', point: 10 },
-                { id: 'q2', point: 30 },
-              ],
-            },
-            {
-              id: 'p2',
-              name: '佐藤',
-              quizzes: [{ id: 'q3', point: 20 }],
-            },
-          ],
-        },
-      },
-    ],
-  },
-};
-
+const meta = {
+  args: { ...quizArgs, ...tournamentArgs },
+  argTypes: { ...quizArgTypes, ...tournamentArgTypes },
+  render: () => <QuizBoardPage />,
+  title: '画面/大会実施/問題ボード',
+  parameters: { page: true, route: { path: pathToQuizBoard(':tournamentId'), entry: pathToQuizBoard('t-1') } },
+} satisfies Meta<QuizControls & TournamentControls>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { name: '通常' };
+export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
+export const Loading: Story = { name: '読み込み中', parameters: { mockScenario: 'loading' } };
+export const Failure: Story = { name: '取得失敗', parameters: { mockScenario: 'error' } };
+export const Finished: Story = {
+  name: '大会終了ダイアログ',
+  parameters: { mockScenario: 'finished' },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(await within(canvasElement).findByRole('button', { name: '大会を終了する！' }));
+    await expect(within(document.body).getByRole('dialog')).toBeVisible();
+  },
+};

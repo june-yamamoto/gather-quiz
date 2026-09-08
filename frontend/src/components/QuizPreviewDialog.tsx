@@ -42,8 +42,8 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
           edge="start"
           color="inherit"
           onClick={onClose}
-          aria-label="close"
-          sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1, color: 'text.primary' }}
+          aria-label="プレビューを閉じる"
+          sx={{ alignSelf: 'flex-end', m: 1, color: 'text.primary' }}
         >
           <CloseIcon fontSize="large" />
         </IconButton>
@@ -66,7 +66,7 @@ export const QuizPreviewDialog = ({ open, onClose, quizId, mode }: QuizPreviewDi
               p: 0,
               paddingLeft: '0',
               paddingRight: '0',
-              height: '100%',
+              minHeight: 0,
             }}
           >
             {mode === 'question' ? (

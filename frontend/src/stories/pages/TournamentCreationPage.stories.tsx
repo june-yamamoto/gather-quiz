@@ -1,44 +1,19 @@
+import { quizArgs, quizArgTypes, tournamentArgs, tournamentArgTypes, type QuizControls, type TournamentControls } from '../controls';
 import type { Meta, StoryObj } from '@storybook/react';
 import TournamentCreationPage from '../../pages/TournamentCreationPage';
+import { pathToTournamentCreation, pathToTournamentEdit } from '../../helpers/route-helpers';
+import { mobile } from '../fixtures';
 
-const meta: Meta<typeof TournamentCreationPage> = {
-  title: '画面/主催者/大会作成・編集ページ',
-  component: TournamentCreationPage,
-};
-
+const meta = {
+  args: { ...quizArgs, ...tournamentArgs },
+  argTypes: { ...quizArgTypes, ...tournamentArgTypes },
+  render: () => <TournamentCreationPage />,
+  title: '画面/主催者/大会作成',
+  parameters: { page: true, route: { path: pathToTournamentCreation(), entry: pathToTournamentCreation() } },
+} satisfies Meta<QuizControls & TournamentControls>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const CreateMode: Story = {
-  name: '作成モード',
-  parameters: {
-    reactRouter: {
-      route: '/tournaments/new',
-      path: '/tournaments/new',
-    },
-  },
-};
-
-export const EditMode: Story = {
-  name: '編集モード',
-  parameters: {
-    reactRouter: {
-      route: '/tournaments/:tournamentId/edit',
-      path: '/tournaments/test-edit-id/edit',
-    },
-    mockData: [
-      {
-        url: '/api/tournaments/test-edit-id',
-        method: 'GET',
-        status: 200,
-        response: {
-          id: 'test-edit-id',
-          name: '編集中の大会',
-          questionsPerParticipant: 5,
-          points: '10,20,30,40,50',
-          regulation: 'これは編集用の既存レギュレーションです。',
-        },
-      },
-    ],
-  },
-};
+export const Default: Story = { name: '通常' };
+export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
+export const Edit: Story = { name: '編集', parameters: { route: { path: pathToTournamentEdit(':tournamentId'), entry: pathToTournamentEdit('t-1') } } };

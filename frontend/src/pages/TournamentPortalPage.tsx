@@ -21,7 +21,7 @@ import { Card } from '../components/design-system/Card/Card';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
-  marginTop: theme.spacing(8),
+  marginTop: theme.spacing(5),
 }));
 
 type ViewedTournament = {
@@ -127,7 +127,7 @@ const TournamentPortalPage = () => {
       <Typography variant="h6" color="textSecondary" paragraph>
         参加方法を選択してください
       </Typography>
-      <Grid container spacing={4} sx={{ mt: 4 }} justifyContent="center">
+      <Grid container spacing={3} sx={{ mt: 3 }} justifyContent="center">
         <Grid item xs={12} sm={6} md={5}>
           <Card>
             <Box>

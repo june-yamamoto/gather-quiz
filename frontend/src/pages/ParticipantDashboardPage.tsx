@@ -12,8 +12,8 @@ import { QuizPreviewDialog } from '../components/QuizPreviewDialog';
 import { getGenreColor } from '../helpers/color-helpers';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
 }));
 
 const ParticipantDashboardPage = () => {
@@ -83,12 +83,12 @@ const ParticipantDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="md">
-      <Box sx={{ mb: 4, textAlign: 'center', position: 'relative' }}>
+      <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Typography variant="h5" component="h1">
           {status?.participantName} さんのダッシュボード
         </Typography>
         {tournament?.regulation && (
-          <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
+          <Box>
             <Button variant="outlined" size="small" onClick={() => setRegulationOpen(true)}>
               ルール確認
             </Button>
@@ -96,7 +96,7 @@ const ParticipantDashboardPage = () => {
         )}
       </Box>
 
-      <Card sx={{ my: 4, textAlign: 'left' }}>
+      <Card sx={{ my: 3, textAlign: 'left' }}>
         <Typography variant="h6" gutterBottom>
           問題作成ステータス
         </Typography>
@@ -120,13 +120,13 @@ const ParticipantDashboardPage = () => {
             return (
               <div key={index}>
                 <ListItem sx={{ py: 2, display: 'block' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                       第{index + 1}問 ({point}点)
                     </Typography>
                     <Box>
                       {quiz ? (
-                        <Stack direction="row" spacing={1}>
+                        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, '& > :not(style) ~ :not(style)': { ml: 0 } }}>
                           <Button
                             variant="outlined"
                             size="small"
@@ -215,7 +215,7 @@ const ParticipantDashboardPage = () => {
         </List>
       </Card>
 
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Button
           component={Link}
           to={pathToTournamentPortal(tournamentId || '')}

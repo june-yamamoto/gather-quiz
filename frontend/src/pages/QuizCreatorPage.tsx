@@ -11,12 +11,17 @@ import { Input } from '../components/design-system/Input/Input';
 import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
 }));
 
 const StyledSection = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
+  padding: theme.spacing(2.5),
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.spacing(2),
+  height: '100%',
+  [theme.breakpoints.down('sm')]: { padding: theme.spacing(2) },
 }));
 
 const QuizCreatorPage = () => {
@@ -157,7 +162,7 @@ const QuizCreatorPage = () => {
 
   return (
     <StyledContainer maxWidth="md">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">
           {editQuizId ? '問題の編集' : '新しい問題の作成'}
         </Typography>
@@ -168,7 +173,7 @@ const QuizCreatorPage = () => {
         )}
       </Box>
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid item>
                 <Input
@@ -204,7 +209,7 @@ const QuizCreatorPage = () => {
             )}
         </Grid>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <StyledSection>
               <Typography variant="h6" gutterBottom>
@@ -239,6 +244,7 @@ const QuizCreatorPage = () => {
               ) : null}
               <Input
                 label="参考リンク"
+                inputProps={{ inputMode: 'url', autoCapitalize: 'none', spellCheck: false }}
                 fullWidth
                 value={questionLink}
                 onChange={(e) => setQuestionLink(e.target.value)}
@@ -277,12 +283,12 @@ const QuizCreatorPage = () => {
                   （設定済みの画像あり）
                 </Typography>
               ) : null}
-              <Input label="参考リンク" fullWidth value={answerLink} onChange={(e) => setAnswerLink(e.target.value)} />
+              <Input label="参考リンク" inputProps={{ inputMode: 'url', autoCapitalize: 'none', spellCheck: false }} fullWidth value={answerLink} onChange={(e) => setAnswerLink(e.target.value)} />
             </StyledSection>
           </Grid>
         </Grid>
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Button type="submit" variant="contained" color="primary" size="large" disabled={isLoading}>
+        <Box sx={{ mt: 3, textAlign: 'center', position: 'sticky', bottom: 0, py: 2, pb: 'max(16px, env(safe-area-inset-bottom))', bgcolor: 'background.default', borderTop: 1, borderColor: 'divider', zIndex: 1 }}>
+          <Button type="submit" variant="contained" color="primary" size="large" disabled={isLoading} sx={{ width: { xs: '100%', sm: 'auto' } }}>
             {editQuizId ? 'この内容で更新する' : 'この内容で問題を保存する'}
           </Button>
         </Box>

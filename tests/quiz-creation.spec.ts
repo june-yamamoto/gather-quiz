@@ -86,6 +86,6 @@ test.describe('クイズ作成フロー', () => {
     await expect(page.getByText(questionText)).toBeVisible();
     await expect(page.getByText('あと 0 問、作成してください。')).toBeVisible();
     await page.getByRole('button', { name: '解答確認', exact: true }).click();
-    await expect(page.getByRole('dialog').getByRole('heading', { name: `A. ${answerText}`, exact: true })).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('heading', { name: `${answerText}`, exact: true })).toBeVisible();
   });
 });

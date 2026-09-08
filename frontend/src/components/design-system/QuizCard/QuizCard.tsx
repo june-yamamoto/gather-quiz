@@ -16,29 +16,31 @@ type StyledQuizCardProps = Omit<QuizCardProps, 'point'>;
 const StyledQuizCard = styled(Paper, {
   shouldForwardProp: (prop) => prop !== 'isAnswered' && prop !== 'isUncreated',
 })<StyledQuizCardProps>(({ theme, isAnswered, isUncreated, onClick }) => ({
-  padding: theme.spacing(1),
+  padding: theme.spacing(2),
   textAlign: 'center',
   width: '100%',
-  minHeight: '85px',
+  minHeight: '112px',
+  borderRadius: theme.spacing(1.5),
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: onClick ? 'pointer' : 'default',
   transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-  border: `1px solid ${theme.palette.grey[300]}`,
+  border: `1px solid ${theme.palette.divider}`,
   boxShadow: 'none',
 
   ...(onClick && {
     '&:hover': {
-      transform: 'translateY(-4px)',
-      boxShadow: theme.shadows[4],
+      transform: 'translateY(-2px)',
+      borderColor: theme.palette.primary.main,
+      boxShadow: '0 8px 20px rgba(35,59,52,0.08)',
     },
   }),
 
   ...(isAnswered
     ? {
         backgroundColor: theme.palette.grey[200],
-        color: theme.palette.text.disabled,
+        color: theme.palette.text.secondary,
       }
     : isUncreated
     ? {
