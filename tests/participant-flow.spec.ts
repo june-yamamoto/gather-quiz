@@ -39,8 +39,11 @@ test.describe('参加者登録と問題作成フロー', () => {
     const participant = await response.json();
 
     // 4. Expect to be redirected to the quiz creation page
-    await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
-    await expect(page.getByRole('heading', { name: '問題作成・編集' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '登録完了！' })).toBeVisible();
+    await page.getByRole('button', { name: 'ダッシュボードへ移動する' }).click();
+    await page.getByRole('link', { name: '作成する', exact: true }).first().click();
+    await expect(page).toHaveURL(new RegExp(`/participants/${participant.id}/quizzes/new\\?`));
+    await expect(page.getByRole('heading', { name: '新しい問題の作成' })).toBeVisible();
 
     // 5. Check if the form elements are visible
     await expect(page.getByRole('textbox', { name: '問題文' })).toBeVisible();

@@ -1,21 +1,4 @@
-#!/bin/bash
-set -e
-
-# Configuration
-BUCKET_NAME="gather-quiz-dev-v3-frontend-bucket"
-DISTRIBUTION_ID="E3LGU49WE56Y8B"
-
-echo "Building frontend..."
-# ルートディレクトリで実行されている前提
-cd frontend
-npm install
-npm run build
-cd ..
-
-echo "Deploying to S3 ($BUCKET_NAME)..."
-aws s3 sync frontend/dist s3://$BUCKET_NAME --delete
-
-echo "Invalidating CloudFront cache ($DISTRIBUTION_ID)..."
-aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
-
-echo "Frontend deployment complete!"
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+exec node --import tsx scripts/deploy.ts frontend "$@"

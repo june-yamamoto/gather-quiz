@@ -27,10 +27,11 @@
 
 ## APIと環境
 
-- `VITE_API_BASE_URL` があればAxiosのbase URLに使い、未設定時は `/` を使う。
+- `VITE_API_BASE_URL` があればAxiosのbase URLに使い、未設定時は `/api` を使う。
 - ローカル開発ではViteが `/api` を `http://localhost:3000` に転送する。
 - APIエラーは `src/errors/ApiError.ts` に変換する既存方式を維持する。
 - 画像アップロードはAPIからS3署名付きURLを取得後、ブラウザからS3へPUTする。
+- 本番画像の取得はCloudFrontの `/uploads/*` を使う。通常デプロイはハッシュ付きアセットを先に、再検証するHTMLを最後に公開し、全キャッシュ無効化や旧アセットの即時削除はしない。
 
 ## コマンド
 
@@ -50,4 +51,3 @@ npm run storybook --prefix frontend
 ## 仕様参照
 
 対象画面に対応する `../docs/外部仕様/画面仕様/` の文書と、`../docs/外部仕様/画面遷移.md` を先に読む。仕様にない挙動を追加する場合は、実装と同時に該当文書を更新する。
-

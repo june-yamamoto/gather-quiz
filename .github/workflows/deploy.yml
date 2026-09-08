@@ -1,0 +1,89 @@
+name: Deploy application
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: デプロイ対象
+        required: true
+        default: both
+        type: choice
+        options: [both, backend, frontend]
+permissions:
+  contents: read
+concurrency:
+  group: gather-deploy-dev
+  cancel-in-progress: false
+jobs:
+  backend:
+    if: github.ref == 'refs/heads/main' && inputs.target != 'frontend'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix backend
+      - run: npm run test --prefix backend
+      - run: npm run lint --prefix backend
+      - run: npm run build --prefix backend
+      - run: npm run test:infra
+      - run: node backend/node_modules/typescript/bin/tsc -p scripts/tsconfig.json
+      - run: npm run build:backend
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-1
+      - run: node --import tsx scripts/deploy.ts backend --skip-build
+      - run: node --import tsx scripts/smoke.ts --read-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-deploy
+          path: |
+            backend/build/function.zip
+            artifacts
+          retention-days: 7
+  frontend:
+    if: github.ref == 'refs/heads/main' && inputs.target != 'backend'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix frontend
+      - run: npm run test --prefix frontend
+      - run: npm run lint --prefix frontend
+      - run: npm run build --prefix frontend
+        env:
+          VITE_API_BASE_URL: /api
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-1
+      - run: node --import tsx scripts/deploy.ts frontend --skip-build
+      - run: node --import tsx scripts/smoke.ts --read-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-deploy
+          path: |
+            frontend/dist
+            artifacts
+          retention-days: 7

@@ -27,7 +27,7 @@ GatherQuiz は、参加者が問題を持ち寄り、オフラインのクイズ
 3. `docs/概要.md` と `development-plan.md`
 4. `README.md` と旧 `GEMINI.md`
 
-既存文書とコードが食い違う場合は推測で合わせず、差異を報告する。`README.md` に掲載されたルートの `dev:*`、`test:*`、`lint` 等は現在のルート `package.json` には存在しないため、下記の実コマンドを使う。
+既存文書とコードが食い違う場合は推測で合わせず、差異を報告する。インフラの実態はAWSリソース、運用手順は `docs/インフラ運用.md` を確認する。
 
 ## 作業方針
 
@@ -45,7 +45,7 @@ GatherQuiz は、参加者が問題を持ち寄り、オフラインのクイズ
 
 ## セットアップ
 
-Node.js 20を基準とする。依存関係はルート、フロントエンド、バックエンドで別管理。
+Node.js 24を基準とする。依存関係はルート、フロントエンド、バックエンドで別管理。
 
 ```bash
 npm ci
@@ -53,7 +53,7 @@ npm ci --prefix frontend
 npm ci --prefix backend
 ```
 
-開発スクリプトとE2E設定は `cp`、`mv`、環境変数の前置記法を使うため、WindowsのPowerShell直下よりDev ContainerまたはWSLを推奨する。`.devcontainer` には古いpnpm/Gemini向け設定も残っているので、実際の `package-lock.json` とnpm scriptsを正とする。
+開発・テスト・デプロイは `scripts/` のTypeScriptから実行でき、WindowsでもDockerやWSLは不要。ルートの `dev:backend` は永続的なローカルSQLiteを初期化する。
 
 ## 検証コマンド
 
@@ -65,17 +65,19 @@ npm run test --prefix frontend
 npm run lint --prefix frontend
 npm run build --prefix frontend
 
-# バックエンド（Dev Container/WSL）
+# バックエンド
 npm run test --prefix backend
 npm run lint --prefix backend
 npm run build --prefix backend
 
-# E2E（Dev Container/WSL、ルートから）
+# インフラとE2E（ルートから）
+npm run test:infra
+node backend/node_modules/typescript/bin/tsc -p scripts/tsconfig.json
 npm run test:e2e
 ```
 
 - 自動修正の `lint-fix` と `format` は変更範囲を確認してから使う。
-- バックエンド単体テストとE2Eは `backend/prisma/schema.prisma` を一時差し替えする。中断後は元のスキーマへ復元されていることと、一時DBやバックアップが残っていないことを確認する。
+- バックエンド単体テスト・E2Eはスキーマファイルを変更しない。生成Clientは共有するため、テストとZIP生成を同時実行しない。中断後は一時DBが残っていないことを確認する。
 - E2Eはポート3000と5173を使い、Playwright設定が両サーバーを起動する。
 - テストを実行できない場合は、未実行のコマンドと理由を報告する。
 
@@ -86,6 +88,9 @@ npm run test:e2e
 - フロントエンドのAPI通信は `frontend/src/api/` に集約し、ページやコンポーネントから直接HTTP通信しない。
 - バックエンドは route → model/Prisma の現行構造を守り、非同期routeは共通エラーハンドラーへ渡す。
 - 大会、参加者、クイズの関係や制約を変える場合は、全Prismaスキーマ、APIモデル、フロントモデル、テストを同時に確認する。
+- 本番はARM64のLambda ZIP、非公開RDS、S3 Gateway Endpoint。NAT、ECR、踏み台は作らない。DB設定はSSM SecureStringからデプロイ時に注入する。
+- `backend/prisma/migrations/0001_initial/migration.sql` は適用済みSQL。既存DBにスキーマ変更を加える場合は明示的な移行を実装し、初期SQLの差し替えだけで済ませない。
+- GitHub ActionsのAWSデプロイは手動起動。mainへのpushを自動デプロイの契機にしない。
 
 ## 関連文書
 
@@ -96,4 +101,3 @@ npm run test:e2e
 - [開発計画](development-plan.md)
 - [フロントエンド規約](frontend/AGENTS.md)
 - [バックエンド規約](backend/AGENTS.md)
-

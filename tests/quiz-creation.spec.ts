@@ -49,13 +49,13 @@ test.describe('クイズ作成フロー', () => {
     });
 
     // 3. Navigate to the quiz creation page
-    await page.goto(`/gather/tournaments/${tournamentId}/participants/${participantId}/quizzes/new`);
-    await expect(page.getByRole('heading', { name: '問題作成・編集' })).toBeVisible();
+    await page.goto(`/gather/tournaments/${tournamentId}/participants/${participantId}/quizzes/new?order=0&point=10`);
+    await expect(page.getByRole('heading', { name: '新しい問題の作成' })).toBeVisible();
 
     // 4. Fill out the form
     const questionText = 'これはなんの画像？';
     const answerText = 'テスト画像';
-    await page.getByLabel('配点').fill('10');
+    await expect(page.getByLabel('配点')).toHaveValue('10');
     await page.getByRole('textbox', { name: '問題文' }).fill(questionText);
     await page.getByRole('textbox', { name: '解答文' }).fill(answerText);
 
@@ -80,11 +80,12 @@ test.describe('クイズ作成フロー', () => {
 
     // 7. Assert navigation to the participant dashboard
     await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participantId}`);
-    await expect(page.getByRole('heading', { name: '参加者ダッシュボード' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'QuizCreator さんのダッシュボード' })).toBeVisible();
 
     // 8. Verify the created quiz is displayed on the dashboard
     await expect(page.getByText(questionText)).toBeVisible();
-    await expect(page.getByText(`正解: ${answerText}`)).toBeVisible();
     await expect(page.getByText('あと 0 問、作成してください。')).toBeVisible();
+    await page.getByRole('button', { name: '解答確認', exact: true }).click();
+    await expect(page.getByRole('dialog').getByRole('heading', { name: `A. ${answerText}`, exact: true })).toBeVisible();
   });
 });

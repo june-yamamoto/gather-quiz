@@ -4,6 +4,7 @@ on:
   # mainブランチにプッシュされたときに実行
   push:
     branches: [ "main" ]
+    paths: ['frontend/**', '.github/workflows/deploy-storybook.yml']
   # GitHub Actionsのページから手動で実行できるようにする
   workflow_dispatch:
 
@@ -23,20 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci --prefix frontend
 
       - name: Build Storybook
-        run: pnpm --filter frontend build-storybook
+        run: npm run build-storybook --prefix frontend
         env:
           # GitHub Pagesのサブディレクトリ設定（例: /<リポジトリ名>/）
           VITE_BASE_URL: /${{ github.event.repository.name }}/
@@ -47,7 +46,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./packages/frontend/storybook-static
+          path: ./frontend/storybook-static
 
       - name: Deploy to GitHub Pages
         id: deployment

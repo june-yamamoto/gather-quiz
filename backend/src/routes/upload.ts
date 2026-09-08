@@ -47,7 +47,7 @@ router.post(uploadRouterPath(pathToUploadImage()), async (req: Request, res: Res
 
     res.json({
       signedUrl,
-      objectUrl: `https://${imageUploadBucket}.s3.${awsRegion}.amazonaws.com/${key}`,
+      objectUrl: `${process.env.IMAGE_PUBLIC_BASE_URL || `https://${imageUploadBucket}.s3.${awsRegion}.amazonaws.com`}/${key}`,
     });
   } catch (error) {
     console.error('Error generating signed URL:', error);

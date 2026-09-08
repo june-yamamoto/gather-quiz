@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
 import {
-  asyncHandler,
+  pathParameter, asyncHandler,
   pathToTournaments,
   pathToParticipants,
   pathToParticipantLogin,
@@ -70,7 +70,7 @@ router.post(
 router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const tournament = await prisma.tournament.findUnique({
       where: { id },
     });
@@ -94,7 +94,7 @@ router.get(
 router.post(
   tournamentsRouterPath(pathToParticipants(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { name } = req.body;
 
     // TODO: パスワードは将来的にユーザーが設定できるようにするが、現在はランダムな文字列を生成して仮対応する
@@ -130,7 +130,7 @@ router.post(
 router.post(
   tournamentsRouterPath(pathToParticipantLogin(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { name, password } = req.body;
 
     const participant = await prisma.participant.findUnique({
@@ -168,7 +168,7 @@ router.post(
 router.post(
   tournamentsRouterPath(pathToTournamentLogin(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { password } = req.body;
 
     const tournament = await prisma.tournament.findUnique({
@@ -200,7 +200,7 @@ router.post(
 router.get(
   tournamentsRouterPath(pathToTournamentStatus(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const tournament = await prisma.tournament.findUnique({
       where: { id },
       include: {
@@ -254,7 +254,7 @@ router.get(
 router.put(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { name, password, questionsPerParticipant, points, regulation, genres } = req.body;
 
     const tournament = await prisma.tournament.findUnique({
@@ -292,7 +292,7 @@ router.put(
 router.patch(
   tournamentsRouterPath(pathToTournamentStart(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
 
     const tournament = await prisma.tournament.findUnique({
       where: { id },
@@ -323,7 +323,7 @@ router.patch(
 router.get(
   tournamentsRouterPath(pathToTournamentBoard(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const tournamentWithRelations = await prisma.tournament.findUnique({
       where: { id },
       include: {

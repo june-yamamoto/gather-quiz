@@ -14,7 +14,7 @@ class UploadApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || '/',
+      baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
       headers: {
         'Content-Type': 'application/json',
       },

@@ -32,15 +32,17 @@
 
 ### 3.1. E2Eテスト
 
-- [ ] **E2Eテストの実施**:
-    - 新しいアーキテクチャ（Lambdaバックエンド）および新機能（参加者ログインフロー等）に対して、E2Eテストを実施し、パスすることを確認する。
+- [x] **E2Eテストの実施**:
+    - 現行画面・スキーマに合わせたPlaywright 7件が成功。公開AWS環境でも大会・参加者・画像・クイズの流れを検証済み。
 
 ### 3.2. CI/CD・インフラ
 
-- [ ] **CI/CDの構築**:
-    - `main` ブランチへのマージ時に、自動的にテスト実行およびデプロイを行う GitHub Actions ワークフローを構築する。
-- [ ] **画像アップロード機能のインフラ構築**:
-    - 本番環境用のS3バケット設定やIAMポリシーの精査を行い、画像アップロード基盤を堅牢化する。
+- [x] **CI/CDの構築**:
+    - PR時のテスト・lint・ビルドと、GitHub Actionsの手動デプロイを用意。対象はbackend/frontend/bothを選択する。mainへのpushではAWSを更新しない。
+- [x] **画像アップロード機能のインフラ構築**:
+    - 非公開S3・署名付きアップロード・CloudFront OACによる配信を実環境で確認。
+- [x] **インフラ簡素化・DB保護**:
+    - ARM64 ZIP Lambda、差分配布、NATなしの隔離VPC、小さいSingle-AZ RDSへ再構築。DBバックアップ・復元・隔離検証スクリプトを追加。
 
 ### 3.3. UI/UX改善
 
@@ -65,9 +67,11 @@
 | コンポーネント | ステータス | URL / Endpoint | インフラ構成 |
 | :--- | :--- | :--- | :--- |
 | **Frontend** | ✅ 稼働中 | `https://dev.gather-quiz.june-yamamoto.com` | S3 + CloudFront |
-| **Backend** | ✅ 稼働中 | `https://38e2eh40bg.execute-api.ap-northeast-1.amazonaws.com` | API Gateway + Lambda |
+| **Backend** | ✅ 稼働中 | 公開サイトの `/api` | HTTP API + ARM64 ZIP Lambda |
 | **Database** | ✅ 稼働中 | (Private Access) | RDS (PostgreSQL) |
-| **Network** | ✅ 稼働中 | - | VPC (Public/Private Subnets) |
+| **Network** | ✅ 稼働中 | - | 隔離サブネット2個 + S3 Gateway Endpoint |
+
+2026-09-08に全構成を新規デプロイして確認。[インフラ運用](docs/インフラ運用.md)と[検証記録](docs/デプロイ検証記録.md)を参照。
 
 ---
 

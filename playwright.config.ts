@@ -23,9 +23,9 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'cp backend/prisma/schema.prisma backend/prisma/schema.original.prisma && cp backend/prisma/schema.e2e.prisma backend/prisma/schema.prisma && cd backend && DATABASE_URL="file:./test.db" npx prisma generate && DATABASE_URL="file:./test.db" npx prisma db push && NODE_ENV=test DATABASE_URL="file:./test.db" npm run dev',
+      command: 'node --import tsx scripts/backend-tests.ts --server',
       url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
       stdout: 'pipe',
     },
     {

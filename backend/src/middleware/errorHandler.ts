@@ -15,12 +15,11 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
-  // エラーの詳細をログに出力
+  // Prismaの詳細にはパスワードや行データが含まれるため、識別情報だけを残す。
   console.error('[ErrorHandler] Error occurred:', {
-    // Prismaのエラーオブジェクトのプロパティを含める (messageなどが上書きされるのを防ぐため先に展開)
-    ...err,
-    message: err.message,
-    stack: err.stack,
+    name: err.name,
+    code: 'code' in err ? err.code : undefined,
+    path: req.path,
   });
 
   // HttpErrorのインスタンスかチェック
