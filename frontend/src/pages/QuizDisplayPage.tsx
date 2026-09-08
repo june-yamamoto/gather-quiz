@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Box, CircularProgress, Alert, Button } from '@mui/material';
 import { useState } from 'react';
+import { resolveMedia } from '../helpers/media';
 import { useQuizOpened } from '../helpers/use-quiz-opened';
 import { useQuery } from '@tanstack/react-query';
 import { pathToAnswerDisplay } from '../helpers/route-helpers';
@@ -11,6 +12,7 @@ const QuizDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
   const [loadedImage, setLoadedImage] = useState('');
+  const [playedMedia, setPlayedMedia] = useState('');
 
   const {
     data: quiz,
@@ -27,8 +29,10 @@ const QuizDisplayPage = () => {
     enabled: !!quizId,
   });
 
+  const media = quiz?.questionLink ? resolveMedia(quiz.questionLink) : undefined;
+  const mediaReady = !quiz?.questionLink || (media?.kind === 'link') || playedMedia === `${quiz?.id}:${quiz?.questionLink}`;
   const record = useQuizOpened(quiz?.id === quizId && !error ? quiz : undefined,
-    !!quiz && (!quiz.questionImage || loadedImage === `${quiz.id}:${quiz.questionImage}`));
+    !!quiz && mediaReady && (!quiz.questionImage || loadedImage === `${quiz.id}:${quiz.questionImage}`));
 
   const showAnswer = () => {
     if (quizId) {
@@ -58,6 +62,7 @@ const QuizDisplayPage = () => {
         既読を保存できませんでした。
       </Alert>}
       <QuizDisplayContainer quiz={quiz} onButtonClick={showAnswer} buttonText="正解を見る"
+        onQuestionMediaPlayed={() => setPlayedMedia(`${quiz.id}:${quiz.questionLink}`)}
         onQuestionImageLoad={() => setLoadedImage(`${quiz.id}:${quiz.questionImage}`)} />
     </Box>
   );

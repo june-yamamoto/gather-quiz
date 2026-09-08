@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { hasQuizContent, validateQuizLink } from '../media-validation';
 import { prisma } from '../db';
 import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
@@ -53,12 +54,14 @@ router.post(
       throw new BadRequestError('Missing required fields');
     }
 
-    if (!questionText && !questionImage) {
-      throw new BadRequestError('Question text or image is required');
+    validateQuizLink(questionLink);
+    validateQuizLink(answerLink);
+    if (!hasQuizContent(questionText, questionImage, questionLink)) {
+      throw new BadRequestError('Question text, image or URL is required');
     }
 
-    if (!answerText && !answerImage) {
-      throw new BadRequestError('Answer text or image is required');
+    if (!hasQuizContent(answerText, answerImage, answerLink)) {
+      throw new BadRequestError('Answer text, image or URL is required');
     }
 
     const quiz = await prisma.quiz.create({
@@ -143,11 +146,15 @@ router.put(
     const nextAnswerText = answerText !== undefined ? answerText : quiz.answerText;
     const nextAnswerImage = answerImage !== undefined ? answerImage : quiz.answerImage;
 
-    if (!nextQuestionText && !nextQuestionImage) {
-      throw new BadRequestError('Question text or image is required');
+    validateQuizLink(questionLink);
+    validateQuizLink(answerLink);
+    const nextQuestionLink = questionLink !== undefined ? questionLink : quiz.questionLink;
+    const nextAnswerLink = answerLink !== undefined ? answerLink : quiz.answerLink;
+    if (!hasQuizContent(nextQuestionText, nextQuestionImage, nextQuestionLink)) {
+      throw new BadRequestError('Question text, image or URL is required');
     }
-    if (!nextAnswerText && !nextAnswerImage) {
-      throw new BadRequestError('Answer text or image is required');
+    if (!hasQuizContent(nextAnswerText, nextAnswerImage, nextAnswerLink)) {
+      throw new BadRequestError('Answer text, image or URL is required');
     }
 
     const updatedQuiz = await prisma.quiz.update({

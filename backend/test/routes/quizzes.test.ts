@@ -52,6 +52,22 @@ describe('クイズAPI', () => {
   });
 
   describe('POST / (クイズ作成)', () => {
+    it('動画URL・音声URLのみの問題と解答を保存して再取得できる', async () => {
+      const data = { point: 10, questionLink: 'https://example.com/movie.mp4', answerLink: 'https://example.com/answer.mp3', tournamentId: tournament.id, participantId: participant.id };
+      const res = await request(app).post('/quizzes').send(data);
+      expect(res.status).toBe(201);
+      const saved = await request(app).get(`/quizzes/${res.body.id}`);
+      expect(saved.body).toMatchObject(data);
+      expect((await request(app).put(`/quizzes/${res.body.id}`).send({ genre: '音楽' })).status).toBe(200);
+      expect((await request(app).put(`/quizzes/${res.body.id}`).send({ questionLink: null })).status).toBe(400);
+      expect((await request(app).put(`/quizzes/${res.body.id}`).send({ questionText: '差し替え', questionLink: null })).status).toBe(200);
+    });
+
+    it.each(['javascript:alert(1)', 'data:text/html,a', 'https://user:pass@example.com', 'invalid', {}, 1])('作成・更新時に不正なURL %j を拒否する', async (questionLink) => {
+      const data = { point: 10, questionText: '問題', answerText: '答え', questionLink, tournamentId: tournament.id, participantId: participant.id };
+      expect((await request(app).post('/quizzes').send(data)).status).toBe(400);
+      expect((await request(app).put(`/quizzes/${quiz.id}`).send({ answerLink: questionLink })).status).toBe(400);
+    });
     it('新しいクイズが正しく作成されること', async () => {
       const quizData = {
         point: 10,
@@ -80,7 +96,7 @@ describe('クイズAPI', () => {
       };
       const res = await request(app).post('/quizzes').send(quizData);
       expect(res.statusCode).toBe(400);
-      expect(res.body.error).toBe('Question text or image is required');
+      expect(res.body.error).toBe('Question text, image or URL is required');
     });
   });
 
@@ -173,7 +189,7 @@ describe('クイズAPI', () => {
       };
       const res = await request(app).put(`/quizzes/${quiz.id}`).send(updatedData);
       expect(res.statusCode).toBe(400);
-      expect(res.body.error).toBe('Question text or image is required');
+      expect(res.body.error).toBe('Question text, image or URL is required');
     });
 
     it('存在しないIDの場合、404エラーを返すこと', async () => {
