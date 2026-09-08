@@ -4,6 +4,7 @@ import { prisma } from '../db';
 import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
+import { assignedSlot, validateChoices } from '../question-slots';
 const router = Router();
 
 /**
@@ -64,8 +65,12 @@ router.post(
       throw new BadRequestError('Answer text, image or URL is required');
     }
 
+    const slot = await assignedSlot(tournamentId, participantId, order ?? 0, point);
+    const choices = validateChoices(req.body.choices, slot.choiceCount);
     const quiz = await prisma.quiz.create({
       data: {
+        ...slot,
+        choices: JSON.stringify(choices),
         point,
         order: order || 0,
         questionText,
@@ -157,9 +162,13 @@ router.put(
       throw new BadRequestError('Answer text, image or URL is required');
     }
 
+    const slot = await assignedSlot(quiz.tournamentId, quiz.participantId, quiz.order, point ?? quiz.point);
+    const choices = validateChoices(req.body.choices === undefined ? JSON.parse(quiz.choices) : req.body.choices, slot.choiceCount);
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
       data: {
+        ...slot,
+        choices: JSON.stringify(choices),
         point,
         questionText,
         questionImage,

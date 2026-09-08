@@ -1,4 +1,5 @@
 import { QuizMedia } from './QuizMedia';
+import { QuizChoices } from './QuizChoices';
 import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
@@ -41,6 +42,7 @@ export const QuizDisplayContainer = ({
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '2vmin' }}>
         <Box>
+          {quiz.label && <Typography variant="h6" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>{quiz.label}</Typography>}
           {quiz.genre && (
             <Typography
               variant="h4"
@@ -124,6 +126,7 @@ export const QuizDisplayContainer = ({
         >
           {quiz.questionText}
         </Typography>
+        {quiz.choiceCount > 0 && <QuizChoices choices={quiz.choices} />}
 
 
 

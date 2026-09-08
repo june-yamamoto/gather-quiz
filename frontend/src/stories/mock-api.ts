@@ -11,6 +11,7 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
   if (!points.length) points.push(10);
   const tournament = { ...tournamentFixture, name: settings.tournamentName, points: points.join(','),
     questionsPerParticipant: points.length, regulation: settings.regulation, genres: settings.genres,
+    questionSlots: settings.questionSlots,
     status: scenario === 'finished' ? 'in_progress' : tournamentFixture.status };
   const participants = Array.from({ length: Math.min(10, Math.max(1, settings.participantCount)) }, (_, index) => ({
     ...participantFixture, id: `p-${index + 1}`, name: index === 0 ? args.participantName || 'あおい' : `参加者${index + 1}`,
@@ -54,7 +55,9 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
       return HttpResponse.json(quiz);
     }),
     http.post('*/api/quizzes', async ({ request }) => {
-      const quiz = { ...controlledQuiz(args), ...await body(request), id: `q-${quizzes.length + 1}` };
+      const data = await body(request);
+      const slot = tournament.questionSlots[Number(data.order)] || { label: '', choiceCount: 0 };
+      const quiz = { ...controlledQuiz(args), ...data, ...slot, id: `q-${quizzes.length + 1}` };
       quizzes.push(quiz);
       return HttpResponse.json(quiz, { status: 201 });
     }),

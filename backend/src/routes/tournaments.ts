@@ -10,7 +10,8 @@ import {
   pathToTournamentStart,
   pathToTournamentBoard,
 } from '../api-helper';
-import { NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
+import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
+import { readQuestionSlots, validateQuestionSlots } from '../question-slots';
 import { Tournament } from '../model/Tournament';
 import { Participant } from '../model/Participant';
 import { Quiz } from '../model/Quiz';
@@ -44,8 +45,10 @@ router.post(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
     const { name, password, questionsPerParticipant, points, regulation, genres } = req.body;
+    const questionSlots = req.body.questionSlots === undefined ? undefined : JSON.stringify(validateQuestionSlots(req.body.questionSlots, questionsPerParticipant, points));
     const tournament = await prisma.tournament.create({
       data: {
+        questionSlots,
         name,
         password,
         questionsPerParticipant,
@@ -264,9 +267,19 @@ router.put(
       throw new NotFoundError('The requested resource was not found.');
     }
 
+    const nextSlots = req.body.questionSlots === undefined ? readQuestionSlots(tournament.questionSlots) : req.body.questionSlots;
+    const questionSlots = tournament.questionSlots || req.body.questionSlots !== undefined
+      ? JSON.stringify(validateQuestionSlots(nextSlots, questionsPerParticipant ?? tournament.questionsPerParticipant, points ?? tournament.points)) : undefined;
+    const previousSlots = tournament.questionSlots || JSON.stringify(tournament.points.split(',').map(() => ({ label: '', choiceCount: 0 })));
+    const slotsChanged = questionSlots !== undefined && questionSlots !== previousSlots;
+    if ((slotsChanged || (points !== undefined && points !== tournament.points) || (questionsPerParticipant !== undefined && questionsPerParticipant !== tournament.questionsPerParticipant)) &&
+        await prisma.quiz.count({ where: { tournamentId: id } })) {
+      throw new BadRequestError('問題作成後は問題枠・配点・問題数を変更できません。');
+    }
     const updatedTournament = await prisma.tournament.update({
       where: { id },
       data: {
+        questionSlots,
         name,
         password,
         questionsPerParticipant,

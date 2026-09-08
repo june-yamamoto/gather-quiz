@@ -123,6 +123,8 @@ const ParticipantDashboardPage = () => {
                   <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                       第{index + 1}問 ({point}点)
+                      {tournament?.questionSlots?.[index]?.label && ` · ${tournament.questionSlots[index].label}`}
+                      {!!tournament?.questionSlots?.[index]?.choiceCount && ` · ${tournament.questionSlots[index].choiceCount}択`}
                     </Typography>
                     <Box>
                       {quiz ? (

@@ -9,6 +9,8 @@ import { checksum, decodeBackup, encodeBackup, tableNames, Tables } from './back
 interface Operation { action: 'migrate' | 'backup' | 'restore' | 'verify' | 'cleanup-smoke'; key?: string; confirm?: string; tournamentId?: string }
 const schemaSql = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 const schemaHash = checksum(schemaSql);
+const initialSchemaHash = checksum(readFileSync(join(__dirname, 'schema.initial.sql'), 'utf8'));
+const questionSlotsMigration = readFileSync(join(__dirname, 'migration.question-slots.sql'), 'utf8');
 const s3 = new S3Client({});
 
 /** 識別子はエスケープし、値は常にプレースホルダーを使う。 */
@@ -69,7 +71,10 @@ export async function handler(event: Operation) {
       if (applied.rowCount === 0) {
         await db.query(schemaSql);
         await db.query('INSERT INTO "_GatherQuizSchema" (hash) VALUES ($1)', [schemaHash]);
-      } else if (applied.rows[0].hash !== schemaHash) {
+      } else if (applied.rowCount === 1 && applied.rows[0].hash === initialSchemaHash) {
+        await db.query(questionSlotsMigration);
+        await db.query('UPDATE "_GatherQuizSchema" SET hash=$1 WHERE hash=$2', [schemaHash, initialSchemaHash]);
+      } else if (applied.rowCount !== 1 || applied.rows[0].hash !== schemaHash) {
         throw new Error('既存DBに対する明示的なマイグレーションが必要です');
       }
       const role = await db.query("SELECT 1 FROM pg_roles WHERE rolname='gatherquiz_app'");

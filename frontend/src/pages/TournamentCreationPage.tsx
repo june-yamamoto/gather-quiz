@@ -34,16 +34,14 @@ const TournamentCreationPage = () => {
         alert('大会情報が更新されました。');
         navigate(pathToOrganizerDashboard(tournament.id));
       } else {
-        const { name, questionsPerParticipant, points, regulation, password } = formData;
-        const dataToSend = { name, questionsPerParticipant, points, regulation, password };
-        const tournament = await tournamentApiClient.create(dataToSend);
+        const tournament = await tournamentApiClient.create(formData);
         navigate(pathToTournamentCreationComplete(tournament.id), {
           state: { password: formData.password },
         });
       }
     } catch (error) {
       console.error(error);
-      alert(isEditMode ? '更新に失敗しました。' : '作成に失敗しました。');
+      alert(error instanceof Error && error.message ? error.message : isEditMode ? '更新に失敗しました。' : '作成に失敗しました。');
     }
   };
 

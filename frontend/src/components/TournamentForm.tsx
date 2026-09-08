@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Grid } from '@mui/material';
+import { Grid, Box, Typography, MenuItem } from '@mui/material';
+import type { QuestionSlot } from '../models/QuestionSlot';
 import { Tournament } from '../models/Tournament';
 import { Input } from './design-system/Input/Input';
 import { Button } from './design-system/Button/Button';
@@ -18,6 +19,7 @@ export type TournamentFormData = {
   name: string;
   questionsPerParticipant: number;
   points: string;
+  questionSlots: QuestionSlot[];
   regulation: string;
   genres: string;
   password?: string;
@@ -38,10 +40,12 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
   );
   const [regulation, setRegulation] = useState(tournament?.regulation || '');
   const [genres, setGenres] = useState(tournament?.genres || '');
+  const [slots, setSlots] = useState<QuestionSlot[]>(tournament?.questionSlots || []);
 
   useEffect(() => {
     if (tournament) {
       setName(tournament.name);
+      setSlots(tournament.questionSlots);
       setQuestionsPerParticipant(tournament.questionsPerParticipant);
       // カンマ区切りの文字列を配列に変換、空の場合は空配列
       setPointValues(tournament.points ? tournament.points.split(',') : []);
@@ -52,6 +56,8 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
 
   // 問題数が変更されたら配点入力欄の数を調整する
   useEffect(() => {
+    if (!Number.isInteger(questionsPerParticipant) || questionsPerParticipant < 1 || questionsPerParticipant > 10) return;
+    setSlots(prev => Array.from({ length: questionsPerParticipant }, (_, index) => prev[index] || { label: '', choiceCount: 0 }));
     setPointValues((prev) => {
       const currentLength = prev.length;
       if (questionsPerParticipant > currentLength) {
@@ -71,12 +77,18 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
     setPointValues(newPoints);
   };
 
+  /** 問題数の変更後も同じ順序の設定を保持する。 */
+  const updateSlot = (index: number, patch: Partial<QuestionSlot>) => {
+    setSlots(prev => prev.map((slot, i) => i === index ? { ...slot, ...patch } : slot));
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const formData: TournamentFormData = {
       name,
       questionsPerParticipant: Number(questionsPerParticipant),
       points: pointValues.join(','),
+      questionSlots: pointValues.map((_, i) => ({ label: (slots[i]?.label || '').trim(), choiceCount: slots[i]?.choiceCount || 0 })),
       regulation,
       genres,
       ...(password && { password }),
@@ -112,19 +124,41 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
           />
         </Grid>
         
-        {/* 動的な配点入力欄 */}
+        {/* 配点が同じでも問題順ごとに別の枠として設定する。 */}
         <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>参加者に割り当てる問題</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>ラベルは任意です。選択問題にすると、参加者が指定数の選択肢を入力します。</Typography>
+            {isEditMode && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>問題が作成された大会では、問題数・配点・ラベル・出題形式は変更できません。</Typography>}
             <Grid container spacing={2}>
             {pointValues.map((point, index) => (
-                <Grid item xs={6} sm={4} md={3} key={index}>
+                <Grid item xs={12} key={index}>
+                <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2 }}>
+                <Typography fontWeight="bold" sx={{ mb: 2 }}>第{index + 1}問</Typography>
+                <Grid container spacing={2}>
+                <Grid item xs={12} sm={7}>
+                  <Input label={`${index + 1}問目のラベル`} placeholder="例: 声優、音楽" fullWidth value={slots[index]?.label || ''} inputProps={{ maxLength: 50 }} onChange={e => updateSlot(index, { label: e.target.value })} />
+                </Grid>
+                <Grid item xs={12} sm={5}>
                 <Input
                     label={`${index + 1}問目の配点`}
                     type="number"
                     fullWidth
                     required
                     value={point}
+                    inputProps={{ min: 1, max: 2147483647, step: 1 }}
                     onChange={(e) => handlePointChange(index, e.target.value)}
                 />
+                </Grid>
+                <Grid item xs={12} sm={7}>
+                  <Input select label={`${index + 1}問目の出題形式`} fullWidth value={slots[index]?.choiceCount ? 'choice' : 'normal'} onChange={e => updateSlot(index, { choiceCount: e.target.value === 'choice' ? 4 : 0 })}>
+                    <MenuItem value="normal">通常問題</MenuItem><MenuItem value="choice">選択問題</MenuItem>
+                  </Input>
+                </Grid>
+                {!!slots[index]?.choiceCount && <Grid item xs={12} sm={5}>
+                  <Input type="number" label={`${index + 1}問目の選択肢数`} required fullWidth inputProps={{ min: 2, max: 20, step: 1 }} value={slots[index].choiceCount} onChange={e => updateSlot(index, { choiceCount: Number(e.target.value) || 1 })} helperText="2〜20択" />
+                </Grid>}
+                </Grid>
+                </Box>
                 </Grid>
             ))}
             </Grid>

@@ -1,18 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-/** 外部素材に依存せず、実際にデコード・再生できるPCM音声を作る。 */
-const makeAudio = () => {
-  const samples = 8000 * 5;
-  const buffer = Buffer.alloc(44 + samples * 2);
-  buffer.write('RIFF'); buffer.writeUInt32LE(buffer.length - 8, 4); buffer.write('WAVEfmt ', 8);
-  buffer.writeUInt32LE(16, 16); buffer.writeUInt16LE(1, 20); buffer.writeUInt16LE(1, 22);
-  buffer.writeUInt32LE(8000, 24); buffer.writeUInt32LE(16000, 28); buffer.writeUInt16LE(2, 32); buffer.writeUInt16LE(16, 34);
-  buffer.write('data', 36); buffer.writeUInt32LE(samples * 2, 40);
-  for (let i = 0; i < samples; i++) buffer.writeInt16LE(Math.round(Math.sin(i * Math.PI * 2 * 440 / 8000) * 2000), 44 + i * 2);
-  return buffer;
-};
+import { makeAudio } from './helpers/media';
 
 /** Canvasを録画し、ブラウザ自身で再生可能なWebMを生成する。 */
 const makeVideo = async (page: Page) => Buffer.from(await page.evaluate(async () => {
@@ -42,9 +31,10 @@ const evidence = async (page: Page, name: string) => {
   await page.screenshot({ path: resolve(directory, `${name}.png`), fullPage: true });
 };
 
-test('動画・音声を添付し、保存・再取得・プレビュー・本番再生・編集できる', async ({ page, request }) => {
+for (const width of [390, 1280]) {
+test(`${width}pxで長文・4択・画像と動画・音声を併用し、保存・プレビュー・本番再生・編集できる`, async ({ page, request }) => {
   await page.setViewportSize({ width: 1280, height: 1100 });
-  const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: { name: 'メディア動作検証', password: 'test-only', questionsPerParticipant: 1, points: '10' } })).json();
+  const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: { name: 'メディア動作検証', password: 'test-only', questionsPerParticipant: 1, points: '10', questionSlots: [{ label: '図形', choiceCount: 4 }] } })).json();
   const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: 'メディア検証' } })).json();
   const dashboard = `/gather/tournaments/${tournament.id}/participants/${participant.id}`;
   await page.goto(`${dashboard}/quizzes/new?order=0&point=10`);
@@ -66,7 +56,9 @@ test('動画・音声を添付し、保存・再取得・プレビュー・本�
       await route.fulfill({ status: 200, contentType: url.endsWith('.webm') ? 'video/webm' : 'audio/wav', body: files.get(url)! });
     }
   });
-  await page.getByLabel('問題文', { exact: true }).fill('この動画に映っている図形は何でしょう？');
+  await page.getByLabel('問題文', { exact: true }).fill('この動画に映っている図形は何でしょう？\n'.repeat(30));
+  const choices = ['円', '三角形', '四角形', '五角形'];
+  for (const [i, choice] of choices.entries()) await page.getByRole('textbox', { name: `選択肢${i + 1}`, exact: true }).fill(choice);
   await page.getByLabel('解答文', { exact: true }).fill('円です。音声も再生できます。');
   await page.getByLabel('問題の動画・音声ファイル').setInputFiles({ name: 'quiz.webm', mimeType: 'video/webm', buffer: video });
   await page.getByLabel('解答の動画・音声ファイル').setInputFiles({ name: 'answer.wav', mimeType: 'audio/wav', buffer: audio });
@@ -75,12 +67,18 @@ test('動画・音声を添付し、保存・再取得・プレビュー・本�
   const savedResponse = page.waitForResponse((res) => res.url().endsWith('/api/quizzes') && res.request().method() === 'POST');
   await page.getByRole('button', { name: 'この内容で問題を保存する' }).click();
   const saved = await (await savedResponse).json();
+  const image = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360"><circle cx="300" cy="180" r="100" fill="#205649"/></svg>');
+  expect((await request.put(`http://localhost:3000/api/quizzes/${saved.id}`, { data: { questionImage: image } })).ok()).toBe(true);
+  await page.setViewportSize({ width, height: 800 });
   await expect(page).toHaveURL(dashboard);
   expect(files.size).toBe(2);
   expect(files.get(saved.questionLink)).toEqual(video);
   expect(files.get(saved.answerLink)).toEqual(audio);
   await page.getByRole('button', { name: '問題確認', exact: true }).click();
   await expect(page.locator('video')).toHaveJSProperty('readyState', 4);
+  await expect(page.getByRole('list', { name: '選択肢' }).getByRole('listitem')).toHaveText(choices);
+  await page.locator('video').scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'プレビューを閉じる' })).toBeInViewport();
   await page.locator('video').evaluate((element: HTMLVideoElement) => element.play());
   await expect.poll(() => page.locator('video').evaluate((element: HTMLVideoElement) => element.currentTime)).toBeGreaterThan(0);
   expect((await (await request.get(`http://localhost:3000/api/quizzes/${saved.id}`)).json()).isOpened).toBe(false);
@@ -88,10 +86,19 @@ test('動画・音声を添付し、保存・再取得・プレビュー・本�
   await expect(page.locator('video')).toHaveCount(0);
   await page.goto(`/gather/quizzes/${saved.id}`);
   await expect(page.locator('video')).toHaveJSProperty('readyState', 4);
+  await page.locator('video').scrollIntoViewIfNeeded();
+  await expect(page.getByRole('img', { name: '問題画像', exact: true })).toBeInViewport({ ratio: 1 });
+  await expect(page.getByRole('button', { name: '正解を見る' })).toBeInViewport();
+  expect(await page.getByRole('region', { name: '本文' }).evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   expect((await (await request.get(`http://localhost:3000/api/quizzes/${saved.id}`)).json()).isOpened).toBe(false);
   await page.locator('video').evaluate((element: HTMLVideoElement) => element.play());
   await expect.poll(async () => (await (await request.get(`http://localhost:3000/api/quizzes/${saved.id}`)).json()).isOpened).toBe(true);
   await evidence(page, '02-video');
+  if (process.env.CAPTURE_SLOTS_EVIDENCE) {
+    const directory = resolve('docs/evidence/question-slots');
+    mkdirSync(directory, { recursive: true });
+    await page.screenshot({ path: resolve(directory, `cards-${width}-video.png`), animations: 'disabled' });
+  }
   await page.getByRole('button', { name: '正解を見る' }).click();
   await expect(page.locator('video')).toHaveCount(0);
   await page.locator('audio').evaluate((element: HTMLAudioElement) => element.play());
@@ -105,6 +112,7 @@ test('動画・音声を添付し、保存・再取得・プレビュー・本�
   await expect(page).toHaveURL(dashboard);
   expect((await (await request.get(`http://localhost:3000/api/quizzes/${saved.id}`)).json()).questionLink).toBe('https://youtu.be/M7lc1UVf-VE');
 });
+}
 
 test('動画404・YouTube遮断を表示し、モバイルでも再試行と画面遷移を操作できる', async ({ page }) => {
   const quiz = { id: 'media-error', point: 10, order: 0, isOpened: false, tournamentId: 't', participantId: 'p', questionText: 'メディア読み込み失敗の検証', questionLink: 'https://example.test/missing.mp4', answerText: '答え' };

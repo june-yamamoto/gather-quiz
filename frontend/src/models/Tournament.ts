@@ -1,9 +1,12 @@
 import { Participant } from './Participant';
+import { parseQuestionSlots, type QuestionSlot } from './QuestionSlot';
 
 /**
  * 大会情報を表現するクラス
  */
 export class Tournament {
+  /** 問題順ごとのラベルと出題形式。 */
+  questionSlots: QuestionSlot[];
   /**
    * 大会ID
    * @type {string}
@@ -59,6 +62,7 @@ export class Tournament {
   createdAt: Date;
 
   constructor(data: {
+    questionSlots?: QuestionSlot[];
     id: string;
     name: string;
     questionsPerParticipant: number;
@@ -70,6 +74,7 @@ export class Tournament {
     participants?: Participant[];
   }) {
     this.id = data.id;
+    this.questionSlots = data.questionSlots?.length ? data.questionSlots : data.points.split(',').map(() => ({ label: '', choiceCount: 0 }));
     this.name = data.name;
     this.questionsPerParticipant = data.questionsPerParticipant;
     this.points = data.points;
@@ -106,6 +111,7 @@ export class Tournament {
     ) {
       const tournamentData = {
         id: data.id,
+        questionSlots: parseQuestionSlots('questionSlots' in data ? data.questionSlots : undefined),
         name: data.name,
         questionsPerParticipant: data.questionsPerParticipant as number,
         points: data.points as string,

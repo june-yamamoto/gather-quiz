@@ -49,7 +49,7 @@ class QuizApiClient {
       return Quiz.fromApi(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new ApiError(error.response.data.message, error.response.status);
+        throw new ApiError(error.response.data.message || error.response.data.error, error.response.status);
       }
       throw new Error('An unexpected error occurred');
     }
@@ -67,7 +67,7 @@ class QuizApiClient {
       return Quiz.fromApi(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new ApiError(error.response.data.message, error.response.status);
+        throw new ApiError(error.response.data.message || error.response.data.error, error.response.status);
       }
       throw new Error('An unexpected error occurred');
     }
@@ -86,7 +86,7 @@ class QuizApiClient {
       return Quiz.fromApi(response.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new ApiError(error.response.data.message, error.response.status);
+        throw new ApiError(error.response.data.message || error.response.data.error, error.response.status);
       }
       throw new Error('An unexpected error occurred');
     }
