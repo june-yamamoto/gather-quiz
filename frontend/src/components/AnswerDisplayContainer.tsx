@@ -1,3 +1,4 @@
+import { ExpandableQuizImage } from './ExpandableQuizImage';
 import { Box, Typography } from '@mui/material';
 import { Quiz } from '../models/Quiz';
 import { Button } from './design-system/Button/Button';
@@ -22,12 +23,12 @@ export const AnswerDisplayContainer = ({
         flexDirection: 'column',
         height: '100%', // Changed from 100vh to 100%
         width: '100%',
-        bgcolor: '#FFF5F5', // Light reddish background for answer
+        bgcolor: 'background.paper',
         p: '2vmin',
         boxSizing: 'border-box',
         // Decorative frame
-        border: '1vmin solid',
-        borderColor: 'error.main', // Red border for answer
+        border: '0.5vmin solid',
+        borderColor: 'secondary.main', // Red border for answer
         overflow: 'hidden',
       }}
     >
@@ -49,23 +50,26 @@ export const AnswerDisplayContainer = ({
             pb: '1vmin',
             width: '100%',
             whiteSpace: 'pre-wrap',
-            fontSize: '2vmin',
+            fontSize: 'clamp(16px, 2vmin, 28px)',
             height: '100%',
             paddingBottom: '8px',
             paddingTop: '8px',
           }}
         >
-          Q. {quiz.questionText}
+          {quiz.questionText}
         </Typography>
       </Box>
 
-      <Box
+      <Box role="region" aria-label="本文" tabIndex={0}
         sx={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'safe center',
+          minHeight: 0,
+          '& > *': { flexShrink: 0 },
+          overflowWrap: 'anywhere',
           overflow: 'auto',
           width: '100%',
         }}
@@ -76,54 +80,29 @@ export const AnswerDisplayContainer = ({
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            fontSize: '4vmin',
+            fontSize: 'clamp(22px, 4vmin, 64px)',
             mb: '4vmin',
             px: '4vmin',
-            color: 'error.main',
-            textShadow: '0.1vmin 0.1vmin 0.2vmin rgba(0,0,0,0.1)',
+            color: 'secondary.main',
+
             whiteSpace: 'pre-wrap',
-            lineHeight: 1.2,
-            maxHeight: quiz.answerImage ? '70%' : '90%',
+            lineHeight: 1.6,
+            maxWidth: '100%',
           }}
         >
-          A. {quiz.answerText}
+          {quiz.answerText}
         </Typography>
 
-        {quiz.answerImage && (
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              overflow: 'hidden',
-              p: '2vmin',
-            }}
-          >
-            <img
-              src={quiz.answerImage}
-              alt="解答画像"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                minHeight: '20%',
-                objectFit: 'contain',
-                borderRadius: '1vmin',
-                boxShadow: '0 0.5vmin 1.5vmin rgba(0,0,0,0.15)',
-              }}
-            />
-          </Box>
-        )}
+
 
         {quiz.answerLink && (
-          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: '2.5vmin' }}>
+          <Typography variant="h6" align="center" sx={{ mt: '2vmin', fontSize: 'clamp(16px, 2.5vmin, 32px)' }}>
             参考リンク:{' '}
             <a
               href={quiz.answerLink}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#d32f2f', textDecoration: 'underline' }}
+              style={{ color: 'inherit', textDecoration: 'underline' }}
             >
               {quiz.answerLink}
             </a>
@@ -131,17 +110,23 @@ export const AnswerDisplayContainer = ({
         )}
       </Box>
 
+        {quiz.answerImage && (
+          <Box sx={{ height: '35%', minHeight: 0, flexShrink: 0, display: 'flex', justifyContent: 'center', pt: 1 }}>
+          <ExpandableQuizImage contained key={quiz.answerImage} src={quiz.answerImage} alt="解答画像" />
+          </Box>
+        )}
+
       {showButton && (
-        <Box sx={{ mt: '2vmin', textAlign: 'center', pb: '2vmin' }}>
+        <Box sx={{ mt: '2vmin', flexShrink: 0, textAlign: 'center', pb: '2vmin' }}>
           <Button
             variant="contained"
             size="large"
             onClick={onButtonClick}
             sx={{
               minWidth: '20vmin',
-              fontSize: '2.5vmin',
+              fontSize: 'clamp(16px, 2.5vmin, 32px)',
               borderRadius: '4vmin',
-              boxShadow: '0 0.5vmin 0.8vmin rgba(0,0,0,0.2)',
+
               bgcolor: 'secondary.main', // Green button to go back
               '&:hover': {
                 bgcolor: 'secondary.dark',

@@ -15,6 +15,9 @@ export function pathParameter(params: Record<string, string | string[]>, name: s
 
 const API_ROOT = '/api';
 
+/** 実際に表示した問題の既読記録用パスを返す。 */
+export const pathToQuizOpened = (id: string) => `${pathToQuiz(id)}/opened`;
+
 /**
  * 大会一覧エンドポイントのパスを返します。
  * @returns {string} '/api/tournaments'

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
-import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz } from '../api-helper';
+import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
 const router = Router();
@@ -93,22 +93,11 @@ router.get(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const id = pathParameter(req.params, 'id');
-    const { preview } = req.query;
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: { participant: true },
     });
     if (quiz) {
-      // 問題詳細を取得した時点で既読(isOpened)にする
-      // ただし、プレビューモード(preview=true)の場合は既読にしない
-      if (!quiz.isOpened && preview !== 'true') {
-        await prisma.quiz.update({
-          where: { id },
-          data: { isOpened: true },
-        });
-        // 更新後の値を反映
-        quiz.isOpened = true;
-      }
       res.json(new Quiz(quiz));
     } else {
       throw new NotFoundError('Quiz not found');
@@ -175,6 +164,18 @@ router.put(
       },
     });
     res.status(200).json(new Quiz(updatedQuiz));
+  })
+);
+
+/** 取得・先読みでは書き込まず、本番表示からの明示的な通知だけを記録する。 */
+router.put(
+  quizzesRouterPath(pathToQuizOpened(':id')),
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = pathParameter(req.params, 'id');
+    const result = await prisma.quiz.updateMany({ where: { id }, data: { isOpened: true } });
+    if (!result.count) throw new NotFoundError('Quiz not found');
+    const quiz = await prisma.quiz.findUniqueOrThrow({ where: { id }, include: { participant: true } });
+    res.json(new Quiz(quiz));
   })
 );
 

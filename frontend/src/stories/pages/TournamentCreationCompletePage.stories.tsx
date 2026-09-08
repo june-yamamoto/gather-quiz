@@ -1,30 +1,19 @@
+import { quizArgs, quizArgTypes, tournamentArgs, tournamentArgTypes, type QuizControls, type TournamentControls } from '../controls';
 import type { Meta, StoryObj } from '@storybook/react';
 import TournamentCreationCompletePage from '../../pages/TournamentCreationCompletePage';
+import { pathToTournamentCreationComplete } from '../../helpers/route-helpers';
+import { mobile } from '../fixtures';
 
-const meta: Meta<typeof TournamentCreationCompletePage> = {
-  title: '画面/主催者/大会作成完了ページ',
-  component: TournamentCreationCompletePage,
-  parameters: {
-    reactRouter: {
-      route: '/tournaments/:id/created',
-      path: '/tournaments/test-complete-id/created',
-      state: { password: 'password123' },
-    },
-    mockData: [
-      {
-        url: '/api/tournaments/test-complete-id',
-        method: 'GET',
-        status: 200,
-        response: {
-          id: 'test-complete-id',
-          name: '作成完了した大会',
-        },
-      },
-    ],
-  },
-};
-
+const meta = {
+  args: { ...quizArgs, ...tournamentArgs },
+  argTypes: { ...quizArgTypes, ...tournamentArgTypes },
+  render: () => <TournamentCreationCompletePage />,
+  title: '画面/主催者/大会作成完了',
+  parameters: { page: true, route: { path: pathToTournamentCreationComplete(':id'), entry: pathToTournamentCreationComplete('t-1') } },
+} satisfies Meta<QuizControls & TournamentControls>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = { name: '通常' };
+export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
+export const WithPassword: Story = { name: '作成直後', parameters: { route: { path: pathToTournamentCreationComplete(':id'), entry: pathToTournamentCreationComplete('t-1'), state: { password: 'demo-only' } } } };

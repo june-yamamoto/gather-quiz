@@ -7,8 +7,8 @@ import { tournamentApiClient } from '../api/TournamentApiClient';
 import { TournamentForm, type TournamentFormData } from '../components/TournamentForm';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
 }));
 
 const TournamentCreationPage = () => {

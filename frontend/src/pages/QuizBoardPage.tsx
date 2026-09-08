@@ -10,10 +10,11 @@ import { QuizCard } from '../components/design-system/QuizCard/QuizCard';
 import { Button } from '../components/design-system/Button/Button';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
   paddingLeft: theme.spacing(4),
   paddingRight: theme.spacing(4),
+  [theme.breakpoints.down('sm')]: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
 }));
 
 const ParticipantName = styled(Typography)(({ theme }) => ({
@@ -92,11 +93,11 @@ const QuizBoardPage = () => {
 
   return (
     <StyledContainer maxWidth={false}>
-      <Box sx={{ position: 'relative', mb: 4, textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 3 }}>
         <Typography variant="h3" component="h1" gutterBottom>
           {tournament.name}
         </Typography>
-        <Box sx={{ position: 'absolute', right: 0, top: 0 }}>
+        <Box>
           <Button variant="outlined" size="small" onClick={() => setRegulationOpen(true)}>
             ルール確認
           </Button>
@@ -134,7 +135,7 @@ const QuizBoardPage = () => {
       </Box>
 
       {isAllOpened && (
-        <Box sx={{ mt: 8, textAlign: 'center' }}>
+        <Box sx={{ mt: 5, textAlign: 'center' }}>
           <Button
             variant="contained"
             color="primary"
@@ -145,8 +146,7 @@ const QuizBoardPage = () => {
                 py: 2,
                 px: 6,
                 borderRadius: '50px',
-                background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-                boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                backgroundColor: 'primary.main',
             }}
           >
             大会を終了する！

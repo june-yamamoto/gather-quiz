@@ -42,8 +42,8 @@ const renderWithProviders = () => {
 describe('AnswerDisplayPage', () => {
   it('クイズの解答が正しく表示されること', async () => {
     renderWithProviders();
-    await screen.findByText('Q. This is a test question.');
-    expect(screen.getByText('A. This is the answer.')).toBeInTheDocument();
+    await screen.findByText('This is a test question.');
+    expect(screen.getByText('This is the answer.')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '解答画像' })).toHaveAttribute('src', 'http://example.com/answer.png');
     expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com/answer');
     expect(screen.getByRole('button', { name: 'ボードに戻る' })).toBeInTheDocument();

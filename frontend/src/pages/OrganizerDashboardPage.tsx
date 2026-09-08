@@ -9,8 +9,8 @@ import { Card } from '../components/design-system/Card/Card';
 import { Table, TableContainer } from '../components/design-system/Table/Table';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
 }));
 
 const OrganizerDashboardPage = () => {
@@ -64,14 +64,14 @@ const OrganizerDashboardPage = () => {
 
   return (
     <StyledContainer maxWidth="lg">
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ mr: 2 }}>
           管理ページ: {status?.tournamentName}
         </Typography>
         {isStarted && <Chip label="開始済み" color="success" />}
       </Box>
 
-      <Card sx={{ mb: 4, textAlign: 'left' }}>
+      <Card sx={{ mb: 3, textAlign: 'left' }}>
         <Typography variant="h6" component="h2" gutterBottom>
           大会情報
         </Typography>
@@ -114,7 +114,7 @@ const OrganizerDashboardPage = () => {
         </Table>
       </TableContainer>
 
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
         {isStarted ? (
           <Button
             variant="contained"
@@ -137,7 +137,7 @@ const OrganizerDashboardPage = () => {
         )}
       </Box>
 
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Button
           component={Link}
           to={pathToTournamentPortal(tournamentId || '')}

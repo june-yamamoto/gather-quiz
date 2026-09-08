@@ -17,7 +17,7 @@ export const Footer = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', mb: 1, '& a': { py: 1.5 } }}>
           <Link component={RouterLink} to="/terms" variant="body2" color="text.secondary" sx={{ mx: 1.5 }}>
             利用規約
           </Link>

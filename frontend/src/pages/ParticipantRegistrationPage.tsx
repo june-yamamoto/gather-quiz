@@ -11,7 +11,9 @@ import { Participant } from '../models/Participant';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
-  marginTop: theme.spacing(8),
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: { marginTop: theme.spacing(3) },
 }));
 
 const PasswordBox = styled(Box)(({ theme }) => ({
@@ -19,7 +21,7 @@ const PasswordBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
   marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(3),
   textAlign: 'center',
 }));
 
@@ -83,9 +85,11 @@ const ParticipantRegistrationPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         参加者登録
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
         <Input
           label="あなたの名前"
+          autoComplete="nickname"
+          inputProps={{ enterKeyHint: 'done' }}
           fullWidth
           required
           value={name}
