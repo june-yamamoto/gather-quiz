@@ -20,6 +20,7 @@ model Tournament {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   participants            Participant[]
+  questionSlots           String?
   quizzes                 Quiz[]
 }
 
@@ -54,4 +55,7 @@ model Quiz {
   participantId String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  label         String?
+  choiceCount   Int       @default(0)
+  choices       String    @default("[]")
 }

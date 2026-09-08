@@ -15,5 +15,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { name: '通常' };
+export const MultipleChoice: Story = { name: 'ラベル付き4択問題を作成', args: { questionSlots: [{ label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 4 }, { label: '', choiceCount: 0 }] } };
+export const MultipleChoiceMobile: Story = { ...MultipleChoice, name: '4択問題・スマートフォン', parameters: mobile };
+export const MultipleChoiceEdit: Story = { name: '選択肢の再編集', args: { label: '声優', choiceCount: 4, choices: ['花澤香菜', '早見沙織', '悠木碧', '水瀬いのり'], questionSlots: [{ label: '声優', choiceCount: 4 }, { label: '', choiceCount: 0 }, { label: '', choiceCount: 0 }] }, parameters: { route: { path: pathToQuizCreator(':tournamentId', ':participantId'), entry: pathToQuizCreator('t-1', 'p-1') + '?edit=q-1&order=0&point=10' } } };
 export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
 export const Edit: Story = { name: '編集・スマートフォン', parameters: { ...mobile, route: { path: pathToQuizCreator(':tournamentId', ':participantId'), entry: pathToQuizCreator('t-1', 'p-1') + '?edit=q-1&order=0&point=10' } } };

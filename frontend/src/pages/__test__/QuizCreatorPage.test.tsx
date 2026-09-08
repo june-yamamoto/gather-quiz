@@ -7,6 +7,7 @@ import { quizApiClient } from '../../api/QuizApiClient';
 import { Quiz } from '../../models/Quiz';
 
 vi.mock('../../api/QuizApiClient');
+vi.mock('../../api/TournamentApiClient', () => ({ tournamentApiClient: { get: vi.fn().mockResolvedValue({ points: '10', genres: '', questionSlots: [{ label: '音楽', choiceCount: 0 }] }) } }));
 
 const queryClient = new QueryClient();
 
@@ -26,9 +27,9 @@ const renderWithProviders = () => {
 };
 
 describe('QuizCreatorPage', () => {
-  it('クイズ作成フォームが正しく表示されること', () => {
+  it('クイズ作成フォームが正しく表示されること', async () => {
     renderWithProviders();
-    expect(screen.getByRole('heading', { name: '新しい問題の作成' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '新しい問題の作成' })).toBeInTheDocument();
     expect(screen.getByLabelText('問題文')).toBeInTheDocument();
     expect(screen.getByLabelText('解答文')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'この内容で問題を保存する' })).toBeInTheDocument();
@@ -47,7 +48,7 @@ describe('QuizCreatorPage', () => {
     );
     renderWithProviders();
 
-    fireEvent.change(screen.getByLabelText('問題文'), { target: { value: 'Test Question' } });
+    fireEvent.change(await screen.findByLabelText('問題文'), { target: { value: 'Test Question' } });
     fireEvent.change(screen.getByLabelText('解答文'), { target: { value: 'Test Answer' } });
     fireEvent.click(screen.getByRole('button', { name: 'この内容で問題を保存する' }));
 

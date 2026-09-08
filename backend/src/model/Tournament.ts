@@ -1,10 +1,13 @@
 import { Participant } from './Participant';
 import { Quiz } from './Quiz';
+import { readQuestionSlots, type QuestionSlot } from '../question-slots';
 
 /**
  * 大会モデル
  */
 export class Tournament {
+  /** 問題順ごとのラベルと出題形式。 */
+  questionSlots: QuestionSlot[];
   /**
    * 大会ID
    * @type {string}
@@ -82,6 +85,7 @@ export class Tournament {
    * @param {Tournament} data - PrismaのTournamentモデルのデータ
    */
   constructor(data: {
+    questionSlots?: string | null;
     id: string;
     name: string;
     password: string;
@@ -96,6 +100,7 @@ export class Tournament {
     quizzes?: Quiz[];
   }) {
     this.id = data.id;
+    this.questionSlots = readQuestionSlots(data.questionSlots);
     this.name = data.name;
     this.password = data.password;
     this.questionsPerParticipant = data.questionsPerParticipant;
@@ -120,6 +125,7 @@ export class Tournament {
       password: this.password,
       questionsPerParticipant: this.questionsPerParticipant,
       points: this.points,
+      questionSlots: this.questionSlots,
       regulation: this.regulation,
       genres: this.genres,
       status: this.status,

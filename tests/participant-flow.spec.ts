@@ -21,7 +21,7 @@ test.describe('参加者登録と問題作成フロー', () => {
   test('ユーザーが参加者登録し、問題作成ページにリダイレクトされること', async ({ page }) => {
     // 1. Navigate to the tournament portal page
     await page.goto(`/gather/tournaments/${tournamentId}`);
-    await expect(page.getByRole('heading', { name: '大会ポータル' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^大会: Participant Flow Test Tournament/ })).toBeVisible();
 
     // 2. Click the button to register as a participant
     await page.getByRole('link', { name: '参加者として新規登録' }).click();

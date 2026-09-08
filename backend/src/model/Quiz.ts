@@ -2,6 +2,12 @@
  * クイズモデル
  */
 export class Quiz {
+  /** 主催者が指定した問題枠のラベル。 */
+  label: string;
+  /** 0は通常問題、2以上は選択問題。 */
+  choiceCount: number;
+  /** 表示順の選択肢。 */
+  choices: string[];
   /**
    * クイズID
    * @type {string}
@@ -103,6 +109,9 @@ export class Quiz {
    * @param {Quiz} data - PrismaのQuizモデルのデータ
    */
   constructor(data: {
+    label?: string | null;
+    choiceCount?: number;
+    choices?: string;
     id: string;
     point: number;
     order: number;
@@ -121,6 +130,9 @@ export class Quiz {
     updatedAt: Date;
   }) {
     this.id = data.id;
+    this.label = data.label || '';
+    this.choiceCount = data.choiceCount || 0;
+    this.choices = JSON.parse(data.choices || '[]');
     this.point = data.point;
     this.order = data.order;
     this.isOpened = data.isOpened;
@@ -146,6 +158,9 @@ export class Quiz {
     return {
       id: this.id,
       point: this.point,
+      label: this.label,
+      choiceCount: this.choiceCount,
+      choices: this.choices,
       order: this.order,
       isOpened: this.isOpened,
       genre: this.genre,

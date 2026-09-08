@@ -5,6 +5,8 @@ import { getGenreColor } from '../../../helpers/color-helpers';
 
 type QuizCardProps = PaperProps & {
   point: number;
+  label?: string;
+  choiceCount?: number;
   isAnswered?: boolean;
   isUncreated?: boolean;
   genre?: string | null;
@@ -53,10 +55,12 @@ const StyledQuizCard = styled(Paper, {
       }),
 }));
 
-export const QuizCard = ({ point, isAnswered, isUncreated, genre, onClick, ...props }: QuizCardProps) => {
+export const QuizCard = ({ point, label, choiceCount, isAnswered, isUncreated, genre, onClick, ...props }: QuizCardProps) => {
   return (
     <StyledQuizCard isAnswered={isAnswered} isUncreated={isUncreated} onClick={onClick} role={onClick ? 'button' : undefined} {...props}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        {label && <Typography fontWeight="bold" sx={{ overflowWrap: 'anywhere' }}>{label}</Typography>}
+        {!!choiceCount && <Typography variant="caption">{choiceCount}択</Typography>}
         {genre && !isUncreated && (
           <Chip
             label={genre}

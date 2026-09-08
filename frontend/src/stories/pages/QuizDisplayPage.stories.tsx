@@ -16,6 +16,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { name: '通常' };
+export const MultipleChoice: Story = { name: '音楽・4択問題', args: { label: '音楽', choiceCount: 4, choices: ['ピアノ', 'バイオリン', 'フルート', 'トランペット'], questionText: '次のうち、弦楽器はどれでしょう？', answerText: '2. バイオリン' } };
 export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
 export const Loading: Story = { name: '読み込み中', parameters: { mockScenario: 'loading' } };
 export const Failure: Story = { name: '取得失敗', parameters: { mockScenario: 'error' } };

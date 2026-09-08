@@ -41,6 +41,7 @@ export const QuizDisplayContainer = ({
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '2vmin' }}>
         <Box>
+          {quiz.label && <Typography variant="h6" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>{quiz.label}</Typography>}
           {quiz.genre && (
             <Typography
               variant="h4"
@@ -124,6 +125,9 @@ export const QuizDisplayContainer = ({
         >
           {quiz.questionText}
         </Typography>
+        {quiz.choiceCount > 0 && <Box component="ol" aria-label="選択肢" sx={{ alignSelf: 'stretch', mx: '4vmin', my: 1, pl: '6vmin' }}>
+          {quiz.choices.map((choice, index) => <Typography component="li" key={index} sx={{ fontSize: 'clamp(20px, 3vmin, 44px)', whiteSpace: 'pre-wrap', mb: 1, pl: 1 }}>{choice}</Typography>)}
+        </Box>}
 
 
 

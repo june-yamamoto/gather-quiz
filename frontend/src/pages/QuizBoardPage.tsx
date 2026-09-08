@@ -119,12 +119,14 @@ const QuizBoardPage = () => {
                                 {quiz ? (
                                     <QuizCard
                                         point={point}
+                                        label={tournament.questionSlots?.[index]?.label}
+                                        choiceCount={tournament.questionSlots?.[index]?.choiceCount}
                                         isAnswered={quiz.isOpened}
                                         genre={quiz.genre}
                                         onClick={() => handleQuizSelect(quiz.id)}
                                     />
                                 ) : (
-                                    <QuizCard point={point} isUncreated />
+                                    <QuizCard point={point} label={tournament.questionSlots?.[index]?.label} choiceCount={tournament.questionSlots?.[index]?.choiceCount} isUncreated />
                                 )}
                             </Box>
                         );

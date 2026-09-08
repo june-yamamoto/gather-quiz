@@ -8,7 +8,7 @@ import { uploadApiClient } from '../../api/UploadApiClient';
 
 vi.mock('../../api/QuizApiClient');
 vi.mock('../../api/UploadApiClient');
-vi.mock('../../api/TournamentApiClient', () => ({ tournamentApiClient: { get: vi.fn().mockResolvedValue({ genres: '' }) } }));
+vi.mock('../../api/TournamentApiClient', () => ({ tournamentApiClient: { get: vi.fn().mockResolvedValue({ genres: '', points: '10', questionSlots: [{ label: '', choiceCount: 0 }] }) } }));
 /** 保存後の遷移も含めてフォームを検証する。 */
 const setup = (suffix = '') => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
   <MemoryRouter initialEntries={[`/gather/tournaments/t/participants/p/quizzes/new?point=10${suffix}`]}><Routes>
@@ -30,7 +30,7 @@ describe('メディア付き問題の保存', () => {
   });
   it('本文なしのURL問題を保存でき、不正URLは送信しない', async () => {
     setup();
-    fireEvent.change(screen.getByLabelText('問題のURL（参考リンク）'), { target: { value: 'javascript:alert(1)' } });
+    fireEvent.change(await screen.findByLabelText('問題のURL（参考リンク）'), { target: { value: 'javascript:alert(1)' } });
     fireEvent.change(screen.getByLabelText('解答のURL（参考リンク）'), { target: { value: 'https://example.com/answer' } });
     fireEvent.click(screen.getByRole('button', { name: 'この内容で問題を保存する' }));
     expect(screen.getByRole('alert')).toHaveTextContent('有効なURL');
@@ -44,7 +44,7 @@ describe('メディア付き問題の保存', () => {
     vi.mocked(uploadApiClient.uploadMedia).mockRejectedValueOnce(new Error('アップロード失敗')).mockResolvedValue('https://example.com/upload.mp3');
     vi.mocked(quizApiClient.create).mockRejectedValueOnce(new Error('保存失敗'));
     setup();
-    fireEvent.change(screen.getByLabelText('解答文'), { target: { value: '答え' } });
+    fireEvent.change(await screen.findByLabelText('解答文'), { target: { value: '答え' } });
     fireEvent.change(screen.getByLabelText('問題の動画・音声ファイル'), { target: { files: [new File(['sound'], 'sound.mp3', { type: 'audio/mpeg' })] } });
     fireEvent.click(screen.getByRole('button', { name: 'この内容で問題を保存する' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('アップロード失敗');

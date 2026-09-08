@@ -12,11 +12,12 @@ type Args = Omit<TournamentControls, 'participantCount' | 'createdQuestions'> & 
 const { participantCount: _participants, createdQuestions: _created, ...fields } = tournamentArgTypes;
 const meta = {
   title: 'コンポーネント/TournamentForm',
-  args: { tournamentName: '', points: '10,20,30', regulation: '', genres: '', isEditMode: false, onSubmit: fn() },
+  args: { tournamentName: '', points: '10,20,30', regulation: '', genres: '', questionSlots: [], isEditMode: false, onSubmit: fn() },
   argTypes: { ...fields, isEditMode: { control: 'boolean' }, onSubmit: { control: false } },
   render: (args) => <TournamentForm isEditMode={args.isEditMode} onSubmit={args.onSubmit} tournament={Tournament.fromApi({
     ...tournamentFixture, name: args.tournamentName, points: args.points, questionsPerParticipant: Math.max(1, args.points.split(',').length),
     regulation: args.regulation, genres: args.genres,
+    questionSlots: args.questionSlots,
   })} />,
   decorators: [(Story) => <div style={{ maxWidth: 720, padding: 16 }}><Story /></div>],
 } satisfies Meta<Args>;
@@ -25,3 +26,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 export const Mobile: Story = { parameters: mobile };
 export const Edit: Story = { args: { ...tournamentArgs, isEditMode: true } };
+export const LabelsAndChoices: Story = {
+  name: 'ラベル・通常問題と選択問題',
+  args: { tournamentName: '声優と音楽のクイズ大会', points: '10,10,20,20', questionSlots: [
+    { label: '声優', choiceCount: 4 }, { label: '音楽', choiceCount: 0 },
+    { label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 3 },
+  ] },
+};

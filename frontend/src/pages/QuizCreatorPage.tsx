@@ -45,6 +45,8 @@ const QuizCreatorPage = () => {
   const [answerMediaFile, setAnswerMediaFile] = useState<File | null>(null);
   const [point, setPoint] = useState(initialPoint);
   const [genre, setGenre] = useState('');
+  const [choices, setChoices] = useState<string[]>([]);
+  const [editOrder, setEditOrder] = useState<number | null>(null);
   
   const [questionText, setQuestionText] = useState('');
   const [questionLink, setQuestionLink] = useState('');
@@ -59,7 +61,7 @@ const QuizCreatorPage = () => {
   const [isRegulationOpen, setIsRegulationOpen] = useState(false);
 
   // Fetch Tournament Info
-  const { data: tournament } = useQuery({
+  const { data: tournament, error: tournamentError } = useQuery({
     queryKey: ['tournament', tournamentId],
     queryFn: () => {
       if (!tournamentId) {
@@ -69,6 +71,9 @@ const QuizCreatorPage = () => {
     },
     enabled: !!tournamentId,
   });
+
+  const slot = tournament?.questionSlots?.[editOrder ?? order];
+  const choiceCount = slot?.choiceCount || 0;
 
   // Fetch Quiz Info if editing
   useEffect(() => {
@@ -82,6 +87,8 @@ const QuizCreatorPage = () => {
           const quiz = await quizApiClient.get(editQuizId);
           if (cancelled) return;
           setPoint(quiz.point);
+          setEditOrder(quiz.order);
+          setChoices(quiz.choices || []);
           setGenre(quiz.genre || '');
           setQuestionText(quiz.questionText || '');
           setQuestionLink(quiz.questionLink || '');
@@ -105,8 +112,12 @@ const QuizCreatorPage = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (submitting.current || isFetchingEdit || editError) return;
+    if (submitting.current || isFetchingEdit || editError || !tournament) return;
     setSaveError('');
+    if (choiceCount && Array.from({ length: choiceCount }, (_, i) => choices[i] || '').some(c => !c.trim())) {
+      setSaveError(`${choiceCount}個すべての選択肢を入力してください。`);
+      return;
+    }
     if ((!questionMediaFile && questionLink.trim() && !safeMediaUrl(questionLink)) || (!answerMediaFile && answerLink.trim() && !safeMediaUrl(answerLink))) {
       setSaveError('HTTPまたはHTTPSの有効なURLを入力してください。');
       return;
@@ -147,8 +158,9 @@ const QuizCreatorPage = () => {
       setAnswerLink(savedAnswerLink);
       setAnswerMediaFile(null);
       const quizData = {
-        point,
-        order,
+        point: Number(tournament.points.split(',')[editOrder ?? order]) || point,
+        order: editOrder ?? order,
+        choices: choiceCount ? choices.slice(0, choiceCount).map(c => c.trim()) : [],
         genre: genre || null,
         questionText,
         questionImage: questionImageUrl,
@@ -185,7 +197,8 @@ const QuizCreatorPage = () => {
         .filter((g) => g !== '')
     : [];
 
-  if (isFetchingEdit) {
+  if (tournamentError) return <StyledContainer maxWidth="md"><Alert severity="error">大会設定を取得できませんでした。再読み込みしてください。</Alert></StyledContainer>;
+  if (isFetchingEdit || !tournament) {
      return (
        <StyledContainer maxWidth="md" sx={{ textAlign: 'center' }}>
          <CircularProgress />
@@ -215,12 +228,15 @@ const QuizCreatorPage = () => {
         {saveError && <Alert severity="error" sx={{ mb: 2 }}>{saveError}</Alert>}
         <Box component="fieldset" disabled={isLoading} sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <Typography fontWeight="bold">{slot?.label || `第${(editOrder ?? order) + 1}問`} · {choiceCount ? `${choiceCount}択の選択問題` : '通常問題'}</Typography>
+            </Grid>
             <Grid item>
                 <Input
                 label="配点"
                 type="number"
                 required
-                value={point}
+                value={Number(tournament.points.split(',')[editOrder ?? order]) || point}
                 // 配点はURLパラメータから指定されるため変更不可とする
                 inputProps={{ readOnly: true }}
                 sx={{ width: '100px' }}
@@ -284,6 +300,10 @@ const QuizCreatorPage = () => {
               ) : null}
               {(questionImageFile || existingQuestionImageUrl) && <Button onClick={() => { setQuestionImageFile(null); setExistingQuestionImageUrl(null); }}>問題画像を削除</Button>}
               <MediaAttachmentField label="問題" url={questionLink} file={questionMediaFile} onUrlChange={setQuestionLink} onFileChange={setQuestionMediaFile} />
+              {choiceCount > 0 && <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" gutterBottom>選択肢（{choiceCount}択）</Typography>
+                {Array.from({ length: choiceCount }, (_, index) => <Input key={index} label={`選択肢${index + 1}`} required fullWidth multiline inputProps={{ maxLength: 500 }} value={choices[index] || ''} onChange={e => setChoices(prev => Array.from({ length: choiceCount }, (_, i) => i === index ? e.target.value : prev[i] || ''))} sx={{ mb: 2 }} />)}
+              </Box>}
             </StyledSection>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -291,6 +311,7 @@ const QuizCreatorPage = () => {
               <Typography variant="h6" gutterBottom>
                 解答の作成
               </Typography>
+              {choiceCount > 0 && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>正解の選択肢番号や内容、解説を解答欄に入力してください。</Typography>}
               <Input
                 label="解答文"
                 fullWidth

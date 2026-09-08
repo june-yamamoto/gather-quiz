@@ -22,7 +22,7 @@ export async function buildBackend() {
     bundle: true, platform: 'node', target: 'node24', format: 'cjs', minify: true,
     external: ['@prisma/adapter-better-sqlite3', 'pg-native'],
   });
-  const schema = await readFile(join(backend, 'prisma/migrations/0001_initial/migration.sql'), 'utf8');
+  const schema = await readFile(join(backend, 'prisma/schema.current.sql'), 'utf8');
   const generated = execFileSync(process.execPath, [requireBackend.resolve('prisma/build/index.js'), 'migrate', 'diff', '--from-empty', '--to-schema', 'prisma/schema.postgres.prisma', '--script'], {
     cwd: backend, encoding: 'utf8', env: { ...process.env, DATABASE_URL: 'postgresql://unused:unused@localhost:5432/gatherquiz' },
   });
@@ -30,6 +30,8 @@ export async function buildBackend() {
   const canonical = (sql: string) => sql.replace(/--[^\n]*/g, '').replace(/CREATE SCHEMA IF NOT EXISTS "public";/g, '').replaceAll('"public".', '').replace(/\s+/g, '');
   if (canonical(schema) !== canonical(generated)) throw new Error('Prismaスキーマと初期SQLが一致しません。マイグレーションを更新してください');
   await writeFile(join(output, 'schema.sql'), schema.replaceAll('\r\n', '\n'));
+  await writeFile(join(output, 'schema.initial.sql'), (await readFile(join(backend, 'prisma/migrations/0001_initial/migration.sql'), 'utf8')).replaceAll('\r\n', '\n'));
+  await writeFile(join(output, 'migration.question-slots.sql'), (await readFile(join(backend, 'prisma/migrations/0002_question_slots/migration.sql'), 'utf8')).replaceAll('\r\n', '\n'));
   const caPath = join(backend, 'build', 'rds-ca-bundle.pem');
   try { await stat(caPath); } catch {
     const response = await fetch('https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem');
