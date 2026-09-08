@@ -8,7 +8,8 @@ const createTournamentFromUI = async (page: Page, tournamentName: string) => {
   await page.getByRole('textbox', { name: '大会名' }).fill(tournamentName);
   await page.getByRole('textbox', { name: '管理用パスワード' }).fill('organizer-password');
   await page.getByRole('spinbutton', { name: '参加者1人あたりの問題作成数' }).fill('2');
-  await page.getByRole('textbox', { name: '各問題の配点 (カンマ区切り)' }).fill('10,20');
+  await page.getByRole('spinbutton', { name: '1問目の配点' }).fill('10');
+  await page.getByRole('spinbutton', { name: '2問目の配点' }).fill('20');
   await page.getByRole('textbox', { name: 'レギュレーション' }).fill('E2E Test Regulation');
 
   await page.getByRole('button', { name: 'この内容で大会を作成する' }).click();
@@ -29,7 +30,8 @@ const registerParticipant = async (page: Page, tournamentId: string, participant
   const response = await responsePromise;
   const participant = await response.json();
 
-  await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participant.id}/quizzes/new`);
+  await page.getByRole('button', { name: 'ダッシュボードへ移動する' }).click();
+  await page.waitForURL(`/gather/tournaments/${tournamentId}/participants/${participant.id}`);
   return participant.id;
 };
 

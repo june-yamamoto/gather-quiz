@@ -13,7 +13,7 @@
 	"forwardPorts": [3000, 5173, 9323],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo chown -R node:node /home/node/.gemini && pnpm install",
+	"postCreateCommand": "sudo chown -R node:node /home/node/.gemini && npm ci && npm ci --prefix backend && npm ci --prefix frontend",
 
 	// Configure tool-specific properties.
 	"customizations": {

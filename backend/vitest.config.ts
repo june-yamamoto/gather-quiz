@@ -7,7 +7,7 @@ export default defineConfig({
     fileParallelism: false,
     setupFiles: ['./test/setup.ts'],
     env: {
-      DATABASE_URL: 'file:./test.db',
+      DATABASE_URL: process.env.DATABASE_URL || 'file:./test.db',
     },
   },
 });

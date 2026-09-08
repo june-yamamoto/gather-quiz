@@ -13,7 +13,9 @@ const createTournament = async (page: Page, tournamentName: string) => {
   await page.getByRole('textbox', { name: '大会名' }).fill(tournamentName);
   await page.getByRole('textbox', { name: '管理用パスワード' }).fill('password123');
   await page.getByRole('spinbutton', { name: '参加者1人あたりの問題作成数' }).fill('5');
-  await page.getByRole('textbox', { name: '各問題の配点 (カンマ区切り)' }).fill('10,20,30,40,50');
+  for (let index = 1; index <= 5; index++) {
+    await page.getByRole('spinbutton', { name: `${index}問目の配点` }).fill(String(index * 10));
+  }
   await page.getByRole('textbox', { name: 'レギュレーション' }).fill('This is a test regulation.');
 
   // Submit the form

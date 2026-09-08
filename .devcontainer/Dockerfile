@@ -1,5 +1,5 @@
 # See here for image contents: https://github.com/devcontainers/images/tree/main/src/typescript-node
-ARG VARIANT="20-bookworm"
+ARG VARIANT="24-bookworm"
 FROM mcr.microsoft.com/devcontainers/typescript-node:${VARIANT}
 
 ENV DEFAULT_MODEL="gemini-2.5-pro"

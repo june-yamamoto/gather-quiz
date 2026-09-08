@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
-import { asyncHandler, pathToParticipants, pathToParticipantQuizzes } from '../api-helper';
+import { pathParameter, asyncHandler, pathToParticipants, pathToParticipantQuizzes } from '../api-helper';
 import { NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
 // 親ルーターから送られてくる:tournamentIdのようなパラメータを取得可能にする
@@ -28,7 +28,7 @@ const participantsRouterPath = (path: string) => path.substring(pathToParticipan
 router.get(
   participantsRouterPath(pathToParticipantQuizzes(':tournamentId', ':participantId')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { participantId } = req.params;
+    const participantId = pathParameter(req.params, 'participantId');
 
     const participant = await prisma.participant.findUnique({
       where: { id: participantId },

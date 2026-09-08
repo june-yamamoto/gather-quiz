@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GatherQuiz GitHub OIDC application deployment (no static access keys)
+Parameters:
+  ApplicationStack: { Type: String }
+  ArtifactBucket: { Type: String }
+  FrontendBucket: { Type: String }
+  Repository: { Type: String, Default: june-yamamoto/gather-quiz }
+Resources:
+  GitHubProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+  DeploymentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: { Federated: !Ref GitHubProvider }
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${Repository}:ref:refs/heads/main'
+      Policies:
+        - PolicyName: DeployApplication
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: cloudformation:DescribeStacks
+                Resource:
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStack}/*'
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStack}-artifacts/*'
+              - Effect: Allow
+                Action: [s3:ListBucket]
+                Resource: [!Sub 'arn:aws:s3:::${ArtifactBucket}', !Sub 'arn:aws:s3:::${FrontendBucket}']
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: [!Sub 'arn:aws:s3:::${ArtifactBucket}/backend/*', !Sub 'arn:aws:s3:::${FrontendBucket}/*']
+              - Effect: Allow
+                Action: [lambda:GetFunction, lambda:GetFunctionConfiguration, lambda:UpdateFunctionCode]
+                Resource:
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-api'
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-db'
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-db'
+Outputs:
+  DeploymentRoleArn: { Value: !GetAtt DeploymentRole.Arn }

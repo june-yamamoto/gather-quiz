@@ -33,18 +33,21 @@
 - スキーマ変更は4ファイルの差分を比較し、意図的なprovider差以外は同期する。
 - 大会 `Tournament` は参加者とクイズを持ち、参加者名は大会内で一意。
 - クイズは大会と作成参加者の両方に属する。配点、表示順、既読状態、任意の問題・解答テキスト/画像/リンクを持つ。
-- 本番/Lambdaでは `DATABASE_URL` または `SECRET_ID` を使用する。画像アップロードには `IMAGE_UPLOAD_BUCKET_NAME`、任意で `AWS_REGION` を使用する。
-- DB push、マイグレーション、AWS Secrets Manager/RDSへの接続は明示的な依頼なしに実行しない。
+- 本番/Lambdaは `DB_HOST`、`DB_USER`、`DB_PASSWORD` を使用する。SSM標準SecureStringをデプロイ時に読み込み、実行時の秘密取得は行わない。RDS CA検証を有効にする。
+- 画像には `IMAGE_UPLOAD_BUCKET_NAME` とCloudFrontの `IMAGE_PUBLIC_BASE_URL` を使用する。画像S3は非公開。
+- `src/maintenance.ts` はIAM専用のDB運用Lambda。初期化・バックアップ・復元を担当し、公開APIへ接続しない。
+- 適用済みの初期SQLは `prisma/migrations/0001_initial/migration.sql`。既存DBへの破壊的な自動同期は禁止する。
+- DB push、マイグレーション、AWS SSM/RDSへの接続は明示的な依頼なしに実行しない。
 
 ## テスト時の注意
 
-`npm run test` のpre/post scriptは `prisma/schema.prisma` を退避し、テスト用スキーマへ差し替える。Unixコマンドを使うためDev ContainerまたはWSLで実行する。失敗・中断時には次を確認する。
+`npm run test` はルートの `scripts/backend-tests.ts` を実行する。スキーマを書き換えず、一時DBを使う。WindowsとCIで同じコマンドを使用する。失敗・中断時には次を確認する。
 
-- `prisma/schema.prisma` が通常版へ戻っている
-- `prisma/schema.original.prisma` が残っていない
-- 意図しない `test.db` が追跡対象になっていない
+- ソースのスキーマに意図しない変更がない
+- 生成Clientが通常のSQLite版へ復元されている
+- `build/test-*.db` が残っていない
 
-同じスキーマを差し替えるバックエンド単体テストとPlaywright E2Eを並列実行しない。
+生成Clientを共有するバックエンド単体テスト・Playwright E2E・本番ZIP生成を同時実行しない。
 
 ## コマンド
 

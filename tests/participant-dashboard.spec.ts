@@ -36,6 +36,7 @@ const createQuiz = async (
       questionText: `Question ${questionNumber}`,
       answerText: 'A',
       point: 10,
+      order: questionNumber - 1,
       tournamentId,
       participantId,
     },
@@ -51,10 +52,9 @@ test.describe('参加者ダッシュボード', () => {
     await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 3 問、作成してください。')).toBeVisible();
-    await expect(page.getByText('作成済みの問題')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '問題リスト' })).toBeVisible();
     // Expect the list of created quizzes to be empty
-    const listItems = await page.locator('ul > div').count();
-    expect(listItems).toBe(0);
+    await expect(page.getByRole('link', { name: '作成する', exact: true })).toHaveCount(3);
   });
 
   test('シナリオ2: クイズがいくつか作成済みの場合に正しいステータスが表示されること', async ({ page, request }) => {
@@ -64,7 +64,7 @@ test.describe('参加者ダッシュボード', () => {
     await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 2 問、作成してください。')).toBeVisible();
-    await expect(page.getByText('作成済みの問題')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '問題リスト' })).toBeVisible();
     await expect(page.getByText(quiz.questionText)).toBeVisible();
   });
 
@@ -78,8 +78,7 @@ test.describe('参加者ダッシュボード', () => {
     await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
 
     await expect(page.getByText('あと 0 問、作成してください。')).toBeVisible();
-    await expect(page.getByText('作成済みの問題')).toBeVisible();
-    const listItems = await page.locator('ul > div').count();
-    expect(listItems).toBe(3);
+    await expect(page.getByRole('heading', { name: '問題リスト' })).toBeVisible();
+    await expect(page.getByRole('link', { name: '編集', exact: true })).toHaveCount(3);
   });
 });

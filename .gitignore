@@ -30,6 +30,9 @@ yarn-error.log*
 # Build artifacts
 *.zip
 *.db
+/artifacts/
+/backups/
+*.dump
 
 # Temporary files
 cname-record.json

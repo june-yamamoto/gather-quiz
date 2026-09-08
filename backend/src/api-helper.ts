@@ -1,4 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
+import { BadRequestError } from './errors/HttpErrors';
+
+/** Express 5の配列パラメーターを単一IDとしてDBへ渡さない。 */
+export function pathParameter(params: Record<string, string | string[]>, name: string): string {
+  const value = params[name];
+  if (typeof value !== 'string' || !value) throw new BadRequestError('Invalid route parameter');
+  return value;
+}
 
 /**
  * @file APIエンドポイントのパス生成や非同期処理のラップなど、API関連のヘルパー関数を提供します。

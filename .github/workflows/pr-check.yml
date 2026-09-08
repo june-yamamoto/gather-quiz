@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
@@ -50,7 +50,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
@@ -61,11 +61,18 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Install deployment tooling
+        run: npm ci
+
+      - run: npm run test:infra
+      - run: node backend/node_modules/typescript/bin/tsc -p scripts/tsconfig.json
+
       - name: Run Backend tests
         working-directory: backend
         run: npm run test
         env:
           DATABASE_URL: "file:./test.db"
+      - run: npm run build --prefix backend
 
       - name: Install Frontend dependencies
         working-directory: frontend
@@ -74,3 +81,4 @@ jobs:
       - name: Run Frontend tests
         working-directory: frontend
         run: npm run test
+      - run: npm run build --prefix frontend

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
-import { asyncHandler, pathToQuizzes, pathToQuiz } from '../api-helper';
+import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
 const router = Router();
@@ -92,7 +92,7 @@ router.post(
 router.get(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { preview } = req.query;
     const quiz = await prisma.quiz.findUnique({
       where: { id },
@@ -136,7 +136,7 @@ router.get(
 router.put(
   quizzesRouterPath(pathToQuiz(':id')),
   asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = pathParameter(req.params, 'id');
     const { point, questionText, questionImage, questionLink, answerText, answerImage, answerLink, genre } = req.body;
 
     const quiz = await prisma.quiz.findUnique({
