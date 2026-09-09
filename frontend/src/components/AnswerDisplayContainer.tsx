@@ -75,6 +75,12 @@ export const AnswerDisplayContainer = ({
           width: '100%',
         }}
       >
+        {quiz.choiceCount > 0 && quiz.correctChoiceIndex !== null && quiz.correctChoiceIndex >= 0 && quiz.correctChoiceIndex < quiz.choices.length && (
+          <Box role="region" aria-label="正解の選択肢" sx={{ width: '100%', boxSizing: 'border-box', border: 2, borderColor: 'secondary.main', borderRadius: 3, p: '3vmin', mb: '3vmin', textAlign: 'center' }}>
+            <Typography component="p" color="secondary.main" fontWeight={800} sx={{ fontSize: 'clamp(20px, 3vmin, 40px)' }}>✓ 正解 · 選択肢{quiz.correctChoiceIndex + 1}</Typography>
+            <Typography component="p" fontWeight={800} sx={{ fontSize: 'clamp(24px, 4vmin, 64px)', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{quiz.choices[quiz.correctChoiceIndex]}</Typography>
+          </Box>
+        )}
         <Typography
           variant="h2"
           align="center"

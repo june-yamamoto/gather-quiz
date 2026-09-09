@@ -19,6 +19,14 @@ const mockQuiz = new Quiz({
 });
 
 describe('AnswerDisplayContainer', () => {
+  it('正解番号・内容と自由な解答文を併記し、未設定の旧問題には正解を捏造しない', () => {
+    const { rerender } = render(<AnswerDisplayContainer quiz={new Quiz({ ...mockQuiz, choiceCount: 2, choices: ['正しい選択肢', '別の選択肢'], correctChoiceIndex: 0 })} />);
+    expect(screen.getByRole('region', { name: '正解の選択肢' })).toHaveTextContent('選択肢1');
+    expect(screen.getByText('正しい選択肢')).toBeInTheDocument();
+    expect(screen.getByText('Test Answer')).toBeInTheDocument();
+    rerender(<AnswerDisplayContainer quiz={mockQuiz} />);
+    expect(screen.queryByRole('region', { name: '正解の選択肢' })).not.toBeInTheDocument();
+  });
   it('解答情報が正しくレンダリングされること', () => {
     render(<AnswerDisplayContainer quiz={mockQuiz} />);
     

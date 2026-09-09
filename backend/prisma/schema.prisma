@@ -62,4 +62,5 @@ model Quiz {
   label         String?
   choiceCount   Int       @default(0)
   choices       String    @default("[]")
+  correctChoiceIndex Int?
 }

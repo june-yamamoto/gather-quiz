@@ -4,18 +4,21 @@ import type { QuestionSlot } from '../models/QuestionSlot';
 import { quizFixture, tournamentFixture } from './fixtures';
 
 export type QuizControls = {
+  correctChoiceIndex: number | null;
   label: string; choiceCount: number; choices: string[];
   point: number; order: number; isOpened: boolean; genre: string; participantName: string;
   questionText: string; questionImage: string; questionLink: string;
   answerText: string; answerImage: string; answerLink: string;
 };
 export const quizArgs: QuizControls = {
+  correctChoiceIndex: null,
   label: '', choiceCount: 0, choices: [],
   point: quizFixture.point, order: quizFixture.order, isOpened: false, genre: quizFixture.genre,
   participantName: quizFixture.participantName, questionText: quizFixture.questionText, answerText: quizFixture.answerText,
   questionImage: '', questionLink: '', answerImage: '', answerLink: '',
 };
 export const quizArgTypes: ArgTypes<QuizControls> = {
+  correctChoiceIndex: { control: { type: 'number', min: 0, max: 19 }, description: '正解の選択肢（0始まり）。nullは未設定。', table: { category: '解答' } },
   label: { control: 'text', table: { category: '問題情報' } },
   choiceCount: { control: { type: 'number', min: 0, max: 20 }, table: { category: '問題情報' } },
   choices: { control: 'object', table: { category: '問題' } },

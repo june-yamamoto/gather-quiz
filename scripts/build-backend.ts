@@ -34,6 +34,8 @@ export async function buildBackend() {
   await writeFile(join(output, 'migration.question-slots.sql'), (await readFile(join(backend, 'prisma/migrations/0002_question_slots/migration.sql'), 'utf8')).replaceAll('\r\n', '\n'));
   await writeFile(join(output, 'schema.question-slots.sql'), (await readFile(join(backend, 'prisma/migrations/0002_question_slots/schema.sql'), 'utf8')).replaceAll('\r\n', '\n'));
   await writeFile(join(output, 'migration.participant-credentials.sql'), (await readFile(join(backend, 'prisma/migrations/0003_participant_credentials/migration.sql'), 'utf8')).replaceAll('\r\n', '\n'));
+  await writeFile(join(output, 'schema.participant-credentials.sql'), (await readFile(join(backend, 'prisma/migrations/0003_participant_credentials/schema.sql'), 'utf8')).replaceAll('\r\n', '\n'));
+  await writeFile(join(output, 'migration.correct-choice.sql'), (await readFile(join(backend, 'prisma/migrations/0004_correct_choice/migration.sql'), 'utf8')).replaceAll('\r\n', '\n'));
   const caPath = join(backend, 'build', 'rds-ca-bundle.pem');
   try { await stat(caPath); } catch {
     const response = await fetch('https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem');
