@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { GettingStarted } from '../components/GettingStarted';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Container, Typography, Box, List, ListItemText, ListItemButton, Paper } from '@mui/material';
@@ -75,6 +76,7 @@ const ServiceTopPage = () => {
         </Box>)}
       </Box>
 
+      <GettingStarted />
       {viewedTournaments.length > 0 && (
         <Box sx={{ mt: 5, textAlign: 'left' }}>
           <Typography variant="h6" gutterBottom>
