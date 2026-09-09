@@ -23,6 +23,8 @@ describe('AnswerDisplayContainer', () => {
     const { rerender } = render(<AnswerDisplayContainer quiz={new Quiz({ ...mockQuiz, choiceCount: 2, choices: ['正しい選択肢', '別の選択肢'], correctChoiceIndex: 0 })} />);
     expect(screen.getByRole('region', { name: '正解の選択肢' })).toHaveTextContent('選択肢1');
     expect(screen.getByText('正しい選択肢')).toBeInTheDocument();
+    expect(screen.getByText('別の選択肢')).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
     expect(screen.getByText('Test Answer')).toBeInTheDocument();
     rerender(<AnswerDisplayContainer quiz={mockQuiz} />);
     expect(screen.queryByRole('region', { name: '正解の選択肢' })).not.toBeInTheDocument();
