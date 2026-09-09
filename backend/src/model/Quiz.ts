@@ -8,6 +8,8 @@ export class Quiz {
   choiceCount: number;
   /** 表示順の選択肢。 */
   choices: string[];
+  /** 正解の選択肢（0始まり）。未設定はnull。 */
+  correctChoiceIndex: number | null;
   /**
    * クイズID
    * @type {string}
@@ -111,6 +113,7 @@ export class Quiz {
   constructor(data: {
     label?: string | null;
     choiceCount?: number;
+    correctChoiceIndex?: number | null;
     choices?: string;
     id: string;
     point: number;
@@ -132,6 +135,7 @@ export class Quiz {
     this.id = data.id;
     this.label = data.label || '';
     this.choiceCount = data.choiceCount || 0;
+    this.correctChoiceIndex = data.correctChoiceIndex ?? null;
     this.choices = JSON.parse(data.choices || '[]');
     this.point = data.point;
     this.order = data.order;
@@ -161,6 +165,7 @@ export class Quiz {
       label: this.label,
       choiceCount: this.choiceCount,
       choices: this.choices,
+      correctChoiceIndex: this.correctChoiceIndex,
       order: this.order,
       isOpened: this.isOpened,
       genre: this.genre,

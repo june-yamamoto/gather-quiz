@@ -14,6 +14,7 @@ test('Storybookでラベルと形式を変更し、4択を保存・プレビュ�
   await canvas.getByLabel('解答文', { exact: true }).fill('2. バイオリン');
   const choices = ['ピアノ', 'バイオリン', 'フルート', 'トランペット'];
   for (const [i, choice] of choices.entries()) await canvas.getByRole('textbox', { name: `選択肢${i + 1}`, exact: true }).fill(choice);
+  await canvas.getByRole('radio', { name: '選択肢2を正解にする', exact: true }).check();
   await canvas.getByRole('button', { name: 'この内容で問題を保存する' }).click();
   await canvas.getByRole('button', { name: '問題確認', exact: true }).nth(1).click();
   await expect(canvas.getByRole('list', { name: '選択肢' }).getByRole('listitem')).toHaveText(choices);
@@ -25,4 +26,5 @@ test('Storybookでラベルと形式を変更し、4択を保存・プレビュ�
   await canvas.getByRole('button', { name: 'プレビューを閉じる' }).click();
   await canvas.getByRole('link', { name: '編集', exact: true }).nth(1).click();
   await expect(canvas.getByRole('textbox', { name: '選択肢4', exact: true })).toHaveValue('トランペット');
+  await expect(canvas.getByRole('radio', { name: '選択肢2を正解にする', exact: true })).toBeChecked();
 });

@@ -31,6 +31,24 @@ afterEach(async () => {
 });
 
 describe('ラベル・選択問題API', () => {
+  it('正解選択肢と解答文を保存・再取得し、不正な番号を拒否する', async () => {
+    const data = await setup();
+    const created = await request(app).post('/quizzes').send({ ...data, choiceCount: 3, choices: ['A', 'B', 'C'], correctChoiceIndex: 1, answerText: '自由な解説' });
+    expect(created.status).toBe(201);
+    expect((await request(app).get(`/quizzes/${created.body.id}`)).body).toMatchObject({ correctChoiceIndex: 1, answerText: '自由な解説' });
+    for (const correctChoiceIndex of [-1, 3, 0.5, '1']) expect((await request(app).put(`/quizzes/${created.body.id}`).send({ correctChoiceIndex })).status).toBe(400);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ answerText: '解説を変更' })).body.correctChoiceIndex).toBe(1);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ choiceCount: 2, choices: ['A', 'B'], correctChoiceIndex: 2 })).status).toBe(400);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ choiceCount: 0 })).body.correctChoiceIndex).toBeNull();
+    expect((await request(app).post('/quizzes').send({ ...data, correctChoiceIndex: 0 })).status).toBe(400);
+  });
+  it('選択した正解だけでも保存でき、未指定の旧問題は従来の解答を保持する', async () => {
+    const data = await setup();
+    const created = await request(app).post('/quizzes').send({ ...data, answerText: '', choiceCount: 2, choices: ['A', 'B'], correctChoiceIndex: 0 });
+    expect(created.status).toBe(201);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ correctChoiceIndex: null })).status).toBe(400);
+    expect((await request(app).post('/quizzes').send({ ...data, choiceCount: 2, choices: ['A', 'B'] })).body.correctChoiceIndex).toBeNull();
+  });
   it('大会指定の形式を強制し、選択問題の選択肢数は参加者ごとに変更できる', async () => {
     const data = await setup();
     const slots = [{ label: '声優', choiceCount: 0, questionType: 'choice' }, { label: '音楽', choiceCount: 0, questionType: 'normal' }];

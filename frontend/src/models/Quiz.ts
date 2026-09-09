@@ -8,6 +8,8 @@ export class Quiz {
   choiceCount: number;
   /** 表示順の選択肢。 */
   choices: string[];
+  /** 正解の選択肢（0始まり）。未設定はnull。 */
+  correctChoiceIndex: number | null;
   /**
    * クイズID
    * @type {string}
@@ -95,6 +97,7 @@ export class Quiz {
   constructor(data: {
     label?: string | null;
     choiceCount?: number;
+    correctChoiceIndex?: number | null;
     choices?: string[];
     id: string;
     point: number;
@@ -114,6 +117,7 @@ export class Quiz {
     this.id = data.id;
     this.label = data.label || '';
     this.choiceCount = data.choiceCount || 0;
+    this.correctChoiceIndex = data.correctChoiceIndex ?? null;
     this.choices = data.choices || [];
     this.point = data.point;
     this.order = data.order;
@@ -151,6 +155,7 @@ export class Quiz {
       (!('label' in data) || data.label === null || typeof data.label === 'string') &&
       (!('choiceCount' in data) || (typeof data.choiceCount === 'number' && Number.isInteger(data.choiceCount) && (data.choiceCount === 0 || (data.choiceCount >= 2 && data.choiceCount <= 20)))) &&
       (!('choices' in data) || (Array.isArray(data.choices) && data.choices.every(choice => typeof choice === 'string'))) &&
+      (!('correctChoiceIndex' in data) || data.correctChoiceIndex === null || (typeof data.correctChoiceIndex === 'number' && Number.isInteger(data.correctChoiceIndex) && data.correctChoiceIndex >= 0 && 'choices' in data && Array.isArray(data.choices) && data.correctChoiceIndex < data.choices.length)) &&
       ('genre' in data ? typeof data.genre === 'string' || data.genre === null : true) && // genre is optional
       'tournamentId' in data &&
       typeof data.tournamentId === 'string' &&
@@ -173,6 +178,7 @@ export class Quiz {
       label: this.label,
       choiceCount: this.choiceCount,
       choices: this.choices,
+      correctChoiceIndex: this.correctChoiceIndex,
       order: this.order,
       isOpened: this.isOpened,
       questionText: this.questionText,

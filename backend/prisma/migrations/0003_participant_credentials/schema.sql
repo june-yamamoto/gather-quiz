@@ -54,7 +54,6 @@ CREATE TABLE "Quiz" (
     "label" TEXT,
     "choiceCount" INTEGER NOT NULL DEFAULT 0,
     "choices" TEXT NOT NULL DEFAULT '[]',
-    "correctChoiceIndex" INTEGER,
 
     CONSTRAINT "Quiz_pkey" PRIMARY KEY ("id")
 );

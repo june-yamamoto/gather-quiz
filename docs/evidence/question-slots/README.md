@@ -9,6 +9,8 @@
 | 03-mobile-edit.png | 390px幅で保存済み選択肢の再編集 |
 | 04-question.png | 本番の番号付き選択肢表示 |
 | 05-storybook.png | Storybookで保存した4択をプレビュー |
+| 08-correct-answer.png | 正解選択肢の番号・内容と従来の解答文を併記 |
+| correct-390.png / correct-1280.png | 正解カード・長文の解説・画像の併用 |
 
 再生成（PowerShell、リポジトリルート）:
 

@@ -55,3 +55,10 @@ export function validateChoiceCount(value: unknown, questionType?: QuestionSlot[
   if ((questionType === 'normal' && value !== 0) || (questionType === 'choice' && value === 0)) throw new BadRequestError('大会で指定された出題形式を使用してください。');
   return value;
 }
+
+/** 通常問題への混入や存在しない選択肢の指定を拒否する。 */
+export function validateCorrectChoice(value: unknown, count: number): number | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value >= count) throw new BadRequestError('正解は存在する選択肢から1つ選んでください。');
+  return value;
+}

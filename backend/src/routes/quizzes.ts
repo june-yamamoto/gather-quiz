@@ -4,7 +4,7 @@ import { prisma } from '../db';
 import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
-import { assignedSlot, validateChoices, validateChoiceCount } from '../question-slots';
+import { assignedSlot, validateChoices, validateChoiceCount, validateCorrectChoice } from '../question-slots';
 const router = Router();
 
 /**
@@ -61,18 +61,18 @@ router.post(
       throw new BadRequestError('Question text, image or URL is required');
     }
 
-    if (!hasQuizContent(answerText, answerImage, answerLink)) {
-      throw new BadRequestError('Answer text, image or URL is required');
-    }
 
     const slot = await assignedSlot(tournamentId, participantId, order ?? 0, point);
     const choiceCount = validateChoiceCount(req.body.choiceCount ?? 0, slot.questionType);
     const choices = validateChoices(req.body.choices, choiceCount);
+    const correctChoiceIndex = validateCorrectChoice(req.body.correctChoiceIndex, choiceCount);
+    if (correctChoiceIndex === null && !hasQuizContent(answerText, answerImage, answerLink)) throw new BadRequestError('Answer text, image or URL is required');
     const quiz = await prisma.quiz.create({
       data: {
         label: slot.label,
         choiceCount,
         choices: JSON.stringify(choices),
+        correctChoiceIndex,
         point,
         order: order || 0,
         questionText,
@@ -160,19 +160,19 @@ router.put(
     if (!hasQuizContent(nextQuestionText, nextQuestionImage, nextQuestionLink)) {
       throw new BadRequestError('Question text, image or URL is required');
     }
-    if (!hasQuizContent(nextAnswerText, nextAnswerImage, nextAnswerLink)) {
-      throw new BadRequestError('Answer text, image or URL is required');
-    }
 
     const slot = await assignedSlot(quiz.tournamentId, quiz.participantId, quiz.order, point ?? quiz.point);
     const choiceCount = validateChoiceCount(req.body.choiceCount ?? quiz.choiceCount, slot.questionType);
     const choices = validateChoices(req.body.choices === undefined ? (choiceCount ? JSON.parse(quiz.choices) : []) : req.body.choices, choiceCount);
+    const correctChoiceIndex = validateCorrectChoice(req.body.correctChoiceIndex === undefined ? (choiceCount ? quiz.correctChoiceIndex : null) : req.body.correctChoiceIndex, choiceCount);
+    if (correctChoiceIndex === null && !hasQuizContent(nextAnswerText, nextAnswerImage, nextAnswerLink)) throw new BadRequestError('Answer text, image or URL is required');
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
       data: {
         label: slot.label,
         choiceCount,
         choices: JSON.stringify(choices),
+        correctChoiceIndex,
         point,
         questionText,
         questionImage,

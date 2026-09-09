@@ -3,7 +3,7 @@ import { safeMediaUrl } from '../helpers/media';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Alert } from '@mui/material';
+import { Container, Typography, Box, Grid, CircularProgress, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Alert, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { pathToParticipantDashboard } from '../helpers/route-helpers';
 import { uploadApiClient } from '../api/UploadApiClient';
@@ -46,6 +46,7 @@ const QuizCreatorPage = () => {
   const [point, setPoint] = useState(initialPoint);
   const [genre, setGenre] = useState('');
   const [choices, setChoices] = useState<string[]>([]);
+  const [correctChoiceIndex, setCorrectChoiceIndex] = useState<number | null>(null);
   const [editOrder, setEditOrder] = useState<number | null>(null);
   
   const [questionText, setQuestionText] = useState('');
@@ -76,6 +77,9 @@ const QuizCreatorPage = () => {
   const [selectedChoiceCount, setChoiceCount] = useState(0);
   const choiceCount = slot?.questionType === 'normal' ? 0 : slot?.questionType === 'choice' ? (selectedChoiceCount || 4) : selectedChoiceCount;
 
+  // 選択肢を減らしたときに、消えた選択肢を正解として残さない。
+  useEffect(() => { setCorrectChoiceIndex(prev => prev !== null && prev >= choiceCount ? null : prev); }, [choiceCount]);
+
   // Fetch Quiz Info if editing
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +94,7 @@ const QuizCreatorPage = () => {
           setPoint(quiz.point);
           setEditOrder(quiz.order);
           setChoices(quiz.choices || []);
+          setCorrectChoiceIndex(quiz.correctChoiceIndex ?? null);
           setChoiceCount(quiz.choiceCount || 0);
           setGenre(quiz.genre || '');
           setQuestionText(quiz.questionText || '');
@@ -129,7 +134,7 @@ const QuizCreatorPage = () => {
       setSaveError('問題には文章・画像・動画・音声・URLのいずれかが必要です。');
       return;
     }
-    if (!answerText.trim() && !answerImageFile && !existingAnswerImageUrl && !answerMediaFile && !answerLink.trim()) {
+    if (correctChoiceIndex === null && !answerText.trim() && !answerImageFile && !existingAnswerImageUrl && !answerMediaFile && !answerLink.trim()) {
       setSaveError('解答には文章・画像・動画・音声・URLのいずれかが必要です。');
       return;
     }
@@ -163,6 +168,7 @@ const QuizCreatorPage = () => {
         point: Number(tournament.points.split(',')[editOrder ?? order]) || point,
         order: editOrder ?? order,
         choiceCount,
+        correctChoiceIndex: choiceCount ? correctChoiceIndex : null,
         choices: choiceCount ? choices.slice(0, choiceCount).map(c => c.trim()) : [],
         genre: genre || null,
         questionText,
@@ -311,7 +317,13 @@ const QuizCreatorPage = () => {
               <MediaAttachmentField label="問題" url={questionLink} file={questionMediaFile} onUrlChange={setQuestionLink} onFileChange={setQuestionMediaFile} />
               {choiceCount > 0 && <Box sx={{ mt: 2 }}>
                 <Typography variant="h6" gutterBottom>選択肢（{choiceCount}択）</Typography>
-                {Array.from({ length: choiceCount }, (_, index) => <Input key={index} label={`選択肢${index + 1}`} required fullWidth multiline inputProps={{ maxLength: 100 }} helperText={`${(choices[index] || '').length}/100文字`} error={(choices[index] || '').length > 100} value={choices[index] || ''} onChange={e => setChoices(prev => Array.from({ length: choiceCount }, (_, i) => i === index ? e.target.value : prev[i] || ''))} sx={{ mb: 2 }} />)}
+                <Typography variant="body2" color="text.secondary">正解を1つ選んでください。解答文は別途入力できます。</Typography>
+                <RadioGroup aria-label="正解の選択肢" value={correctChoiceIndex ?? ''} onChange={e => setCorrectChoiceIndex(Number(e.target.value))}>
+                {Array.from({ length: choiceCount }, (_, index) => <Box key={index}>
+                  <FormControlLabel value={index} control={<Radio />} label={`選択肢${index + 1}を正解にする`} />
+                  <Input key={index} label={`選択肢${index + 1}`} required fullWidth multiline inputProps={{ maxLength: 100 }} helperText={`${(choices[index] || '').length}/100文字`} error={(choices[index] || '').length > 100} value={choices[index] || ''} onChange={e => setChoices(prev => Array.from({ length: choiceCount }, (_, i) => i === index ? e.target.value : prev[i] || ''))} sx={{ mb: 2 }} /></Box>)}
+                </RadioGroup>
+                {correctChoiceIndex !== null && <Button onClick={() => setCorrectChoiceIndex(null)}>正解の指定を解除</Button>}
               </Box>}
             </StyledSection>
           </Grid>
@@ -320,7 +332,7 @@ const QuizCreatorPage = () => {
               <Typography variant="h6" gutterBottom>
                 解答の作成
               </Typography>
-              {choiceCount > 0 && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>正解の選択肢番号や内容、解説を解答欄に入力してください。</Typography>}
+              {choiceCount > 0 && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>選択した正解と一緒に表示する解説などを自由に入力できます。正解を選択した場合、解答文は省略できます。</Typography>}
               <Input
                 label="解答文"
                 fullWidth

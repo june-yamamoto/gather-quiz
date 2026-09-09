@@ -14,6 +14,8 @@ const initialSchemaHash = checksum(readFileSync(join(__dirname, 'schema.initial.
 const questionSlotsMigration = readFileSync(join(__dirname, 'migration.question-slots.sql'), 'utf8');
 const questionSlotsSchemaHash = checksum(readFileSync(join(__dirname, 'schema.question-slots.sql'), 'utf8'));
 const credentialsMigration = readFileSync(join(__dirname, 'migration.participant-credentials.sql'), 'utf8');
+const credentialsSchemaHash = checksum(readFileSync(join(__dirname, 'schema.participant-credentials.sql'), 'utf8'));
+const correctChoiceMigration = readFileSync(join(__dirname, 'migration.correct-choice.sql'), 'utf8');
 const s3 = new S3Client({});
 
 /** 識別子はエスケープし、値は常にプレースホルダーを使う。 */
@@ -74,13 +76,16 @@ export async function handler(event: Operation) {
       if (applied.rowCount === 0) {
         await db.query(schemaSql);
         await db.query('INSERT INTO "_GatherQuizSchema" (hash) VALUES ($1)', [schemaHash]);
-      } else if (applied.rowCount === 1 && [initialSchemaHash, questionSlotsSchemaHash].includes(applied.rows[0].hash)) {
+      } else if (applied.rowCount === 1 && [initialSchemaHash, questionSlotsSchemaHash, credentialsSchemaHash].includes(applied.rows[0].hash)) {
         if (applied.rows[0].hash === initialSchemaHash) await db.query(questionSlotsMigration);
-        await db.query(credentialsMigration);
-        const participants = await db.query('SELECT id, password FROM "Participant"');
-        for (const participant of participants.rows) {
-          await db.query('UPDATE "Participant" SET password=$1 WHERE id=$2', [await hashPassword(participant.password), participant.id]);
+        if (applied.rows[0].hash !== credentialsSchemaHash) {
+          await db.query(credentialsMigration);
+          const participants = await db.query('SELECT id, password FROM "Participant"');
+          for (const participant of participants.rows) {
+            await db.query('UPDATE "Participant" SET password=$1 WHERE id=$2', [await hashPassword(participant.password), participant.id]);
+          }
         }
+        await db.query(correctChoiceMigration);
         await db.query('UPDATE "_GatherQuizSchema" SET hash=$1', [schemaHash]);
       } else if (applied.rowCount !== 1 || applied.rows[0].hash !== schemaHash) {
         throw new Error('既存DBに対する明示的なマイグレーションが必要です');
