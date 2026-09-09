@@ -20,6 +20,10 @@ for (const width of [390, 1280]) {
     await page.goto(`/gather/tournaments/${tournament.id}/admin`);
     await page.getByLabel('参加チーム数').fill('2');
     await page.getByLabel('チーム1の名前').fill('赤チーム');
+    await page.getByLabel('チーム2の名前').fill('赤チーム');
+    await page.getByRole('button', { name: 'この内容で大会を開始する' }).click();
+    await expect(page.getByRole('alert')).toContainText('チーム名は重複しないようにしてください。');
+    await expect(page.getByLabel('チーム1の名前')).toHaveValue('赤チーム');
     await page.getByLabel('チーム2の名前').fill('青チーム');
     await page.getByRole('button', { name: 'この内容で大会を開始する' }).click();
     await expect(page).toHaveURL(`/gather/tournaments/${tournament.id}/board`);
