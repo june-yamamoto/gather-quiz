@@ -1,4 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Alert } from '@mui/material';
+import { TeamFields } from '../components/TeamFields';
 import { Container, Typography, Box, TableHead, TableRow, TableCell, TableBody, CircularProgress, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +19,9 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 const OrganizerDashboardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
+  const [teamNames, setTeamNames] = useState<string[] | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState('');
   const portalUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
   const {
@@ -33,14 +39,18 @@ const OrganizerDashboardPage = () => {
     enabled: !!tournamentId, // tournamentId が存在する場合のみクエリを実行
   });
 
+  /** チーム設定と開始を一度に保存し、失敗時には入力を保持する。 */
   const handleStartTournament = async () => {
-    if (!tournamentId) return;
+    if (!tournamentId || starting) return;
+    setStarting(true);
+    setStartError('');
     try {
-      await tournamentApiClient.start(tournamentId);
+      await tournamentApiClient.start(tournamentId, teamNames ?? status?.teams?.map(team => team.name) ?? []);
       navigate(pathToQuizBoard(tournamentId));
     } catch (error) {
-      console.error(error);
-      alert('大会の開始に失敗しました。');
+      setStartError(error instanceof Error ? error.message : '大会の開始に失敗しました。');
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -84,7 +94,7 @@ const OrganizerDashboardPage = () => {
           </Typography>
         </Box>
         <Box sx={{ mt: 2 }}>
-          <Typography sx={{ mb: 2 }}>参加チーム：{status?.teams?.map(team => team.name).join('、') || 'スコア管理なし'}（開始前に大会概要から設定できます）</Typography>
+          {isStarted && <Typography sx={{ mb: 2 }}>参加チーム：{status?.teams?.map(team => team.name).join('、') || 'スコア管理なし'}</Typography>}
           <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined">
             大会概要を編集する
           </Button>
@@ -115,7 +125,12 @@ const OrganizerDashboardPage = () => {
         </Table>
       </TableContainer>
 
-      <Box sx={{ mt: 3, textAlign: 'center' }}>
+      <Box component="form" onSubmit={event => { event.preventDefault(); void handleStartTournament(); }} sx={{ mt: 3, textAlign: 'center' }}>
+        {!isStarted && <Card sx={{ mb: 3, textAlign: 'left' }}>
+          <Typography sx={{ mb: 2 }}>大会を開始する前に、当日の参加チームを設定してください。開始ボタンで確定します。</Typography>
+          <TeamFields names={teamNames ?? status?.teams?.map(team => team.name) ?? []} onChange={setTeamNames} disabled={starting} />
+        </Card>}
+        {startError && <Alert severity="error" sx={{ mb: 2 }}>{startError}</Alert>}
         {isStarted ? (
           <Button
             variant="contained"
@@ -127,7 +142,7 @@ const OrganizerDashboardPage = () => {
              問題ボードへ移動する
           </Button>
         ) : (
-          <Button variant="contained" color="primary" size="large" onClick={handleStartTournament}>
+          <Button variant="contained" color="primary" size="large" type="submit" disabled={starting}>
             この内容で大会を開始する
           </Button>
         )}

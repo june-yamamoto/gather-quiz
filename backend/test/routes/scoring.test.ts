@@ -17,6 +17,16 @@ async function setup() {
 }
 afterEach(async () => { for (const id of ids.splice(0)) { await prisma.quiz.deleteMany({ where: { tournamentId: id } }); await prisma.participant.deleteMany({ where: { tournamentId: id } }); await prisma.tournament.delete({ where: { id } }); } });
 describe('チーム採点と結果発表', () => {
+  it('開始時にチームを保存し、不正な名前では開始せず開始後の変更を拒否する', async () => {
+    const { base } = await setup();
+    expect((await request(app).patch(`${base}/start`).send({ teamNames: ['同名', '同名'] })).status).toBe(400);
+    expect((await request(app).get(base)).body.status).toBe('pending');
+    const started = await request(app).patch(`${base}/start`).send({ teamNames: ['当日のチーム'] });
+    expect(started.status).toBe(200);
+    expect(started.body.teams.map((team: { name: string }) => team.name)).toEqual(['当日のチーム']);
+    expect((await request(app).patch(`${base}/start`).send({ teamNames: ['変更'] })).status).toBe(409);
+    expect((await request(app).get(base)).body.teams).toEqual(started.body.teams);
+  });
   it('チームは作問者と独立し、名前の長さ・重複を検証する', async () => {
     const { t, base } = await setup();
     expect(t.teams).toHaveLength(2);
