@@ -15,6 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
+export const LabelAndGenre: Story = { name: 'ラベルとジャンル・長い名称', args: { label: '音楽・声優に関する長い問題ラベル', genre: 'アニメーションとゲームの音楽', point: 100 } };
 export const Mobile: Story = { parameters: mobile };
 export const LongText: Story = { args: { questionText: quizArgs.questionText.repeat(20) } };
 export const Preview: Story = { args: { showButton: false } };
