@@ -1,0 +1,58 @@
+import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+
+test('参加者が表示名・ID・短いパスワードを設定して再ログインできる', async ({ page, request }) => {
+  const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: { name: '参加者登録の検証', password: 'test-only', points: '10', questionsPerParticipant: 1 } })).json();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/gather/tournaments/${tournament.id}/register`);
+  await expect(page.getByText(/3〜20文字の半角英数字/)).toBeVisible();
+  await expect(page.getByText(/半角英数字4〜6文字/)).toBeVisible();
+  await page.getByLabel('表示名').fill('あおい');
+  await page.getByLabel(/^ID/).fill('aoi_quiz');
+  await page.getByLabel(/^パスワード/).fill('123456');
+  await expect(page.getByLabel(/^パスワード/)).toHaveAttribute('type', 'password');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  if (process.env.CAPTURE_SLOTS_EVIDENCE) await page.screenshot({ path: resolve('docs/evidence/question-slots/06-registration.png'), fullPage: true });
+  const registered = page.waitForResponse(r => r.request().method() === 'POST' && r.url().endsWith('/participants'));
+  await page.getByRole('button', { name: 'この内容で参加する' }).click();
+  const participant = await (await registered).json();
+  expect(participant).not.toHaveProperty('password');
+  await expect(page.getByText('登録完了！')).toBeVisible();
+  await expect(page.getByText('123456', { exact: true })).toHaveCount(0);
+  await page.goto(`/gather/tournaments/${tournament.id}`);
+  await page.getByRole('button', { name: '参加者としてログイン', exact: true }).click();
+  await page.getByLabel(/^ID/).fill('AOI_QUIZ');
+  await page.getByLabel(/^パスワード/).fill('123456');
+  await page.getByRole('button', { name: 'ログイン', exact: true }).click();
+  await expect(page).toHaveURL(`/gather/tournaments/${tournament.id}/participants/${participant.id}`);
+});
+
+test('参加者が選択肢数と形式を変更でき、100文字を超えて入力できない', async ({ page, request }) => {
+  const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: { name: '形式変更', password: 'test-only', points: '10', questionsPerParticipant: 1 } })).json();
+  const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: 'あおい', loginId: 'aoi', password: '1234' } })).json();
+  await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}/quizzes/new?point=10`);
+  await page.getByLabel('出題形式', { exact: true }).click();
+  await page.getByRole('option', { name: '選択問題', exact: true }).click();
+  await page.getByLabel(/^選択肢数/).fill('2');
+  await page.getByRole('textbox', { name: '選択肢1', exact: true }).fill('あ'.repeat(101));
+  await expect(page.getByRole('textbox', { name: '選択肢1', exact: true })).toHaveValue('あ'.repeat(100));
+  await page.getByRole('textbox', { name: '選択肢2', exact: true }).fill('別の選択肢');
+  await page.getByLabel('問題文', { exact: true }).fill('問題');
+  await page.getByLabel('解答文', { exact: true }).fill('1');
+  const saved = page.waitForResponse(r => r.url().endsWith('/api/quizzes') && r.request().method() === 'POST');
+  await page.getByRole('button', { name: 'この内容で問題を保存する' }).click();
+  const quiz = await (await saved).json();
+  expect(quiz.choiceCount).toBe(2);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto(`/gather/quizzes/${quiz.id}`);
+  const choices = page.getByRole('list', { name: '選択肢' });
+  expect((await choices.boundingBox())!.width).toBeGreaterThan(1500);
+  if (process.env.CAPTURE_SLOTS_EVIDENCE) await page.screenshot({ path: resolve('docs/evidence/question-slots/07-wide.png'), fullPage: true });
+  await page.goto(`/gather/tournaments/${tournament.id}/participants/${participant.id}/quizzes/new?edit=${quiz.id}`);
+  await page.getByLabel('出題形式', { exact: true }).click();
+  await page.getByRole('option', { name: '通常問題', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: '選択肢1', exact: true })).toHaveCount(0);
+  const updated = page.waitForResponse(r => r.url().endsWith(`/api/quizzes/${quiz.id}`) && r.request().method() === 'PUT');
+  await page.getByRole('button', { name: 'この内容で更新する' }).click();
+  expect(await (await updated).json()).toMatchObject({ choiceCount: 0, choices: [] });
+});

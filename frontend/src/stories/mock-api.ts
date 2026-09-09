@@ -57,7 +57,7 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
     http.post('*/api/quizzes', async ({ request }) => {
       const data = await body(request);
       const slot = tournament.questionSlots[Number(data.order)] || { label: '', choiceCount: 0 };
-      const quiz = { ...controlledQuiz(args), ...data, ...slot, id: `q-${quizzes.length + 1}` };
+      const quiz = { ...controlledQuiz(args), ...data, label: slot.label, id: `q-${quizzes.length + 1}` };
       quizzes.push(quiz);
       return HttpResponse.json(quiz, { status: 201 });
     }),
@@ -73,13 +73,13 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
     http.get('*/api/tournaments/:id', () => HttpResponse.json(board())),
     http.post('*/api/tournaments/:id/participants/login', async ({ request }) => {
       const data = await body(request);
-      return HttpResponse.json(participants.find((participant) => participant.name === data.name) || participants[0]);
+      return HttpResponse.json(participants.find((participant) => participant.loginId === data.loginId) || participants[0]);
     }),
     http.post('*/api/tournaments/:id/participants', async ({ request }) => {
       const data = await body(request);
-      const participant = { ...participantFixture, id: `p-${participants.length + 1}`, name: typeof data.name === 'string' ? data.name : '参加者' };
+      const participant = { ...participantFixture, id: `p-${participants.length + 1}`, name: typeof data.name === 'string' ? data.name : '参加者', loginId: typeof data.loginId === 'string' ? data.loginId.toLowerCase() : 'demo' };
       participants.push(participant);
-      return HttpResponse.json({ ...participant, password: 'demo-only' }, { status: 201 });
+      return HttpResponse.json(participant, { status: 201 });
     }),
     http.post('*/api/tournaments/:id/login', () => HttpResponse.json({ success: true })),
     http.post('*/api/tournaments', async ({ request }) => {

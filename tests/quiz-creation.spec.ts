@@ -17,7 +17,7 @@ test.beforeAll(async ({ request }) => {
   tournamentId = tournament.id;
 
   const participantRes = await request.post(`http://localhost:3000/api/tournaments/${tournamentId}/participants`, {
-    data: { name: 'QuizCreator' },
+    data: { name: 'QuizCreator', loginId: 'user1', password: '123456' },
   });
   const participant = await participantRes.json();
   participantId = participant.id;

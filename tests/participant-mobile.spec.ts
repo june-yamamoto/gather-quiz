@@ -8,8 +8,10 @@ for (const width of [320, 375]) {
       name: 'スマートフォン入力テスト', password: 'test-only', questionsPerParticipant: 1, points: '10', regulation: '一人一問です。',
     } })).json();
     await page.goto(pathToTournamentRegisterParticipant(tournament.id));
-    await page.getByLabel('あなたの名前').fill('長い名前の参加者あおい');
-    await page.getByRole('button', { name: 'この名前で参加する' }).click();
+    await page.getByLabel('表示名').fill('長い名前の参加者あおい');
+    await page.getByLabel(/^ID/).fill('user1');
+    await page.getByLabel(/^パスワード/).fill('123456');
+    await page.getByRole('button', { name: 'この内容で参加する' }).click();
     await page.getByRole('button', { name: 'ダッシュボードへ移動する' }).click();
     await page.getByRole('link', { name: '作成する', exact: true }).click();
     const question = page.getByLabel('問題文');

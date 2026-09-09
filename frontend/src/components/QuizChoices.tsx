@@ -5,7 +5,7 @@ import { alpha } from '@mui/material/styles';
 export const QuizChoices = ({ choices }: { choices: string[] }) => (
   <Box component="ol" aria-label="選択肢" sx={{
     display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' },
-    gap: '2vmin', width: '100%', maxWidth: 1100, listStyle: 'none', m: 0, px: '2vmin', py: '2vmin', boxSizing: 'border-box',
+    gap: '2vmin', width: '100%', maxWidth: '100%', listStyle: 'none', m: 0, px: '2vmin', py: '2vmin', boxSizing: 'border-box',
   }}>
     {choices.map((choice, index) => (
       <Box component="li" key={index} sx={theme => ({

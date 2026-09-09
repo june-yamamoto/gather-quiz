@@ -1,3 +1,5 @@
+import { hashPassword } from '../password';
+import { validateRegistration, loginParticipant } from '../participant-credentials';
 import { Router, Request, Response } from 'express';
 import { prisma } from '../db';
 import {
@@ -10,7 +12,7 @@ import {
   pathToTournamentStart,
   pathToTournamentBoard,
 } from '../api-helper';
-import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors';
+import { BadRequestError, NotFoundError, UnauthorizedError, HttpError } from '../errors/HttpErrors';
 import { readQuestionSlots, validateQuestionSlots } from '../question-slots';
 import { Tournament } from '../model/Tournament';
 import { Participant } from '../model/Participant';
@@ -98,15 +100,17 @@ router.post(
   tournamentsRouterPath(pathToParticipants(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const id = pathParameter(req.params, 'id');
-    const { name } = req.body;
-
-    // TODO: パスワードは将来的にユーザーが設定できるようにするが、現在はランダムな文字列を生成して仮対応する
-    const password = Math.random().toString(36).slice(-8);
+    const input = validateRegistration(req.body.name, req.body.loginId, req.body.password);
+    const legacy = await prisma.participant.findMany({ where: { tournamentId: id, loginId: null }, select: { name: true } });
+    if (legacy.some(p => p.name.toLowerCase() === input.loginId)) throw new HttpError(409, 'そのIDは既に使用されています。');
+    const name = input.name;
+    const password = await hashPassword(input.password);
 
     const participant = await prisma.participant.create({
       data: {
         name,
         password,
+        loginId: input.loginId,
         tournament: {
           connect: {
             id,
@@ -134,26 +138,8 @@ router.post(
   tournamentsRouterPath(pathToParticipantLogin(':id')),
   asyncHandler(async (req: Request, res: Response) => {
     const id = pathParameter(req.params, 'id');
-    const { name, password } = req.body;
-
-    const participant = await prisma.participant.findUnique({
-      where: {
-        tournamentId_name: {
-          tournamentId: id,
-          name: name,
-        },
-      },
-    });
-
-    if (!participant) {
-      throw new NotFoundError('Participant not found');
-    }
-
-    if (participant.password === password) {
-      res.json(new Participant(participant));
-    } else {
-      throw new UnauthorizedError('Invalid password');
-    }
+    const participant = await loginParticipant(id, req.body.loginId ?? req.body.name, req.body.password);
+    res.json(new Participant(participant));
   })
 );
 

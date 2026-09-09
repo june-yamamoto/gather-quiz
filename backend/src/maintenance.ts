@@ -1,3 +1,4 @@
+import { hashPassword } from './password';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -11,6 +12,8 @@ const schemaSql = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 const schemaHash = checksum(schemaSql);
 const initialSchemaHash = checksum(readFileSync(join(__dirname, 'schema.initial.sql'), 'utf8'));
 const questionSlotsMigration = readFileSync(join(__dirname, 'migration.question-slots.sql'), 'utf8');
+const questionSlotsSchemaHash = checksum(readFileSync(join(__dirname, 'schema.question-slots.sql'), 'utf8'));
+const credentialsMigration = readFileSync(join(__dirname, 'migration.participant-credentials.sql'), 'utf8');
 const s3 = new S3Client({});
 
 /** 識別子はエスケープし、値は常にプレースホルダーを使う。 */
@@ -71,9 +74,14 @@ export async function handler(event: Operation) {
       if (applied.rowCount === 0) {
         await db.query(schemaSql);
         await db.query('INSERT INTO "_GatherQuizSchema" (hash) VALUES ($1)', [schemaHash]);
-      } else if (applied.rowCount === 1 && applied.rows[0].hash === initialSchemaHash) {
-        await db.query(questionSlotsMigration);
-        await db.query('UPDATE "_GatherQuizSchema" SET hash=$1 WHERE hash=$2', [schemaHash, initialSchemaHash]);
+      } else if (applied.rowCount === 1 && [initialSchemaHash, questionSlotsSchemaHash].includes(applied.rows[0].hash)) {
+        if (applied.rows[0].hash === initialSchemaHash) await db.query(questionSlotsMigration);
+        await db.query(credentialsMigration);
+        const participants = await db.query('SELECT id, password FROM "Participant"');
+        for (const participant of participants.rows) {
+          await db.query('UPDATE "Participant" SET password=$1 WHERE id=$2', [await hashPassword(participant.password), participant.id]);
+        }
+        await db.query('UPDATE "_GatherQuizSchema" SET hash=$1', [schemaHash]);
       } else if (applied.rowCount !== 1 || applied.rows[0].hash !== schemaHash) {
         throw new Error('既存DBに対する明示的なマイグレーションが必要です');
       }

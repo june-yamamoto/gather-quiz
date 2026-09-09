@@ -34,7 +34,11 @@ model Participant {
   updatedAt    DateTime   @updatedAt
   quizzes      Quiz[]
 
-  @@unique([tournamentId, name])
+  loginId String?
+  loginAttempts Int @default(0)
+  loginWindowStart DateTime?
+
+  @@unique([tournamentId, loginId])
 }
 
 model Quiz {

@@ -4,7 +4,7 @@ import { prisma } from '../db';
 import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
 import { Quiz } from '../model/Quiz';
-import { assignedSlot, validateChoices } from '../question-slots';
+import { assignedSlot, validateChoices, validateChoiceCount } from '../question-slots';
 const router = Router();
 
 /**
@@ -66,10 +66,12 @@ router.post(
     }
 
     const slot = await assignedSlot(tournamentId, participantId, order ?? 0, point);
-    const choices = validateChoices(req.body.choices, slot.choiceCount);
+    const choiceCount = validateChoiceCount(req.body.choiceCount ?? 0);
+    const choices = validateChoices(req.body.choices, choiceCount);
     const quiz = await prisma.quiz.create({
       data: {
-        ...slot,
+        label: slot.label,
+        choiceCount,
         choices: JSON.stringify(choices),
         point,
         order: order || 0,
@@ -163,11 +165,13 @@ router.put(
     }
 
     const slot = await assignedSlot(quiz.tournamentId, quiz.participantId, quiz.order, point ?? quiz.point);
-    const choices = validateChoices(req.body.choices === undefined ? JSON.parse(quiz.choices) : req.body.choices, slot.choiceCount);
+    const choiceCount = validateChoiceCount(req.body.choiceCount ?? quiz.choiceCount);
+    const choices = validateChoices(req.body.choices === undefined ? (choiceCount ? JSON.parse(quiz.choices) : []) : req.body.choices, choiceCount);
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
       data: {
-        ...slot,
+        label: slot.label,
+        choiceCount,
         choices: JSON.stringify(choices),
         point,
         questionText,

@@ -16,8 +16,10 @@ export const Mobile: Story = { name: 'スマートフォン', parameters: mobile
 export const Registered: Story = { name: '登録完了', parameters: mobile,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText(/あなたの名前/), 'あおい');
-    await userEvent.click(canvas.getByRole('button', { name: 'この名前で参加する' }));
+    await userEvent.type(canvas.getByLabelText(/表示名/), 'あおい');
+    await userEvent.type(canvas.getByLabelText(/^ID/), 'aoi');
+    await userEvent.type(canvas.getByLabelText(/^パスワード/), '123456');
+    await userEvent.click(canvas.getByRole('button', { name: 'この内容で参加する' }));
     await expect(await canvas.findByText('登録完了！')).toBeVisible();
   },
 };

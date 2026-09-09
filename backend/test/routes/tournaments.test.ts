@@ -1,3 +1,4 @@
+import { hashPassword } from '../../src/password';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
@@ -82,7 +83,7 @@ describe('大会API', () => {
 
   describe('POST /:id/participants (参加者作成)', () => {
     it('新しい参加者が正しく作成されること', async () => {
-      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '新規参加者' });
+      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '新規参加者', loginId: 'newuser', password: '1234' });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.name).toBe('新規参加者');
@@ -94,19 +95,19 @@ describe('大会API', () => {
       const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({});
 
       // Prismaのバリデーションエラーは500を返すため、それを検証する
-      expect(res.statusCode).toBe(500);
+      expect(res.statusCode).toBe(400);
     });
 
     it('同じ大会内で重複する参加者名の場合、エラーを返すこと', async () => {
       await prisma.participant.create({
         data: {
-          name: '重複参加者',
+          name: '重複参加者', loginId: 'duplicate',
           password: 'pw',
           tournamentId: tournament.id,
         },
       });
 
-      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '重複参加者' });
+      const res = await request(app).post(`/tournaments/${tournament.id}/participants`).send({ name: '重複参加者', loginId: 'duplicate', password: '1234' });
 
       // Prismaのユニーク制約違反は409を返すため、それを検証する
       expect(res.statusCode).toBe(409);
@@ -119,7 +120,7 @@ describe('大会API', () => {
       await prisma.participant.create({
         data: {
           name: 'LoginUser',
-          password: 'loginpw',
+          password: await hashPassword('loginpw'),
           tournamentId: tournament.id,
         },
       });
@@ -137,7 +138,7 @@ describe('大会API', () => {
       await prisma.participant.create({
         data: {
           name: 'LoginUser2',
-          password: 'loginpw2',
+          password: await hashPassword('loginpw2'),
           tournamentId: tournament.id,
         },
       });
@@ -147,7 +148,7 @@ describe('大会API', () => {
         .send({ name: 'LoginUser2', password: 'wrongpw' });
 
       expect(res.statusCode).toBe(401);
-      expect(res.body.error).toBe('Invalid password');
+      expect(res.body.error).toBe('IDまたはパスワードが違います。');
     });
 
     it('存在しない参加者名の場合、404エラーを返すこと', async () => {
@@ -155,8 +156,8 @@ describe('大会API', () => {
         .post(`/tournaments/${tournament.id}/participants/login`)
         .send({ name: 'NonexistentUser', password: 'pw' });
 
-      expect(res.statusCode).toBe(404);
-      expect(res.body.error).toBe('Participant not found');
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe('IDまたはパスワードが違います。');
     });
   });
 

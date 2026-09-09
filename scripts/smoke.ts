@@ -49,8 +49,8 @@ async function main() {
       tournamentId = tournament.id;
       assert.ok(tournamentId);
       await api(`/tournaments/${tournamentId}/login`, 'POST', { password });
-      const participant = await api(`/tournaments/${tournamentId}/participants`, 'POST', { name: '動作確認' });
-      await api(`/tournaments/${tournamentId}/participants/login`, 'POST', { name: participant.name, password: participant.password });
+      const participant = await api(`/tournaments/${tournamentId}/participants`, 'POST', { name: '動作確認', loginId: 'smoke-user', password: '123456' });
+      await api(`/tournaments/${tournamentId}/participants/login`, 'POST', { loginId: 'smoke-user', password: '123456' });
       const image = await api('/upload/image', 'POST', { tournamentId, participantId: participant.id, fileName: 'smoke.png', fileType: 'image/png' });
       const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jT1kAAAAASUVORK5CYII=', 'base64');
       const put = await fetch(image.signedUrl, { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: png });
