@@ -1,3 +1,4 @@
+import { parseTeams, type Team } from '../models/Team';
 import axios, { type AxiosInstance } from 'axios';
 import { Tournament } from '../models/Tournament';
 import { Participant } from '../models/Participant';
@@ -47,11 +48,12 @@ class TournamentApiClient {
    * @returns {Promise<any>} 大会のステータス情報
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  public async getStatus(id: string): Promise<{ tournamentName: string; status: string; participants: Participant[] }> {
+  public async getStatus(id: string): Promise<{ tournamentName: string; status: string; participants: Participant[]; teams?: Team[] }> {
     try {
       const response = await this.client.get(`/tournaments/${id}/status`);
       return {
         tournamentName: response.data.tournamentName,
+        teams: parseTeams(response.data.teams),
         status: response.data.status,
         participants: response.data.participants.map(Participant.fromApi),
       };

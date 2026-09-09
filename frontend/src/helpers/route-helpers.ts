@@ -121,3 +121,6 @@ export const pathToAnswerDisplay = (quizId: string) => [ROOT_PATH, SEGMENTS.QUIZ
  * @returns {string} エラーページへのパス
  */
 export const pathToErrorPage = () => `*`;
+
+/** 終了後の結果発表ページ。 */
+export const pathToTournamentResults = (id: string) => pathToTournamentPortal(id) + '/results';

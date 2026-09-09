@@ -1,3 +1,4 @@
+import { TeamFields } from './TeamFields';
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import { Grid, Box, Typography, MenuItem } from '@mui/material';
@@ -22,6 +23,7 @@ export type TournamentFormData = {
   questionSlots: QuestionSlot[];
   regulation: string;
   genres: string;
+  teamNames: string[];
   password?: string;
 };
 
@@ -40,11 +42,13 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
   );
   const [regulation, setRegulation] = useState(tournament?.regulation || '');
   const [genres, setGenres] = useState(tournament?.genres || '');
+  const [teamNames, setTeamNames] = useState<string[]>(tournament?.teams?.map(team => team.name) || []);
   const [slots, setSlots] = useState<QuestionSlot[]>(tournament?.questionSlots || []);
 
   useEffect(() => {
     if (tournament) {
       setName(tournament.name);
+      setTeamNames(tournament.teams.map(team => team.name));
       setSlots(tournament.questionSlots);
       setQuestionsPerParticipant(tournament.questionsPerParticipant);
       // カンマ区切りの文字列を配列に変換、空の場合は空配列
@@ -91,6 +95,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
       questionSlots: pointValues.map((_, i) => ({ ...slots[i], label: (slots[i]?.label || '').trim(), choiceCount: slots[i]?.choiceCount || 0 })),
       regulation,
       genres,
+      teamNames,
       ...(password && { password }),
     };
     onSubmit(formData);
@@ -124,6 +129,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
           />
         </Grid>
         
+        <Grid item xs={12}><TeamFields names={teamNames} onChange={setTeamNames} disabled={!!tournament && tournament.status !== 'pending'} /></Grid>
         {/* 配点が同じでも問題順ごとに別の枠として設定する。 */}
         <Grid item xs={12}>
             <Typography variant="h6" gutterBottom>参加者に割り当てる問題</Typography>

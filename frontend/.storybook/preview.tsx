@@ -7,6 +7,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { CssBaseline } from '@mui/material';
 import type { PropsWithChildren } from 'react';
+import type { RequestHandler } from 'msw';
 import { createMockApi, type MockScenario } from '../src/stories/mock-api';
 import App from '../src/App';
 import { Layout } from '../src/components/Layout';
@@ -25,7 +26,7 @@ initialize({
 });
 
 /** Story間のキャッシュ混入を防ぎ、失敗・読み込み状態を再現可能にする。 */
-const StoryProviders = ({ children, snapshot, scenario }: PropsWithChildren<{ snapshot: string; scenario: MockScenario }>) => {
+const StoryProviders = ({ children, snapshot, scenario, handlers }: PropsWithChildren<{ snapshot: string; scenario: MockScenario; handlers?: RequestHandler[] }>) => {
   const runtime = useMemo(() => ({
     ...createMockApi(JSON.parse(snapshot), scenario),
     client: new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false }, mutations: { retry: false } } }),
@@ -33,10 +34,10 @@ const StoryProviders = ({ children, snapshot, scenario }: PropsWithChildren<{ sn
   const [active, setActive] = useState<typeof runtime | null>(null);
   useLayoutEffect(() => {
     // 子画面のqueryより先に、Controlsと状態に対応するハンドラーへ置き換える。
-    getWorker().resetHandlers(...runtime.handlers);
+    getWorker().resetHandlers(...(handlers || []), ...runtime.handlers);
     setActive(runtime);
     return () => { runtime.client.clear(); };
-  }, [runtime]);
+  }, [runtime, handlers]);
   if (active !== runtime) return null;
   return <QueryClientProvider client={runtime.client}><ThemeProvider theme={theme}><CssBaseline />{children}</ThemeProvider></QueryClientProvider>;
 };
@@ -67,7 +68,7 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const route = context.parameters.route || { path: '*', entry: '/' };
-      return <StoryProviders key={context.id} snapshot={JSON.stringify(context.args)} scenario={context.parameters.mockScenario || 'normal'}>
+      return <StoryProviders key={context.id} snapshot={JSON.stringify(context.args)} scenario={context.parameters.mockScenario || 'normal'} handlers={context.parameters.msw?.handlers}>
         <div data-story-id={context.id} style={{ display: 'contents' }}>
         <MemoryRouter initialEntries={[{ pathname: route.entry.split('?')[0], search: route.entry.split('?')[1] || '', state: route.state }]}>
           <Routes>

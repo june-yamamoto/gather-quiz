@@ -1,3 +1,4 @@
+import { readTeams } from '../team-scoring';
 /**
  * クイズモデル
  */
@@ -8,6 +9,8 @@ export class Quiz {
   choiceCount: number;
   /** 表示順の選択肢。 */
   choices: string[];
+  /** チーム判定画面を使う大会か。点数や判定自体は含めない。 */
+  hasTeams: boolean;
   /** 正解の選択肢（0始まり）。未設定はnull。 */
   correctChoiceIndex: number | null;
   /**
@@ -113,6 +116,7 @@ export class Quiz {
   constructor(data: {
     label?: string | null;
     choiceCount?: number;
+    tournament?: { teams: string };
     correctChoiceIndex?: number | null;
     choices?: string;
     id: string;
@@ -133,6 +137,7 @@ export class Quiz {
     updatedAt: Date;
   }) {
     this.id = data.id;
+    this.hasTeams = readTeams(data.tournament?.teams).length > 0;
     this.label = data.label || '';
     this.choiceCount = data.choiceCount || 0;
     this.correctChoiceIndex = data.correctChoiceIndex ?? null;
@@ -161,6 +166,7 @@ export class Quiz {
   toJSON() {
     return {
       id: this.id,
+      hasTeams: this.hasTeams,
       point: this.point,
       label: this.label,
       choiceCount: this.choiceCount,

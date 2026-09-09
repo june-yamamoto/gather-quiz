@@ -1,3 +1,4 @@
+import { readTeams, type Team } from '../team-scoring';
 import { Participant } from './Participant';
 import { Quiz } from './Quiz';
 import { readQuestionSlots, type QuestionSlot } from '../question-slots';
@@ -8,6 +9,8 @@ import { readQuestionSlots, type QuestionSlot } from '../question-slots';
 export class Tournament {
   /** 問題順ごとのラベルと出題形式。 */
   questionSlots: QuestionSlot[];
+  /** 作問者とは独立した参加チーム。 */
+  teams: Team[];
   /**
    * 大会ID
    * @type {string}
@@ -86,6 +89,7 @@ export class Tournament {
    */
   constructor(data: {
     questionSlots?: string | null;
+    teams?: string;
     id: string;
     name: string;
     password: string;
@@ -100,6 +104,7 @@ export class Tournament {
     quizzes?: Quiz[];
   }) {
     this.id = data.id;
+    this.teams = readTeams(data.teams);
     this.questionSlots = readQuestionSlots(data.questionSlots);
     this.name = data.name;
     this.password = data.password;
@@ -126,6 +131,7 @@ export class Tournament {
       questionsPerParticipant: this.questionsPerParticipant,
       points: this.points,
       questionSlots: this.questionSlots,
+      teams: this.teams,
       regulation: this.regulation,
       genres: this.genres,
       status: this.status,

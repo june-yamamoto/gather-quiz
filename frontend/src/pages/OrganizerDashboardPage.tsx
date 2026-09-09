@@ -84,6 +84,7 @@ const OrganizerDashboardPage = () => {
           </Typography>
         </Box>
         <Box sx={{ mt: 2 }}>
+          <Typography sx={{ mb: 2 }}>参加チーム：{status?.teams?.map(team => team.name).join('、') || 'スコア管理なし'}（開始前に大会概要から設定できます）</Typography>
           <Button component={Link} to={pathToTournamentEdit(tournamentId || '')} variant="outlined">
             大会概要を編集する
           </Button>

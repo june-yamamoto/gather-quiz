@@ -1,3 +1,4 @@
+import TournamentResultsPage from './pages/TournamentResultsPage';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ServiceTopPage from './pages/ServiceTopPage';
 import TournamentCreationPage from './pages/TournamentCreationPage';
@@ -17,6 +18,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import ContactPage from './pages/ContactPage';
 import {
   pathToServiceTop,
+  pathToTournamentResults,
   pathToTournamentCreation,
   pathToTournamentCreationComplete,
   pathToTournamentRegisterParticipant,
@@ -46,6 +48,7 @@ const App = () => {
         />
         <Route path={pathToOrganizerDashboard(':tournamentId')} element={<OrganizerDashboardPage />} />
         <Route path={pathToTournamentEdit(':tournamentId')} element={<TournamentCreationPage />} />
+        <Route path={pathToTournamentResults(':tournamentId')} element={<TournamentResultsPage />} />
         <Route path={pathToQuizBoard(':tournamentId')} element={<QuizBoardPage />} />
         <Route path={pathToQuizDisplay(':quizId')} element={<QuizDisplayPage />} />
         <Route path={pathToAnswerDisplay(':quizId')} element={<AnswerDisplayPage />} />

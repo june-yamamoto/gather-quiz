@@ -1,10 +1,11 @@
+import { scoringApiClient } from '../api/ScoringApiClient';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Container, Typography, CircularProgress, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { Quiz } from '../models/Quiz';
-import { pathToQuizDisplay, pathToTournamentPortal } from '../helpers/route-helpers';
+import { pathToQuizDisplay, pathToTournamentResults } from '../helpers/route-helpers';
 import { tournamentApiClient } from '../api/TournamentApiClient';
 import { QuizCard } from '../components/design-system/QuizCard/QuizCard';
 import { Button } from '../components/design-system/Button/Button';
@@ -33,6 +34,8 @@ const QuizBoardPage = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
   const [regulationOpen, setRegulationOpen] = useState(false);
+  const [finishError, setFinishError] = useState('');
+  const [finishing, setFinishing] = useState(false);
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
 
   const {
@@ -58,10 +61,13 @@ const QuizBoardPage = () => {
     setFinishDialogOpen(true);
   };
 
-  const handleBackToPortal = () => {
-    if (tournamentId) {
-      navigate(pathToTournamentPortal(tournamentId));
-    }
+  /** サーバーで判定漏れを確認してから結果を公開する。 */
+  const finish = async () => {
+    if (!tournamentId || finishing) return;
+    setFinishing(true); setFinishError('');
+    try { await scoringApiClient.finish(tournamentId); navigate(pathToTournamentResults(tournamentId)); }
+    catch (e) { setFinishError(e instanceof Error ? e.message : '終了に失敗しました。'); }
+    finally { setFinishing(false); }
   };
 
   if (isLoading) {
@@ -139,7 +145,8 @@ const QuizBoardPage = () => {
 
       </Box>
 
-      {isAllOpened && (
+      {tournament.status === 'finished' && <Box sx={{ mt: 3, textAlign: 'center' }}><Button variant="contained" onClick={() => navigate(pathToTournamentResults(tournament.id))}>結果発表を見る</Button></Box>}
+      {isAllOpened && tournament.status !== 'finished' && (
         <Box sx={{ mt: 5, textAlign: 'center' }}>
           <Button
             variant="contained"
@@ -173,23 +180,25 @@ const QuizBoardPage = () => {
       </Dialog>
 
       {/* Finish Dialog */}
-      <Dialog open={finishDialogOpen} onClose={() => setFinishDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={finishDialogOpen} onClose={finishing ? undefined : () => setFinishDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
-            お疲れ様でした！
+            大会を終了して結果を発表しますか？
         </DialogTitle>
         <DialogContent>
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="h5" gutterBottom>
-              全ての問題が終了しました。
+              終了後はチームの判定を変更できません。
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              クイズ大会にご参加いただきありがとうございました。
+              未保存の判定がある場合は、各解答画面で保存してから終了してください。
             </Typography>
           </Box>
         </DialogContent>
+        {finishError && <Alert severity="error">{finishError}</Alert>}
         <DialogActions sx={{ justifyContent: 'center', pb: 4 }}>
-          <Button onClick={handleBackToPortal} variant="contained" color="primary" size="large">
-            大会ポータルへ戻る
+          <Button onClick={() => setFinishDialogOpen(false)} disabled={finishing}>戻る</Button>
+          <Button onClick={finish} disabled={finishing} variant="contained" color="primary" size="large">
+            大会を終了して順位を発表
           </Button>
         </DialogActions>
       </Dialog>

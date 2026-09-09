@@ -21,6 +21,7 @@ model Tournament {
   updatedAt               DateTime  @updatedAt
   participants            Participant[]
   questionSlots           String?
+  teams                   String @default("[]")
   quizzes                 Quiz[]
 }
 
@@ -63,4 +64,6 @@ model Quiz {
   choiceCount   Int       @default(0)
   choices       String    @default("[]")
   correctChoiceIndex Int?
+  answerRevealed Boolean @default(false)
+  judgments String @default("{}")
 }
