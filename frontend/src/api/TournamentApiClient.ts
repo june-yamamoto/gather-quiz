@@ -150,7 +150,7 @@ class TournamentApiClient {
       await this.client.patch(`/tournaments/${id}/start`, teamNames === undefined ? undefined : { teamNames });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new ApiError(error.response.data.message, error.response.status);
+        throw new ApiError(error.response.data.message || error.response.data.error || '大会の開始に失敗しました。', error.response.status);
       }
       throw new Error('An unexpected error occurred');
     }

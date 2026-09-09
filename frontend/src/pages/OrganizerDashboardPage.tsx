@@ -48,7 +48,7 @@ const OrganizerDashboardPage = () => {
       await tournamentApiClient.start(tournamentId, teamNames ?? status?.teams?.map(team => team.name) ?? []);
       navigate(pathToQuizBoard(tournamentId));
     } catch (error) {
-      setStartError(error instanceof Error ? error.message : '大会の開始に失敗しました。');
+      setStartError(error instanceof Error && error.message ? error.message : '大会の開始に失敗しました。');
     } finally {
       setStarting(false);
     }
