@@ -1,9 +1,9 @@
 import { BadRequestError, NotFoundError } from './errors/HttpErrors';
 import { prisma } from './db';
 
-export type QuestionSlot = { label: string; choiceCount: number };
+export type QuestionSlot = { label: string; choiceCount: number; questionType?: 'normal' | 'choice' };
 
-/** 旧大会は通常問題として扱い、新設定だけを厳密に検証する。 */
+/** 旧大会の未指定形式は保持し、新設定だけを厳密に検証する。 */
 export function validateQuestionSlots(value: unknown, count: unknown, points: unknown): QuestionSlot[] {
   if (!Number.isInteger(count) || Number(count) < 1 || Number(count) > 10 || typeof points !== 'string' ||
       points.split(',').length !== count || points.split(',').some(p => !Number.isInteger(Number(p)) || Number(p) < 1 || Number(p) > 2147483647) ||
@@ -16,7 +16,8 @@ export function validateQuestionSlots(value: unknown, count: unknown, points: un
         (slot.choiceCount !== 0 && (slot.choiceCount < 2 || slot.choiceCount > 20))) {
       throw new BadRequestError('ラベルは50文字以内、選択肢数は2〜20の整数で指定してください。');
     }
-    return { label: slot.label.trim(), choiceCount: slot.choiceCount };
+    if ('questionType' in slot && slot.questionType !== 'normal' && slot.questionType !== 'choice') throw new BadRequestError('出題形式は通常問題または選択問題を指定してください。');
+    return { label: slot.label.trim(), choiceCount: slot.choiceCount, ...('questionType' in slot ? { questionType: slot.questionType as 'normal' | 'choice' } : {}) };
   });
 }
 
@@ -35,7 +36,7 @@ export function validateChoices(value: unknown, count: number): string[] {
 }
 
 /** クライアント指定の形式ではなく、大会に割り当てられた枠を使用する。 */
-export async function assignedSlot(tournamentId: string, participantId: string, order: unknown, point: unknown) {
+export async function assignedSlot(tournamentId: string, participantId: string, order: unknown, point: unknown): Promise<QuestionSlot> {
   const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
   if (!tournament) throw new NotFoundError('Tournament not found');
   const participant = await prisma.participant.findUnique({ where: { id: participantId } });
@@ -48,8 +49,9 @@ export async function assignedSlot(tournamentId: string, participantId: string, 
   return slots[order];
 }
 
-/** 問題作成者が通常問題または2〜20択を選ぶ。 */
-export function validateChoiceCount(value: unknown): number {
+/** 主催者指定の形式を守り、参加者が選んだ択数を検証する。 */
+export function validateChoiceCount(value: unknown, questionType?: QuestionSlot['questionType']): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || (value !== 0 && (value < 2 || value > 20))) throw new BadRequestError('選択肢数は2〜20の整数で指定してください。');
+  if ((questionType === 'normal' && value !== 0) || (questionType === 'choice' && value === 0)) throw new BadRequestError('大会で指定された出題形式を使用してください。');
   return value;
 }

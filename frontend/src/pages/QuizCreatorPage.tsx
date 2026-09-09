@@ -73,7 +73,8 @@ const QuizCreatorPage = () => {
   });
 
   const slot = tournament?.questionSlots?.[editOrder ?? order];
-  const [choiceCount, setChoiceCount] = useState(0);
+  const [selectedChoiceCount, setChoiceCount] = useState(0);
+  const choiceCount = slot?.questionType === 'normal' ? 0 : slot?.questionType === 'choice' ? (selectedChoiceCount || 4) : selectedChoiceCount;
 
   // Fetch Quiz Info if editing
   useEffect(() => {
@@ -233,11 +234,11 @@ const QuizCreatorPage = () => {
             <Grid item xs={12}>
               <Typography fontWeight="bold">{slot?.label || `第${(editOrder ?? order) + 1}問`} · {choiceCount ? `${choiceCount}択の選択問題` : '通常問題'}</Typography>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            {!slot?.questionType && <Grid item xs={12} sm={6}>
               <Input select label="出題形式" fullWidth value={choiceCount ? 'choice' : 'normal'} onChange={e => setChoiceCount(e.target.value === 'choice' ? 4 : 0)}>
                 <MenuItem value="normal">通常問題</MenuItem><MenuItem value="choice">選択問題</MenuItem>
               </Input>
-            </Grid>
+            </Grid>}
             {!!choiceCount && <Grid item xs={12} sm={6}><Input label="選択肢数" type="number" fullWidth required inputProps={{ min: 2, max: 20, step: 1 }} value={choiceCount} onChange={e => setChoiceCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))} helperText="2〜20択。各選択肢は100文字まで" /></Grid>}
             <Grid item>
                 <Input

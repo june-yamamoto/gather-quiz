@@ -31,6 +31,17 @@ afterEach(async () => {
 });
 
 describe('ラベル・選択問題API', () => {
+  it('大会指定の形式を強制し、選択問題の選択肢数は参加者ごとに変更できる', async () => {
+    const data = await setup();
+    const slots = [{ label: '声優', choiceCount: 0, questionType: 'choice' }, { label: '音楽', choiceCount: 0, questionType: 'normal' }];
+    expect((await request(app).put(`/tournaments/${data.tournamentId}`).send({ questionSlots: slots })).body.questionSlots).toEqual(slots);
+    expect((await request(app).post('/quizzes').send(data)).status).toBe(400);
+    expect((await request(app).post('/quizzes').send({ ...data, order: 1, choiceCount: 2, choices: ['A', 'B'] })).status).toBe(400);
+    const created = await request(app).post('/quizzes').send({ ...data, choiceCount: 2, choices: ['A', 'B'] });
+    expect(created.status).toBe(201);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ choiceCount: 3, choices: ['A', 'B', 'C'] })).body.choiceCount).toBe(3);
+    expect((await request(app).put(`/quizzes/${created.body.id}`).send({ choiceCount: 0 })).status).toBe(400);
+  });
   it('主催者の形式に関係なく参加者が切替でき、100文字は保存し101文字は拒否する', async () => {
     const data = await setup();
     const normal = await request(app).post('/quizzes').send(data);
