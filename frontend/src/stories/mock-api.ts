@@ -90,7 +90,9 @@ export const createMockApi = (args: Partial<QuizControls & TournamentControls> =
       Object.assign(tournament, await body(request));
       return HttpResponse.json(board());
     }),
-    http.patch('*/api/tournaments/:id/start', () => {
+    http.patch('*/api/tournaments/:id/start', async ({ request }) => {
+      const data = await body(request);
+      if (Array.isArray(data.teamNames)) Object.assign(tournament, { teams: data.teamNames.map((name, i) => ({ id: `team-${i}`, name })) });
       tournament.status = 'in_progress';
       return HttpResponse.json({ success: true });
     }),

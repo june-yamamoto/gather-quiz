@@ -145,9 +145,9 @@ class TournamentApiClient {
    * @returns {Promise<void>}
    * @throws {ApiError} APIリクエストが失敗した場合
    */
-  public async start(id: string): Promise<void> {
+  public async start(id: string, teamNames?: string[]): Promise<void> {
     try {
-      await this.client.patch(`/tournaments/${id}/start`);
+      await this.client.patch(`/tournaments/${id}/start`, teamNames === undefined ? undefined : { teamNames });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         throw new ApiError(error.response.data.message, error.response.status);

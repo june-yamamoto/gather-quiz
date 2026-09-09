@@ -309,12 +309,21 @@ router.patch(
     }
 
     if (tournament.status === 'finished') throw new HttpError(409, '終了した大会は再開できません。');
-    const updatedTournament = await prisma.tournament.update({
-      where: { id },
+    if (tournament.status !== 'pending') {
+      if (req.body?.teamNames !== undefined) throw new HttpError(409, '開始後は参加チームを変更できません。');
+      res.json(new Tournament(tournament));
+      return;
+    }
+    const teams = req.body?.teamNames === undefined ? tournament.teams : JSON.stringify(configureTeams(req.body.teamNames, readTeams(tournament.teams)));
+    const started = await prisma.tournament.updateMany({
+      where: { id, status: 'pending' },
       data: {
         status: 'in_progress',
+        teams,
       },
     });
+    if (!started.count) throw new HttpError(409, '大会は既に開始されています。');
+    const updatedTournament = await prisma.tournament.findUniqueOrThrow({ where: { id } });
     res.json(new Tournament(updatedTournament));
   })
 );
