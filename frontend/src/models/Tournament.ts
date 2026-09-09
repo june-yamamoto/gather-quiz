@@ -1,3 +1,4 @@
+import { parseTeams, type Team } from './Team';
 import { Participant } from './Participant';
 import { parseQuestionSlots, type QuestionSlot } from './QuestionSlot';
 
@@ -7,6 +8,8 @@ import { parseQuestionSlots, type QuestionSlot } from './QuestionSlot';
 export class Tournament {
   /** 問題順ごとのラベルと出題形式。 */
   questionSlots: QuestionSlot[];
+  /** 作問者とは独立したチーム。 */
+  teams: Team[];
   /**
    * 大会ID
    * @type {string}
@@ -63,6 +66,7 @@ export class Tournament {
 
   constructor(data: {
     questionSlots?: QuestionSlot[];
+    teams?: Team[];
     id: string;
     name: string;
     questionsPerParticipant: number;
@@ -74,6 +78,7 @@ export class Tournament {
     participants?: Participant[];
   }) {
     this.id = data.id;
+    this.teams = data.teams || [];
     this.questionSlots = data.questionSlots?.length ? data.questionSlots : data.points.split(',').map(() => ({ label: '', choiceCount: 0 }));
     this.name = data.name;
     this.questionsPerParticipant = data.questionsPerParticipant;
@@ -111,6 +116,7 @@ export class Tournament {
     ) {
       const tournamentData = {
         id: data.id,
+        teams: parseTeams('teams' in data ? data.teams : undefined),
         questionSlots: parseQuestionSlots('questionSlots' in data ? data.questionSlots : undefined),
         name: data.name,
         questionsPerParticipant: data.questionsPerParticipant as number,

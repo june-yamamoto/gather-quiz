@@ -2,10 +2,17 @@ import { Router, Request, Response } from 'express';
 import { hasQuizContent, validateQuizLink } from '../media-validation';
 import { prisma } from '../db';
 import { pathParameter, asyncHandler, pathToQuizzes, pathToQuiz, pathToQuizOpened } from '../api-helper';
-import { BadRequestError, NotFoundError } from '../errors/HttpErrors';
+import { BadRequestError, NotFoundError, HttpError } from '../errors/HttpErrors';
+import { readTeams } from '../team-scoring';
 import { Quiz } from '../model/Quiz';
 import { assignedSlot, validateChoices, validateChoiceCount, validateCorrectChoice } from '../question-slots';
 const router = Router();
+
+/** 開始後の作問変更で確定済み判定や得点が変わることを防ぐ。 */
+async function assertEditable(tournamentId: string) {
+  const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+  if (tournament && tournament.status !== 'pending' && readTeams(tournament.teams).length) throw new HttpError(409, 'スコア管理を使う大会では開始後に問題を変更できません。');
+}
 
 /**
  * @file クイズ（Quiz）に関連するAPIエンドポイントのルーター
@@ -56,6 +63,7 @@ router.post(
     }
 
     validateQuizLink(questionLink);
+    await assertEditable(tournamentId);
     validateQuizLink(answerLink);
     if (!hasQuizContent(questionText, questionImage, questionLink)) {
       throw new BadRequestError('Question text, image or URL is required');
@@ -105,7 +113,7 @@ router.get(
     const id = pathParameter(req.params, 'id');
     const quiz = await prisma.quiz.findUnique({
       where: { id },
-      include: { participant: true },
+      include: { participant: true, tournament: { select: { teams: true } } },
     });
     if (quiz) {
       res.json(new Quiz(quiz));
@@ -146,6 +154,7 @@ router.put(
     }
 
     // 更新後の値を予測してバリデーションを行う
+    await assertEditable(quiz.tournamentId);
     // リクエストボディに値が含まれていればそれを、なければ既存の値を使用する
     // 注意: 空文字列への更新を許可する場合は、undefined判定を行う必要がある
     const nextQuestionText = questionText !== undefined ? questionText : quiz.questionText;

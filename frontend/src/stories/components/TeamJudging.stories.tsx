@@ -1,0 +1,10 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+import { http, HttpResponse } from 'msw';
+import { TeamJudging } from '../../components/TeamJudging';
+import { Quiz } from '../../models/Quiz';
+import { quizFixture } from '../fixtures';
+const state = { teams: [{ id: 'a', name: '赤チーム' }, { id: 'b', name: '青チーム' }], judgments: {}, canJudge: true };
+const meta = { title: '大会運営/チーム正誤入力', component: TeamJudging, args: { quiz: new Quiz(quizFixture), open: true, onClose: fn(), onSaved: fn() }, parameters: { msw: { handlers: [http.post('*/api/tournaments/:id/scoring/:quizId/reveal', () => HttpResponse.json(state)), http.put('*/api/tournaments/:id/scoring/:quizId', () => HttpResponse.json(state))] } } } satisfies Meta<typeof TeamJudging>;
+export default meta;
+export const Default: StoryObj<typeof meta> = {};

@@ -14,7 +14,6 @@ CREATE TABLE "Tournament" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "questionSlots" TEXT,
-    "teams" TEXT NOT NULL DEFAULT '[]',
 
     CONSTRAINT "Tournament_pkey" PRIMARY KEY ("id")
 );
@@ -56,8 +55,6 @@ CREATE TABLE "Quiz" (
     "choiceCount" INTEGER NOT NULL DEFAULT 0,
     "choices" TEXT NOT NULL DEFAULT '[]',
     "correctChoiceIndex" INTEGER,
-    "answerRevealed" BOOLEAN NOT NULL DEFAULT false,
-    "judgments" TEXT NOT NULL DEFAULT '{}',
 
     CONSTRAINT "Quiz_pkey" PRIMARY KEY ("id")
 );

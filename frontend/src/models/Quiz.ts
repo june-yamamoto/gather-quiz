@@ -8,6 +8,8 @@ export class Quiz {
   choiceCount: number;
   /** 表示順の選択肢。 */
   choices: string[];
+  /** チーム判定画面を使う大会か。点数や判定自体は含めない。 */
+  hasTeams: boolean;
   /** 正解の選択肢（0始まり）。未設定はnull。 */
   correctChoiceIndex: number | null;
   /**
@@ -97,6 +99,7 @@ export class Quiz {
   constructor(data: {
     label?: string | null;
     choiceCount?: number;
+    hasTeams?: boolean;
     correctChoiceIndex?: number | null;
     choices?: string[];
     id: string;
@@ -115,6 +118,7 @@ export class Quiz {
     participantName?: string;
   }) {
     this.id = data.id;
+    this.hasTeams = data.hasTeams === true;
     this.label = data.label || '';
     this.choiceCount = data.choiceCount || 0;
     this.correctChoiceIndex = data.correctChoiceIndex ?? null;

@@ -115,3 +115,12 @@ type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => 
 export const asyncHandler = (fn: AsyncRequestHandler) => (req: Request, res: Response, next: NextFunction) => {
   return Promise.resolve(fn(req, res, next)).catch(next);
 };
+
+/** 問題単位のチーム判定。 */
+export const pathToScoring = (id: string, quizId: string) => pathToTournament(id) + '/scoring/' + quizId;
+/** 解答表示を記録する。 */
+export const pathToRevealAnswer = (id: string, quizId: string) => pathToScoring(id, quizId) + '/reveal';
+/** 大会終了と結果取得。 */
+export const pathToTournamentFinish = (id: string) => pathToTournament(id) + '/finish';
+/** 終了後だけ順位を取得する。 */
+export const pathToTournamentResults = (id: string) => pathToTournament(id) + '/results';

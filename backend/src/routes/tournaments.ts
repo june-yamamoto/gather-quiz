@@ -1,3 +1,5 @@
+import scoringRouter from './scoring';
+import { configureTeams, readTeams } from '../team-scoring';
 import { hashPassword } from '../password';
 import { validateRegistration, loginParticipant } from '../participant-credentials';
 import { Router, Request, Response } from 'express';
@@ -19,6 +21,7 @@ import { Participant } from '../model/Participant';
 import { Quiz } from '../model/Quiz';
 import participantsRouter from './participants';
 const router = Router();
+router.use('/:id', scoringRouter);
 
 /**
  * @file 大会（Tournament）に関連するAPIエンドポイントのルーター
@@ -47,10 +50,12 @@ router.post(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
     const { name, password, questionsPerParticipant, points, regulation, genres } = req.body;
+    const teams = JSON.stringify(configureTeams(req.body.teamNames ?? []));
     const questionSlots = req.body.questionSlots === undefined ? undefined : JSON.stringify(validateQuestionSlots(req.body.questionSlots, questionsPerParticipant, points));
     const tournament = await prisma.tournament.create({
       data: {
         questionSlots,
+        teams,
         name,
         password,
         questionsPerParticipant,
@@ -219,6 +224,7 @@ router.get(
 
     res.json({
       tournamentName: tournament.name,
+      teams: readTeams(tournament.teams),
       status: tournament.status,
       participants: participantStatus,
     });
@@ -253,6 +259,8 @@ router.put(
       throw new NotFoundError('The requested resource was not found.');
     }
 
+    const teams = req.body.teamNames === undefined ? undefined : JSON.stringify(configureTeams(req.body.teamNames, readTeams(tournament.teams)));
+    if (teams !== undefined && teams !== tournament.teams && tournament.status !== 'pending') throw new HttpError(409, '大会開始後はチームを変更できません。');
     const nextSlots = req.body.questionSlots === undefined ? readQuestionSlots(tournament.questionSlots) : req.body.questionSlots;
     const questionSlots = tournament.questionSlots || req.body.questionSlots !== undefined
       ? JSON.stringify(validateQuestionSlots(nextSlots, questionsPerParticipant ?? tournament.questionsPerParticipant, points ?? tournament.points)) : undefined;
@@ -300,6 +308,7 @@ router.patch(
       throw new NotFoundError('The requested resource was not found.');
     }
 
+    if (tournament.status === 'finished') throw new HttpError(409, '終了した大会は再開できません。');
     const updatedTournament = await prisma.tournament.update({
       where: { id },
       data: {

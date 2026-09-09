@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { TeamJudging } from '../components/TeamJudging';
 import { useParams, useNavigate } from 'react-router-dom';
 import { pathToQuizBoard } from '../helpers/route-helpers';
 import { Container, Typography, Box, CircularProgress } from '@mui/material';
@@ -8,6 +10,7 @@ import { AnswerDisplayContainer } from '../components/AnswerDisplayContainer';
 const AnswerDisplayPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const [judgingOpen, setJudgingOpen] = useState(false);
 
   const {
     data: quiz,
@@ -48,7 +51,8 @@ const AnswerDisplayPage = () => {
 
   return (
     <Box sx={{ height: '100dvh', width: '100%' }}>
-      <AnswerDisplayContainer quiz={quiz} onButtonClick={backToBoard} buttonText="ボードに戻る" />
+      <AnswerDisplayContainer quiz={quiz} onButtonClick={quiz.hasTeams ? () => setJudgingOpen(true) : backToBoard} buttonText={quiz.hasTeams ? 'チームの正誤を設定' : 'ボードに戻る'} />
+      {quiz.hasTeams && <TeamJudging quiz={quiz} open={judgingOpen} onClose={() => setJudgingOpen(false)} onSaved={backToBoard} />}
     </Box>
   );
 };
