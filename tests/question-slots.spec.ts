@@ -20,21 +20,26 @@ test('大会のラベルと出題形式が参加者の作成・編集・表示�
     await page.getByLabel(`${index + 1}問目のラベル`).fill(label);
     await page.getByLabel(`${index + 1}問目の配点`).fill(index < 2 ? '10' : '20');
   }
+  await page.getByLabel('2問目の出題形式').click();
+  await page.getByRole('option', { name: '選択問題', exact: true }).click();
+  await expect(page.getByLabel('2問目の選択肢数')).toHaveCount(0);
   // 撮影前に検証専用パスワードも非表示のままであることを確認する。
   await expect(page.getByRole('textbox', { name: '管理用パスワード', exact: true })).toHaveAttribute('type', 'password');
   await evidence(page, '01-tournament');
   const created = page.waitForResponse(r => r.url().endsWith('/api/tournaments') && r.request().method() === 'POST');
   await page.getByRole('button', { name: 'この内容で大会を作成する' }).click();
   const tournament = await (await created).json();
-  expect(tournament.questionSlots).toEqual([{ label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 0 }, { label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 0 }]);
+  expect(tournament.questionSlots).toEqual([{ label: '声優', choiceCount: 0, questionType: 'normal' }, { label: '音楽', choiceCount: 0, questionType: 'choice' }, { label: '声優', choiceCount: 0, questionType: 'normal' }, { label: '音楽', choiceCount: 0, questionType: 'normal' }]);
   const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: 'あおい', loginId: 'user1', password: '123456' } })).json();
   const dashboard = `/gather/tournaments/${tournament.id}/participants/${participant.id}`;
   await page.goto(dashboard);
   await expect(page.getByText('第2問 (10点) · 音楽')).toBeVisible();
   await page.getByRole('link', { name: '作成する' }).nth(1).click();
-  await page.getByLabel('出題形式', { exact: true }).click();
-  await page.getByRole('option', { name: '選択問題', exact: true }).click();
+  await expect(page.getByLabel('出題形式', { exact: true })).toHaveCount(0);
   await expect(page.getByText('音楽 · 4択の選択問題')).toBeVisible();
+  await page.getByLabel('選択肢数').fill('2');
+  await expect(page.getByRole('textbox', { name: '選択肢3', exact: true })).toHaveCount(0);
+  await page.getByLabel('選択肢数').fill('4');
   await page.getByLabel('問題文', { exact: true }).fill('次のうち、弦楽器はどれでしょう？');
   await page.getByLabel('解答文', { exact: true }).fill('2. バイオリン');
   const choices = ['ピアノ', 'バイオリン', 'フルート', 'トランペット'];

@@ -29,7 +29,7 @@ export const Edit: Story = { args: { ...tournamentArgs, isEditMode: true } };
 export const LabelsAndChoices: Story = {
   name: 'ラベル・通常問題と選択問題',
   args: { tournamentName: '声優と音楽のクイズ大会', points: '10,10,20,20', questionSlots: [
-    { label: '声優', choiceCount: 4 }, { label: '音楽', choiceCount: 0 },
-    { label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 3 },
+    { label: '声優', choiceCount: 0, questionType: 'choice' }, { label: '音楽', choiceCount: 0, questionType: 'normal' },
+    { label: '声優', choiceCount: 0, questionType: 'normal' }, { label: '音楽', choiceCount: 0, questionType: 'choice' },
   ] },
 };

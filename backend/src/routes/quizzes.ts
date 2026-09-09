@@ -66,7 +66,7 @@ router.post(
     }
 
     const slot = await assignedSlot(tournamentId, participantId, order ?? 0, point);
-    const choiceCount = validateChoiceCount(req.body.choiceCount ?? 0);
+    const choiceCount = validateChoiceCount(req.body.choiceCount ?? 0, slot.questionType);
     const choices = validateChoices(req.body.choices, choiceCount);
     const quiz = await prisma.quiz.create({
       data: {
@@ -165,7 +165,7 @@ router.put(
     }
 
     const slot = await assignedSlot(quiz.tournamentId, quiz.participantId, quiz.order, point ?? quiz.point);
-    const choiceCount = validateChoiceCount(req.body.choiceCount ?? quiz.choiceCount);
+    const choiceCount = validateChoiceCount(req.body.choiceCount ?? quiz.choiceCount, slot.questionType);
     const choices = validateChoices(req.body.choices === undefined ? (choiceCount ? JSON.parse(quiz.choices) : []) : req.body.choices, choiceCount);
     const updatedQuiz = await prisma.quiz.update({
       where: { id },

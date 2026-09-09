@@ -1,6 +1,6 @@
 import { quizArgs, quizArgTypes, tournamentArgs, tournamentArgTypes, type QuizControls, type TournamentControls } from '../controls';
 import type { Meta, StoryObj } from '@storybook/react';
-import { userEvent, within } from '@storybook/test';
+import { within, expect } from '@storybook/test';
 import QuizCreatorPage from '../../pages/QuizCreatorPage';
 import { pathToQuizCreator } from '../../helpers/route-helpers';
 import { mobile } from '../fixtures';
@@ -16,11 +16,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { name: '通常' };
-export const MultipleChoice: Story = { name: '参加者が4択問題を選択', args: { questionSlots: [{ label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 0 }, { label: '', choiceCount: 0 }] },
+export const MultipleChoice: Story = { name: '主催者指定の選択問題・参加者が択数を設定', args: { questionSlots: [{ label: '声優', choiceCount: 0 }, { label: '音楽', choiceCount: 0, questionType: 'choice' }, { label: '', choiceCount: 0 }] },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(await canvas.findByLabelText('出題形式'));
-    await userEvent.click(within(canvasElement.ownerDocument.body).getByRole('option', { name: '選択問題' }));
+    await expect(await canvas.findByLabelText(/選択肢数/)).toHaveValue(4);
+    await expect(canvas.queryByLabelText('出題形式')).not.toBeInTheDocument();
   },
 };
 export const MultipleChoiceMobile: Story = { ...MultipleChoice, name: '4択問題・スマートフォン', parameters: mobile };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Grid, Box, Typography } from '@mui/material';
+import { Grid, Box, Typography, MenuItem } from '@mui/material';
 import type { QuestionSlot } from '../models/QuestionSlot';
 import { Tournament } from '../models/Tournament';
 import { Input } from './design-system/Input/Input';
@@ -57,7 +57,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
   // 問題数が変更されたら配点入力欄の数を調整する
   useEffect(() => {
     if (!Number.isInteger(questionsPerParticipant) || questionsPerParticipant < 1 || questionsPerParticipant > 10) return;
-    setSlots(prev => Array.from({ length: questionsPerParticipant }, (_, index) => prev[index] || { label: '', choiceCount: 0 }));
+    setSlots(prev => Array.from({ length: questionsPerParticipant }, (_, index) => prev[index] || { label: '', choiceCount: 0, questionType: 'normal' }));
     setPointValues((prev) => {
       const currentLength = prev.length;
       if (questionsPerParticipant > currentLength) {
@@ -88,7 +88,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
       name,
       questionsPerParticipant: Number(questionsPerParticipant),
       points: pointValues.join(','),
-      questionSlots: pointValues.map((_, i) => ({ label: (slots[i]?.label || '').trim(), choiceCount: slots[i]?.choiceCount || 0 })),
+      questionSlots: pointValues.map((_, i) => ({ ...slots[i], label: (slots[i]?.label || '').trim(), choiceCount: slots[i]?.choiceCount || 0 })),
       regulation,
       genres,
       ...(password && { password }),
@@ -127,7 +127,7 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
         {/* 配点が同じでも問題順ごとに別の枠として設定する。 */}
         <Grid item xs={12}>
             <Typography variant="h6" gutterBottom>参加者に割り当てる問題</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>ラベルは任意です。選択問題にすると、参加者が指定数の選択肢を入力します。</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>ラベルは任意です。通常問題／選択問題を指定してください。選択肢数（2〜20択）は参加者が問題作成時に決めます。</Typography>
             {isEditMode && <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>問題が作成された大会では、問題数・配点・ラベル・出題形式は変更できません。</Typography>}
             <Grid container spacing={2}>
             {pointValues.map((point, index) => (
@@ -148,6 +148,12 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
                     inputProps={{ min: 1, max: 2147483647, step: 1 }}
                     onChange={(e) => handlePointChange(index, e.target.value)}
                 />
+                </Grid>
+                <Grid item xs={12}>
+                  <Input select label={`${index + 1}問目の出題形式`} fullWidth value={slots[index]?.questionType || 'legacy'} onChange={e => updateSlot(index, { questionType: e.target.value as 'normal' | 'choice' })}>
+                    {!slots[index]?.questionType && <MenuItem value="legacy">従来設定（参加者が形式選択）</MenuItem>}
+                    <MenuItem value="normal">通常問題</MenuItem><MenuItem value="choice">選択問題</MenuItem>
+                  </Input>
                 </Grid>
                 </Grid>
                 </Box>
