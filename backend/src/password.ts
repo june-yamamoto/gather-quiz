@@ -17,4 +17,3 @@ export async function verifyPassword(password: string, stored: string): Promise<
   if (format !== 'scrypt' || !/^[a-f0-9]{32}$/.test(salt || '') || !/^[a-f0-9]{128}$/.test(hash || '')) return false;
   return timingSafeEqual(await derive(password, salt), Buffer.from(hash, 'hex'));
 }
-
