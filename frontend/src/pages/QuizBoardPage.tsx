@@ -104,18 +104,19 @@ const QuizBoardPage = () => {
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
-        {tournament.participants.map((p) => {
+      <Box role="region" aria-label="問題一覧" tabIndex={0} sx={{ overflowX: 'auto', pb: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, tournament.participants.length)}, minmax(180px, 1fr))`, gap: 2 }}>
+        {tournament.participants.map((p, column) => {
             const isParticipantVisible = p.quizzes.some((q) => q.isOpened);
             return (
-                <Box key={p.id} sx={{ minWidth: '180px', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <ParticipantName variant="h6" title={isParticipantVisible ? p.name : '???'}>
+                <Box key={p.id} sx={{ display: 'contents' }}>
+                    <ParticipantName sx={{ gridColumn: column + 1, gridRow: 1 }} variant="h6" title={isParticipantVisible ? p.name : '???'}>
                         {isParticipantVisible ? p.name : '???'}
                     </ParticipantName>
                     {points.map((point, index) => {
                         const quiz = p.quizzes.find((q: Quiz) => q.order === index);
                         return (
-                            <Box key={`${p.id}-${index}`} sx={{ width: '100%' }}>
+                            <Box key={`${p.id}-${index}`} data-question-order={index} sx={{ gridColumn: column + 1, gridRow: index + 2, display: 'flex', minWidth: 0, '& > *': { height: '100%', boxSizing: 'border-box' } }}>
                                 {quiz ? (
                                     <QuizCard
                                         point={point}
@@ -134,6 +135,8 @@ const QuizBoardPage = () => {
                 </Box>
             );
         })}
+      </Box>
+
       </Box>
 
       {isAllOpened && (
