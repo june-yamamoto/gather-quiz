@@ -11,11 +11,11 @@ export async function outputs(name = stack, location = region): Promise<Record<s
 }
 
 /** 秘密のパラメーターをログやコマンドラインへ出さず、IaCを適用する。 */
-export async function deployStack(name: string, file: string, parameters: Record<string, string>, location = region) {
+export async function deployStack(name: string, file: string, parameters: Record<string, string | undefined>, location = region, templateBody?: string) {
   const client = new CloudFormationClient({ region: location });
   const input = {
-    StackName: name, TemplateBody: await readFile(file, 'utf8'),
-    Parameters: Object.entries(parameters).map(([ParameterKey, ParameterValue]) => ({ ParameterKey, ParameterValue })),
+    StackName: name, TemplateBody: templateBody ?? await readFile(file, 'utf8'),
+    Parameters: Object.entries(parameters).map(([ParameterKey, ParameterValue]) => ParameterValue === undefined ? { ParameterKey, UsePreviousValue: true } : { ParameterKey, ParameterValue }),
     Capabilities: ['CAPABILITY_NAMED_IAM' as const],
   };
   let exists = true;

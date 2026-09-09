@@ -2,6 +2,12 @@ name: Deploy application
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: デプロイ環境
+        required: true
+        default: dev
+        type: choice
+        options: [dev, prod]
       target:
         description: デプロイ対象
         required: true
@@ -11,8 +17,10 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: gather-deploy-dev
+  group: gather-deploy-${{ inputs.environment }}
   cancel-in-progress: false
+env:
+  GATHER_ENV: ${{ inputs.environment }}
 jobs:
   backend:
     if: github.ref == 'refs/heads/main' && inputs.target != 'frontend'
@@ -39,7 +47,7 @@ jobs:
       - run: npm run build:backend
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ vars[inputs.environment == 'prod' && 'AWS_DEPLOY_PROD_ROLE_ARN' || 'AWS_DEPLOY_ROLE_ARN'] }}
           aws-region: ap-northeast-1
       - run: node --import tsx scripts/deploy.ts backend --skip-build
       - run: node --import tsx scripts/smoke.ts --read-only
@@ -75,7 +83,7 @@ jobs:
           VITE_API_BASE_URL: /api
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ vars[inputs.environment == 'prod' && 'AWS_DEPLOY_PROD_ROLE_ARN' || 'AWS_DEPLOY_ROLE_ARN'] }}
           aws-region: ap-northeast-1
       - run: node --import tsx scripts/deploy.ts frontend --skip-build
       - run: node --import tsx scripts/smoke.ts --read-only

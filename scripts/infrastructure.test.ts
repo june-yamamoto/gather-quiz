@@ -3,9 +3,29 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { parseDocument } from 'yaml';
 import { runInNewContext } from 'node:vm';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 
 const source = await readFile(new URL('../cloudformation/application.yaml', import.meta.url), 'utf8');
 const template = parseDocument(source, { logLevel: 'silent' }).toJS();
+
+test('devのHTMLとアセットは認証前に拒否し、正しいBasic認証だけを許可する', () => {
+  const authorization = `Basic ${Buffer.from('dev:test-password').toString('base64')}`;
+  const hash = createHash('sha256').update(authorization).digest('hex');
+  const code = template.Resources.SpaRewrite.Properties.FunctionCode.replace('${FrontendAuthHash}', hash);
+  const handler = runInNewContext(`${code}; handler;`, { require: createRequire(import.meta.url) });
+  for (const uri of ['/', '/index.html', '/gather/tournaments/new', '/assets/app.js']) {
+    for (const headers of [{}, { authorization: { value: 'Basic wrong' } }]) {
+      const response = handler({ request: { uri, headers } });
+      assert.equal(response.statusCode, 401);
+      assert.match(response.headers['www-authenticate'].value, /^Basic /);
+      assert.equal(response.headers['cache-control'].value, 'no-store');
+    }
+  }
+  const request = handler({ request: { uri: '/gather', headers: { authorization: { value: authorization } } } });
+  assert.equal(request.uri, '/index.html');
+  assert.equal(request.headers.authorization, undefined);
+});
 
 test('DBを非公開にし、NATとコンテナ配布を作成しない', () => {
   assert.equal(template.Resources.Database.Properties.PubliclyAccessible, false);
@@ -18,7 +38,7 @@ test('DBを非公開にし、NATとコンテナ配布を作成しない', () => 
 });
 
 test('SPA書き換えがAPIエラーやアセットをHTMLへ変換しない', () => {
-  const handler = runInNewContext(`${template.Resources.SpaRewrite.Properties.FunctionCode}; handler;`);
+  const handler = runInNewContext(`${template.Resources.SpaRewrite.Properties.FunctionCode.replace('${FrontendAuthHash}', '')}; handler;`);
   for (const uri of ['/', '/gather', '/gather/tournaments/123', '/terms', '/privacy', '/contact']) assert.equal(handler({ request: { uri } }).uri, '/index.html');
   for (const uri of ['/api/quizzes/missing', '/assets/app.js', '/uploads/example.png']) assert.equal(handler({ request: { uri } }).uri, uri);
 });

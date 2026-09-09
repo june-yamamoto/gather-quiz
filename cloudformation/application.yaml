@@ -8,6 +8,11 @@ Parameters:
   DomainName: { Type: String }
   CertificateArn: { Type: String }
   HostedZoneId: { Type: String }
+  FrontendAuthHash:
+    Type: String
+    Default: ''
+    AllowedPattern: '^([a-f0-9]{64})?$'
+    Description: SHA256 of the Basic authorization header; empty for public production
 Resources:
   Vpc:
     Type: AWS::EC2::VPC
@@ -281,9 +286,24 @@ Resources:
       Name: !Sub '${AWS::StackName}-spa'
       AutoPublish: true
       FunctionConfig: { Comment: Rewrite only GatherQuiz routes, Runtime: cloudfront-js-2.0 }
-      FunctionCode: |
+      FunctionCode: !Sub |
         function handler(event) {
           var request = event.request;
+          var expected = '${FrontendAuthHash}';
+          if (expected) {
+            var authorization = request.headers.authorization;
+            if (!authorization || require('crypto').createHash('sha256').update(authorization.value).digest('hex') !== expected) {
+              return {
+                statusCode: 401,
+                statusDescription: 'Unauthorized',
+                headers: {
+                  'www-authenticate': { value: 'Basic realm="GatherQuiz dev", charset="UTF-8"' },
+                  'cache-control': { value: 'no-store' }
+                }
+              };
+            }
+            delete request.headers.authorization;
+          }
           if (['/', '/terms', '/privacy', '/contact'].indexOf(request.uri) !== -1 || request.uri === '/gather' || request.uri.startsWith('/gather/')) {
             request.uri = '/index.html';
           }

@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { outputs, databaseOperation } from './aws.ts';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { region } from './config.ts';
+import { frontendAuthorization } from './frontend-auth.ts';
 
 /** 実データを出力せず、配信・DB・画像・バックアップ復元を通して検証する。 */
 async function main() {
@@ -16,13 +17,23 @@ async function main() {
     assert.ok(response.ok, `${method} ${path}: HTTP ${response.status}`);
     return response.json();
   }
-  const html = await fetch(`${state.Url}/gather/tournaments/new`);
+  const authorization = await frontendAuthorization();
+  const headers: Record<string, string> = authorization ? { Authorization: authorization } : {};
+  if (authorization) {
+    for (const path of ['/gather/tournaments/new', '/index.html', '/assets/nonexistent.js']) {
+      const denied = await fetch(`${state.Url}${path}`);
+      assert.equal(denied.status, 401);
+      assert.match(denied.headers.get('www-authenticate') || '', /^Basic /);
+    }
+    checks.push('frontend Basic authentication');
+  }
+  const html = await fetch(`${state.Url}/gather/tournaments/new`, { headers });
   assert.equal(html.status, 200);
   assert.match(html.headers.get('content-type') || '', /text\/html/);
   const text = await html.text();
   const asset = text.match(/src="([^" ]+\.js)"/)?.[1];
   assert.ok(asset, 'JSアセット参照');
-  const js = await fetch(new URL(asset, state.Url));
+  const js = await fetch(new URL(asset, state.Url), { headers });
   assert.equal(js.status, 200);
   assert.match(js.headers.get('cache-control') || '', /immutable/);
   const missing = await fetch(`${state.Url}/api/tournaments/${randomUUID()}`);

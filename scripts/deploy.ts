@@ -6,7 +6,9 @@ import { SSMClient, GetParameterCommand, PutParameterCommand } from '@aws-sdk/cl
 import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { LambdaClient, GetFunctionCommand, UpdateFunctionCodeCommand, waitUntilFunctionUpdatedV2 } from '@aws-sdk/client-lambda';
 import { outputs, deployStack, databaseOperation } from './aws.ts';
-import { region, stack, domain, zoneId } from './config.ts';
+import { environment, region, stack, domain, zoneId } from './config.ts';
+import { frontendAuthHash } from './frontend-auth.ts';
+import { ciProviderArn } from './ci-provider.ts';
 
 const root = resolve(import.meta.dirname, '..');
 const s3 = new S3Client({ region });
@@ -107,12 +109,14 @@ async function main() {
     state = await measure('infrastructure', async () => deployStack(stack, join(root, 'cloudformation/application.yaml'), {
       ArtifactBucket: bootstrap.ArtifactBucket, CodeKey: key, DbPassword: await password('admin'), AppPassword: await password('app'),
       DomainName: domain, HostedZoneId: zoneId, CertificateArn: certificate.CertificateArn,
+      FrontendAuthHash: await frontendAuthHash(),
     }));
     await measure('database-schema', () => databaseOperation({ action: 'migrate' }, state));
-    const ci = await measure('ci-role', () => deployStack(`${stack}-ci`, join(root, 'cloudformation/ci.yaml'), {
+    const ci = await measure('ci-role', async () => deployStack(`${stack}-ci`, join(root, 'cloudformation/ci.yaml'), {
       ApplicationStack: stack, ArtifactBucket: bootstrap.ArtifactBucket, FrontendBucket: state.FrontendBucket,
+      ExistingOidcProviderArn: await ciProviderArn(),
     }));
-    console.log(`GitHub variable AWS_DEPLOY_ROLE_ARN: ${ci.DeploymentRoleArn}`);
+    console.log(`GitHub variable ${environment === 'prod' ? 'AWS_DEPLOY_PROD_ROLE_ARN' : 'AWS_DEPLOY_ROLE_ARN'}: ${ci.DeploymentRoleArn}`);
   } else {
     state = await outputs();
     if (mode === 'backend') {

@@ -5,8 +5,12 @@ Parameters:
   ArtifactBucket: { Type: String }
   FrontendBucket: { Type: String }
   Repository: { Type: String, Default: june-yamamoto/gather-quiz }
+  ExistingOidcProviderArn: { Type: String, Default: '' }
+Conditions:
+  CreateOidcProvider: !Equals [!Ref ExistingOidcProviderArn, '']
 Resources:
   GitHubProvider:
+    Condition: CreateOidcProvider
     Type: AWS::IAM::OIDCProvider
     Properties:
       Url: https://token.actions.githubusercontent.com
@@ -17,7 +21,8 @@ Resources:
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
-            Principal: { Federated: !Ref GitHubProvider }
+            Principal:
+              Federated: !If [CreateOidcProvider, !Ref GitHubProvider, !Ref ExistingOidcProviderArn]
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
@@ -44,7 +49,11 @@ Resources:
                   - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-api'
                   - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-db'
               - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ApplicationStack}/frontend-password'
+              - Effect: Allow
                 Action: lambda:InvokeFunction
                 Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ApplicationStack}-db'
 Outputs:
   DeploymentRoleArn: { Value: !GetAtt DeploymentRole.Arn }
+  OidcProviderArn: { Value: !If [CreateOidcProvider, !Ref GitHubProvider, !Ref ExistingOidcProviderArn] }
