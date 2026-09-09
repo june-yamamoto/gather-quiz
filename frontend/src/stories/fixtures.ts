@@ -7,7 +7,7 @@ export const quizFixture = {
   answerText: '茶道', questionImage: null, answerImage: null, questionLink: null, answerLink: null,
 };
 export const participantFixture = {
-  id: 'p-1', tournamentId: 't-1', name: 'あおい', created: 1, required: 3, quizzes: [quizFixture],
+  id: 'p-1', loginId: 'aoi', tournamentId: 't-1', name: 'あおい', created: 1, required: 3, quizzes: [quizFixture],
 };
 export const tournamentFixture = {
   id: 't-1', name: '週末の持ち寄りクイズ大会', questionsPerParticipant: 3, points: '10,20,30',

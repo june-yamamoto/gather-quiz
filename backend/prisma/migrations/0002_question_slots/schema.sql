@@ -27,10 +27,6 @@ CREATE TABLE "Participant" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    "loginId" TEXT,
-    "loginAttempts" INTEGER NOT NULL DEFAULT 0,
-    "loginWindowStart" TIMESTAMP(3),
-
     CONSTRAINT "Participant_pkey" PRIMARY KEY ("id")
 );
 
@@ -59,7 +55,7 @@ CREATE TABLE "Quiz" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Participant_tournamentId_loginId_key" ON "Participant"("tournamentId", "loginId");
+CREATE UNIQUE INDEX "Participant_tournamentId_name_key" ON "Participant"("tournamentId", "name");
 
 -- AddForeignKey
 ALTER TABLE "Participant" ADD CONSTRAINT "Participant_tournamentId_fkey" FOREIGN KEY ("tournamentId") REFERENCES "Tournament"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -18,7 +18,7 @@ const createTournament = async (request: APIRequestContext) => {
 const createParticipant = async (request: APIRequestContext, tournamentId: string) => {
   const response = await request.post(`http://localhost:3000/api/tournaments/${tournamentId}/participants`, {
     data: {
-      name: `Test Participant ${Date.now()}`,
+      name: 'テスト参加者', loginId: 'user1', password: '123456',
     },
   });
   return await response.json();

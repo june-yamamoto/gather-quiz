@@ -114,8 +114,7 @@ const TournamentPortalPage = () => {
         navigate(pathToParticipantDashboard(id, participant.id));
       }, 0);
     } catch (error) {
-      console.error(error);
-      alert('名前またはパスワードが違います。');
+      alert(error instanceof Error ? error.message : 'IDまたはパスワードが違います。');
     }
   };
 
@@ -204,7 +203,9 @@ const TournamentPortalPage = () => {
           <Input
             autoFocus
             margin="dense"
-            label="名前"
+            label="ID"
+            autoComplete="username"
+            helperText="登録したIDを入力してください。以前の登録者は従来の名前でログインできます"
             fullWidth
             value={participantName}
             onChange={(e) => setParticipantName(e.target.value)}

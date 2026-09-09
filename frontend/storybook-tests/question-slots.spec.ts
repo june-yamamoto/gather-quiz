@@ -8,9 +8,6 @@ test('Storybookでラベルと形式を変更し、4択を保存・プレビュ�
   const canvas = page.frameLocator('#storybook-preview-iframe');
   await expect(canvas.getByLabel('1問目のラベル')).toHaveValue('声優', { timeout: 20000 });
   await canvas.getByLabel('1問目のラベル').fill('アニメ');
-  await canvas.getByLabel('1問目の出題形式').click();
-  await canvas.getByRole('option', { name: '通常問題', exact: true }).click();
-  await expect(canvas.getByLabel('1問目の選択肢数')).toHaveCount(0);
   await page.goto('/?path=/story/画面-参加者-問題作成--multiple-choice');
   await expect(canvas.getByText('音楽 · 4択の選択問題')).toBeVisible();
   await canvas.getByLabel('問題文', { exact: true }).fill('次のうち、弦楽器はどれでしょう？');

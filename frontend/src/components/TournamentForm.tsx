@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Grid, Box, Typography, MenuItem } from '@mui/material';
+import { Grid, Box, Typography } from '@mui/material';
 import type { QuestionSlot } from '../models/QuestionSlot';
 import { Tournament } from '../models/Tournament';
 import { Input } from './design-system/Input/Input';
@@ -149,14 +149,6 @@ export const TournamentForm = ({ tournament, onSubmit, isEditMode }: TournamentF
                     onChange={(e) => handlePointChange(index, e.target.value)}
                 />
                 </Grid>
-                <Grid item xs={12} sm={7}>
-                  <Input select label={`${index + 1}問目の出題形式`} fullWidth value={slots[index]?.choiceCount ? 'choice' : 'normal'} onChange={e => updateSlot(index, { choiceCount: e.target.value === 'choice' ? 4 : 0 })}>
-                    <MenuItem value="normal">通常問題</MenuItem><MenuItem value="choice">選択問題</MenuItem>
-                  </Input>
-                </Grid>
-                {!!slots[index]?.choiceCount && <Grid item xs={12} sm={5}>
-                  <Input type="number" label={`${index + 1}問目の選択肢数`} required fullWidth inputProps={{ min: 2, max: 20, step: 1 }} value={slots[index].choiceCount} onChange={e => updateSlot(index, { choiceCount: Number(e.target.value) || 1 })} helperText="2〜20択" />
-                </Grid>}
                 </Grid>
                 </Box>
                 </Grid>

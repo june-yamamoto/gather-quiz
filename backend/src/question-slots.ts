@@ -28,8 +28,8 @@ export function readQuestionSlots(value: string | null | undefined): QuestionSlo
 /** 指定数の入力を必須とし、通常問題へ選択肢が紛れ込むことを防ぐ。 */
 export function validateChoices(value: unknown, count: number): string[] {
   const choices = value === undefined ? [] : value;
-  if (!Array.isArray(choices) || choices.length !== count || choices.some(c => typeof c !== 'string' || !c.trim() || c.trim().length > 500)) {
-    throw new BadRequestError(count ? `${count}個の選択肢を各1〜500文字で入力してください。` : '通常問題には選択肢を設定できません。');
+  if (!Array.isArray(choices) || choices.length !== count || choices.some(c => typeof c !== 'string' || !c.trim() || c.trim().length > 100)) {
+    throw new BadRequestError(count ? `${count}個の選択肢を各1〜100文字で入力してください。` : '通常問題には選択肢を設定できません。');
   }
   return choices.map(c => c.trim());
 }
@@ -46,4 +46,10 @@ export async function assignedSlot(tournamentId: string, participantId: string, 
     throw new BadRequestError('大会で指定された問題枠・配点を使用してください。');
   }
   return slots[order];
+}
+
+/** 問題作成者が通常問題または2〜20択を選ぶ。 */
+export function validateChoiceCount(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || (value !== 0 && (value < 2 || value > 20))) throw new BadRequestError('選択肢数は2〜20の整数で指定してください。');
+  return value;
 }

@@ -23,10 +23,12 @@ const registerParticipant = async (page: Page, tournamentId: string, participant
   await page.goto(`/gather/tournaments/${tournamentId}`);
   await page.getByRole('link', { name: '参加者として新規登録' }).click();
   await page.waitForURL(`/gather/tournaments/${tournamentId}/register`);
-  await page.getByLabel('あなたの名前').fill(participantName);
+  await page.getByLabel('表示名').fill(participantName);
+    await page.getByLabel(/^ID/).fill(participantName.replaceAll(' ', '_'));
+    await page.getByLabel(/^パスワード/).fill('123456');
 
   const responsePromise = page.waitForResponse((resp) => resp.url().includes('/participants') && resp.status() === 200);
-  await page.getByRole('button', { name: 'この名前で参加する' }).click();
+  await page.getByRole('button', { name: 'この内容で参加する' }).click();
   const response = await responsePromise;
   const participant = await response.json();
 

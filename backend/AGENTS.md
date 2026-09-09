@@ -31,7 +31,7 @@
 - `prisma/schema.e2e.prisma`: E2E用SQLite
 - `prisma/schema.postgres.prisma`: AWS RDS PostgreSQL用
 - スキーマ変更は4ファイルの差分を比較し、意図的なprovider差以外は同期する。
-- 大会 `Tournament` は参加者とクイズを持ち、参加者名は大会内で一意。
+- 大会 `Tournament` は参加者とクイズを持ち、参加者のログインIDは大会内で一意。表示名は重複可能。
 - クイズは大会と作成参加者の両方に属する。配点、表示順、既読状態、任意の問題・解答テキスト/画像/リンクを持つ。
 - 本番/Lambdaは `DB_HOST`、`DB_USER`、`DB_PASSWORD` を使用する。SSM標準SecureStringをデプロイ時に読み込み、実行時の秘密取得は行わない。RDS CA検証を有効にする。
 - 画像には `IMAGE_UPLOAD_BUCKET_NAME` とCloudFrontの `IMAGE_PUBLIC_BASE_URL` を使用する。画像S3は非公開。

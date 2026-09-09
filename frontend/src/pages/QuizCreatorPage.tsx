@@ -73,7 +73,7 @@ const QuizCreatorPage = () => {
   });
 
   const slot = tournament?.questionSlots?.[editOrder ?? order];
-  const choiceCount = slot?.choiceCount || 0;
+  const [choiceCount, setChoiceCount] = useState(0);
 
   // Fetch Quiz Info if editing
   useEffect(() => {
@@ -89,6 +89,7 @@ const QuizCreatorPage = () => {
           setPoint(quiz.point);
           setEditOrder(quiz.order);
           setChoices(quiz.choices || []);
+          setChoiceCount(quiz.choiceCount || 0);
           setGenre(quiz.genre || '');
           setQuestionText(quiz.questionText || '');
           setQuestionLink(quiz.questionLink || '');
@@ -114,8 +115,8 @@ const QuizCreatorPage = () => {
     event.preventDefault();
     if (submitting.current || isFetchingEdit || editError || !tournament) return;
     setSaveError('');
-    if (choiceCount && Array.from({ length: choiceCount }, (_, i) => choices[i] || '').some(c => !c.trim())) {
-      setSaveError(`${choiceCount}個すべての選択肢を入力してください。`);
+    if (choiceCount && Array.from({ length: choiceCount }, (_, i) => choices[i] || '').some(c => !c.trim() || c.trim().length > 100)) {
+      setSaveError(`${choiceCount}個すべての選択肢を1〜100文字で入力してください。`);
       return;
     }
     if ((!questionMediaFile && questionLink.trim() && !safeMediaUrl(questionLink)) || (!answerMediaFile && answerLink.trim() && !safeMediaUrl(answerLink))) {
@@ -160,6 +161,7 @@ const QuizCreatorPage = () => {
       const quizData = {
         point: Number(tournament.points.split(',')[editOrder ?? order]) || point,
         order: editOrder ?? order,
+        choiceCount,
         choices: choiceCount ? choices.slice(0, choiceCount).map(c => c.trim()) : [],
         genre: genre || null,
         questionText,
@@ -231,6 +233,12 @@ const QuizCreatorPage = () => {
             <Grid item xs={12}>
               <Typography fontWeight="bold">{slot?.label || `第${(editOrder ?? order) + 1}問`} · {choiceCount ? `${choiceCount}択の選択問題` : '通常問題'}</Typography>
             </Grid>
+            <Grid item xs={12} sm={6}>
+              <Input select label="出題形式" fullWidth value={choiceCount ? 'choice' : 'normal'} onChange={e => setChoiceCount(e.target.value === 'choice' ? 4 : 0)}>
+                <MenuItem value="normal">通常問題</MenuItem><MenuItem value="choice">選択問題</MenuItem>
+              </Input>
+            </Grid>
+            {!!choiceCount && <Grid item xs={12} sm={6}><Input label="選択肢数" type="number" fullWidth required inputProps={{ min: 2, max: 20, step: 1 }} value={choiceCount} onChange={e => setChoiceCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))} helperText="2〜20択。各選択肢は100文字まで" /></Grid>}
             <Grid item>
                 <Input
                 label="配点"
@@ -302,7 +310,7 @@ const QuizCreatorPage = () => {
               <MediaAttachmentField label="問題" url={questionLink} file={questionMediaFile} onUrlChange={setQuestionLink} onFileChange={setQuestionMediaFile} />
               {choiceCount > 0 && <Box sx={{ mt: 2 }}>
                 <Typography variant="h6" gutterBottom>選択肢（{choiceCount}択）</Typography>
-                {Array.from({ length: choiceCount }, (_, index) => <Input key={index} label={`選択肢${index + 1}`} required fullWidth multiline inputProps={{ maxLength: 500 }} value={choices[index] || ''} onChange={e => setChoices(prev => Array.from({ length: choiceCount }, (_, i) => i === index ? e.target.value : prev[i] || ''))} sx={{ mb: 2 }} />)}
+                {Array.from({ length: choiceCount }, (_, index) => <Input key={index} label={`選択肢${index + 1}`} required fullWidth multiline inputProps={{ maxLength: 100 }} helperText={`${(choices[index] || '').length}/100文字`} error={(choices[index] || '').length > 100} value={choices[index] || ''} onChange={e => setChoices(prev => Array.from({ length: choiceCount }, (_, i) => i === index ? e.target.value : prev[i] || ''))} sx={{ mb: 2 }} />)}
               </Box>}
             </StyledSection>
           </Grid>

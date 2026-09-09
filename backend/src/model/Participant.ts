@@ -17,10 +17,10 @@ export class Participant {
   name: string;
 
   /**
-   * 参加者ごとのパスワード
+   * 参加者が設定したログインID（旧参加者は未設定）
    * @type {string}
    */
-  password: string;
+  loginId?: string | null;
 
   /**
    * 紐づく大会のID
@@ -53,7 +53,8 @@ export class Participant {
   constructor(data: {
     id: string;
     name: string;
-    password: string;
+    password?: string;
+    loginId?: string | null;
     tournamentId: string;
     createdAt: Date;
     updatedAt: Date;
@@ -61,7 +62,7 @@ export class Participant {
   }) {
     this.id = data.id;
     this.name = data.name;
-    this.password = data.password;
+    this.loginId = data.loginId;
     this.tournamentId = data.tournamentId;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
@@ -76,7 +77,7 @@ export class Participant {
     return {
       id: this.id,
       name: this.name,
-      password: this.password,
+      loginId: this.loginId,
       tournamentId: this.tournamentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

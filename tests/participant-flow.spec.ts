@@ -29,12 +29,14 @@ test.describe('参加者登録と問題作成フロー', () => {
 
     // 3. Fill out the registration form
     const participantName = `Test Participant ${Date.now()}`;
-    await page.getByLabel('あなたの名前').fill(participantName);
+    await page.getByLabel('表示名').fill(participantName);
+    await page.getByLabel(/^ID/).fill('user1');
+    await page.getByLabel(/^パスワード/).fill('123456');
 
     const responsePromise = page.waitForResponse(
       (resp) => resp.url().includes('/participants') && resp.status() === 200
     );
-    await page.getByRole('button', { name: 'この名前で参加する' }).click();
+    await page.getByRole('button', { name: 'この内容で参加する' }).click();
     const response = await responsePromise;
     const participant = await response.json();
 

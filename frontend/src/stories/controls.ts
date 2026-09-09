@@ -44,7 +44,7 @@ export const tournamentArgs: TournamentControls = {
   participantCount: 2, createdQuestions: 1,
 };
 export const tournamentArgTypes: ArgTypes<TournamentControls> = {
-  questionSlots: { control: 'object', description: '問題順にlabelとchoiceCountを指定。choiceCountが0なら通常問題。', table: { category: '大会' } },
+  questionSlots: { control: 'object', description: '問題順にラベルを指定。出題形式は問題作成時に参加者が設定。', table: { category: '大会' } },
   tournamentName: { control: 'text', table: { category: '大会' } },
   points: { control: 'text', description: 'カンマ区切りの配点。問題数もこの数に合わせます。', table: { category: '大会' } },
   regulation: { control: 'text', table: { category: '大会' } },

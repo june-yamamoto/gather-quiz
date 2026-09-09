@@ -35,7 +35,7 @@ for (const width of [390, 1280]) {
 test(`${width}pxで長文・4択・画像と動画・音声を併用し、保存・プレビュー・本番再生・編集できる`, async ({ page, request }) => {
   await page.setViewportSize({ width: 1280, height: 1100 });
   const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: { name: 'メディア動作検証', password: 'test-only', questionsPerParticipant: 1, points: '10', questionSlots: [{ label: '図形', choiceCount: 4 }] } })).json();
-  const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: 'メディア検証' } })).json();
+  const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: 'メディア検証', loginId: 'user1', password: '123456' } })).json();
   const dashboard = `/gather/tournaments/${tournament.id}/participants/${participant.id}`;
   await page.goto(`${dashboard}/quizzes/new?order=0&point=10`);
   const video = await makeVideo(page);
@@ -57,6 +57,8 @@ test(`${width}pxで長文・4択・画像と動画・音声を併用し、保存
     }
   });
   await page.getByLabel('問題文', { exact: true }).fill('この動画に映っている図形は何でしょう？\n'.repeat(30));
+  await page.getByLabel('出題形式', { exact: true }).click();
+  await page.getByRole('option', { name: '選択問題', exact: true }).click();
   const choices = ['円', '三角形', '四角形', '五角形'];
   for (const [i, choice] of choices.entries()) await page.getByRole('textbox', { name: `選択肢${i + 1}`, exact: true }).fill(choice);
   await page.getByLabel('解答文', { exact: true }).fill('円です。音声も再生できます。');

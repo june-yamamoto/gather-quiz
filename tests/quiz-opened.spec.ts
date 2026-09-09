@@ -5,7 +5,7 @@ test('編集・プレビューでは既読を付けず、本番に表示した1�
   const tournament = await (await request.post('http://localhost:3000/api/tournaments', { data: {
     name: '既読の回帰テスト', password: 'test-only', questionsPerParticipant: 2, points: '10,20',
   } })).json();
-  const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: '参加者' } })).json();
+  const participant = await (await request.post(`http://localhost:3000/api/tournaments/${tournament.id}/participants`, { data: { name: '参加者', loginId: 'user1', password: '123456' } })).json();
   const quizzes = [];
   for (const order of [0, 1]) {
     quizzes.push(await (await request.post('http://localhost:3000/api/quizzes', { data: {
