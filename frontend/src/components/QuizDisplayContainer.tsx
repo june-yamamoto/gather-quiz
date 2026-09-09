@@ -40,45 +40,12 @@ export const QuizDisplayContainer = ({
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '2vmin' }}>
-        <Box>
-          {quiz.label && <Typography variant="h6" sx={{ fontWeight: 'bold', overflowWrap: 'anywhere' }}>{quiz.label}</Typography>}
-          {quiz.genre && (
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 'bold',
-                color: 'white',
-                bgcolor: getGenreColor(quiz.genre),
-                px: '3vmin',
-                py: '1vmin',
-                borderRadius: '0 0 2vmin 0',
-                mt: '-2vmin',
-                ml: '-2vmin',
-
-                fontSize: 'clamp(22px, 4vmin, 64px)',
-              }}
-            >
-              {quiz.genre}
-            </Typography>
-          )}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1, mb: '2vmin', maxHeight: '35%', overflow: 'auto', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, flex: '1 1 220px', minWidth: 0 }}>
+          {quiz.label && <Typography component="p" sx={{ fontSize: 'clamp(16px, 2.5vmin, 32px)', fontWeight: 700, overflowWrap: 'anywhere', maxWidth: '100%', px: '2vmin', py: '1vmin', border: 1, borderColor: 'primary.main', borderRadius: 2 }}>{quiz.label}</Typography>}
+          {quiz.genre && <Typography component="p" sx={{ fontSize: 'clamp(16px, 2.5vmin, 32px)', fontWeight: 700, overflowWrap: 'anywhere', maxWidth: '100%', color: 'white', bgcolor: getGenreColor(quiz.genre), px: '2vmin', py: '1vmin', borderRadius: 2 }}>{quiz.genre}</Typography>}
         </Box>
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 'bold',
-            color: 'white',
-            bgcolor: 'primary.main',
-            px: '3vmin',
-            py: '1vmin',
-            borderRadius: '0 0 0 2vmin', // Decorative shape
-            mt: '-2vmin', // Pull up to attach to top border
-            mr: '-2vmin', // Pull right to attach to right border
-            fontSize: 'clamp(22px, 4vmin, 64px)',
-          }}
-        >
-          {quiz.point}点問題
-        </Typography>
+        <Typography component="p" sx={{ fontSize: 'clamp(16px, 2.5vmin, 32px)', fontWeight: 800, color: 'primary.contrastText', bgcolor: 'primary.main', px: '2vmin', py: '1vmin', borderRadius: 2, ml: 'auto', whiteSpace: 'nowrap' }}>{quiz.point}点問題</Typography>
       </Box>
 
       <Box role="region" aria-label="本文" tabIndex={0}
