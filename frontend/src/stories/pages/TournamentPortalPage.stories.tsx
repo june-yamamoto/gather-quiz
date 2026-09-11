@@ -16,6 +16,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = { name: '通常' };
+export const Overview: Story = { name: '大会内容を確認', args: {
+  questionSlots: [{ label: '声優', choiceCount: 0, questionType: 'normal' }, { label: '音楽', choiceCount: 0, questionType: 'choice' }, { label: '自由テーマ', choiceCount: 0, questionType: 'normal' }],
+}, play: async ({ canvasElement }) => {
+  await expect(await within(canvasElement).findByRole('heading', { name: '大会概要' })).toBeVisible();
+  await expect(within(canvasElement).getByText('1人あたり3問')).toBeVisible();
+} };
+export const Unconfigured: Story = { name: '任意項目未設定', args: { regulation: '', genres: '' } };
 export const Mobile: Story = { name: 'スマートフォン', parameters: mobile };
 export const ParticipantLogin: Story = { name: '参加者ログイン', parameters: mobile,
   play: async ({ canvasElement }) => {

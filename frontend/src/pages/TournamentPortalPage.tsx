@@ -18,6 +18,7 @@ import { tournamentApiClient } from '../api/TournamentApiClient';
 import { Button } from '../components/design-system/Button/Button';
 import { Input } from '../components/design-system/Input/Input';
 import { Card } from '../components/design-system/Card/Card';
+import { TournamentOverview } from '../components/TournamentOverview';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   textAlign: 'center',
@@ -51,6 +52,12 @@ const TournamentPortalPage = () => {
       }
       return tournamentApiClient.get(id);
     },
+    enabled: !!id,
+  });
+
+  const { data: tournamentStatus, isError: participantCountError } = useQuery({
+    queryKey: ['tournament', id, 'status'],
+    queryFn: () => tournamentApiClient.getStatus(id!),
     enabled: !!id,
   });
 
@@ -123,6 +130,7 @@ const TournamentPortalPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         {tournament ? `大会: ${tournament.name}` : '大会ポータル'}
       </Typography>
+      {tournament && <TournamentOverview tournament={tournament} participantCount={tournamentStatus?.participants.length} participantCountError={participantCountError} />}
       <Typography variant="h6" color="textSecondary" paragraph>
         参加方法を選択してください
       </Typography>
